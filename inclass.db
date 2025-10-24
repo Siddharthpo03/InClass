@@ -1,0 +1,56 @@
+-- inclass-backend/schema.sql
+-- Clean setup: drops existing tables and creates new ones
+
+-- Drop tables if they exist (cascade to handle dependencies)
+--DROP TABLE IF EXISTS attendance CASCADE;
+--DROP TABLE IF EXISTS sessions CASCADE;
+--DROP TABLE IF EXISTS classes CASCADE;
+--DROP TABLE IF EXISTS users CASCADE;
+
+-- 1. USERS Table (Handles Admin, Faculty, and Student roles)
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL CHECK (role IN ('admin', 'faculty', 'student')),
+    roll_no VARCHAR(50) UNIQUE, 
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. CLASSES Table (Managed by Faculty)
+CREATE TABLE classes (
+    id SERIAL PRIMARY KEY,
+    faculty_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    course_code VARCHAR(10) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    total_classes INTEGER DEFAULT 0 NOT NULL, 
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (faculty_id, course_code)
+);
+
+-- 3. SESSIONS Table (Attendance Code Management)
+CREATE TABLE sessions (
+    id SERIAL PRIMARY KEY,
+    class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE NOT NULL,
+    code VARCHAR(10) UNIQUE NOT NULL,
+    expires_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL, 
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. ATTENDANCE Table (Student records)
+CREATE TABLE attendance (
+    id SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    session_id INTEGER REFERENCES sessions(id) ON DELETE CASCADE NOT NULL,
+    status VARCHAR(50) DEFAULT 'Present' NOT NULL CHECK (status IN ('Present', 'Absent', 'Manual')),
+    ip_address VARCHAR(50),
+    location TEXT, 
+    is_overridden BOOLEAN DEFAULT FALSE NOT NULL,
+    override_reason TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (student_id, session_id)
+);
+
+select * from users
