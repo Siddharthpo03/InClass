@@ -1,11 +1,11 @@
 /* InClassFacultyPortal.module.css */
 
-/* --- Base Layout (Specific to Portal Wrapper) --- */
+/* --- Base Layout --- */
 .portal-page-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f0fdf7; /* Light greenish background */
+  background: #f0fdf7;
 }
 
 .portal-container {
@@ -29,7 +29,7 @@
 .brand-name {
   font-weight: bold;
   font-size: 1.5rem;
-  color: #2f795d;
+  /* color: #2f795d; */
 }
 
 .logout-btn {
@@ -48,7 +48,7 @@
   color: white;
 }
 
-/* --- Profile Card (Shared Look) --- */
+/* --- Profile Card --- */
 .profile-card {
   display: flex;
   align-items: center;
@@ -81,7 +81,6 @@
   font-weight: bold;
   color: #10b981;
 }
-/* Faculty specific style to remove circle border used by student */
 .attendance-summary p:first-child {
   font-size: 1.2rem;
   color: #10b981;
@@ -101,13 +100,9 @@
   }
 }
 
-/* --- Session Card (Faculty Specific) --- */
+/* --- Session Card --- */
 .session-card {
-  background: linear-gradient(
-    135deg,
-    #f0fff8,
-    #ffffff
-  ); /* Lighter green/white */
+  background: linear-gradient(135deg, #f0fff8, #ffffff);
   border: 1px solid #b6f0d3;
   padding: 25px;
   border-radius: 15px;
@@ -115,7 +110,7 @@
 }
 
 .session-card.active {
-  border-left: 5px solid #3b82f6; /* Blue indicator for active */
+  border-left: 5px solid #3b82f6;
 }
 
 .session-card h3 {
@@ -158,8 +153,13 @@
   align-items: center;
   gap: 8px;
 }
+.stats-live {
+  font-weight: 600;
+  color: #2f795d;
+  margin-bottom: 10px;
+}
 
-/* --- Button Styles (Shared but defined here for portability) --- */
+/* --- Button Styles --- */
 .join-btn {
   width: 100%;
   padding: 12px;
@@ -175,7 +175,7 @@
   opacity: 0.9;
 }
 
-/* --- History Card (Reports) --- */
+/* --- History Card (Roster/Reports) --- */
 .history-card {
   background: white;
   padding: 25px;
@@ -188,42 +188,200 @@
   color: #2f795d;
 }
 
-.history-list {
+.roster-info {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #2f795d;
+}
+
+/* --- Live Attendance List --- */
+.live-attendance-list {
   list-style: none;
   padding: 0;
-  margin: 0;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 8px;
 }
 
-.history-item {
+.attendance-row {
   display: flex;
   justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px dashed #eee;
-  font-size: 0.95rem;
   align-items: center;
+  padding: 10px 15px;
+  border-bottom: 1px dashed #f0f0f0;
+  font-size: 0.95rem;
 }
 
-.history-item:last-child {
+.attendance-row:last-child {
   border-bottom: none;
 }
 
-.history-course {
+/* Overridden State */
+.attendance-row.overridden {
+  background-color: #fffbe6;
+  border-left: 3px solid #ffc107;
+}
+
+.student-name {
+  flex-grow: 1;
   font-weight: 500;
+  color: #333;
+}
+.empty-roster {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-style: italic;
 }
 
-.history-status {
-  font-weight: 600;
+.timestamp {
+  font-size: 0.75rem;
+  color: #999;
+  margin-left: 10px;
 }
 
+/* Status Badges */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  min-width: 80px;
+  text-align: center;
+}
+
+.present-badge {
+  background-color: #e6fff3;
+  color: #10b981;
+}
+
+.absent-badge {
+  background-color: #fce4e4;
+  color: #c93535;
+}
+
+/* --- Manual Override Button --- */
+.override-btn {
+  margin-left: 15px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s, opacity 0.2s;
+  line-height: 1;
+}
+
+.override-btn i {
+  font-size: 1.1rem;
+  vertical-align: middle;
+}
+
+.override-btn.mark-present {
+  background-color: #10b981;
+  color: white;
+}
+
+.override-btn.mark-absent {
+  background-color: #c93535;
+  color: white;
+}
+
+.override-btn:hover {
+  opacity: 0.85;
+}
+
+/* --- Report Links --- */
 .view-link {
+  display: block;
   text-align: right;
   color: #3b82f6;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
+  margin-top: 15px;
 }
 .view-link:hover {
   color: #007bff;
+}
+
+/* --- NEW Registration Toggle Area --- */
+.registration-toggle-area {
+  margin-top: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.register-course-toggle-btn {
+  width: 100%;
+  padding: 12px;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-weight: 600;
+}
+
+.register-course-toggle-btn:hover {
+  opacity: 0.9;
+}
+
+.register-course-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px dashed #b6f0d3;
+  border-radius: 8px;
+  background: #f8fffb;
+}
+
+.register-course-form h4 {
+  color: #2f795d;
+  margin-bottom: 5px;
+}
+
+.course-select-dropdown,
+.num-classes-input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.confirm-register-btn {
+  padding: 12px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirm-register-btn:hover {
+  background: #007bff;
+}
+
+.confirm-register-btn:disabled {
+  background: #9ca3af !important;
+  cursor: not-allowed;
+}
+
+.registration-error {
+  color: #c93535;
+  font-weight: 600;
+  text-align: center;
 }
 
 /* --- Footer --- */

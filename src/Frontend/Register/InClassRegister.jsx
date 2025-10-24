@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // 🚨 NEW IMPORT 🚨
 import "./InClassRegister.css";
 
 // Reusable Input Component (Abstraction)
@@ -49,7 +50,6 @@ const InClassRegister = () => {
 
   const handleFormChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    // Clear relevant error on change for better UX
     setValidationErrors((prev) => ({ ...prev, [e.target.name]: "" }));
     setRegisterMessage("");
   };
@@ -57,7 +57,6 @@ const InClassRegister = () => {
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);
     setDropdownOpen(false);
-    // Clear specific ID field and its error if role changes
     setFormData((prev) => ({
       ...prev,
       studentId: "",
@@ -71,7 +70,6 @@ const InClassRegister = () => {
     }));
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -82,7 +80,6 @@ const InClassRegister = () => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // Memoized function to determine required fields
   const getRequiredFields = useCallback(() => {
     let fields = ["fullName", "email", "password"];
     if (role !== "Admin") {
@@ -96,16 +93,11 @@ const InClassRegister = () => {
     return fields;
   }, [role]);
 
-  // Effect to manage button disability
   useEffect(() => {
     const requiredFields = getRequiredFields();
-
-    // Check if ALL fields (including conditional IDs) are non-empty
     const allRequiredFieldsFilled = requiredFields.every(
       (field) => formData[field] && formData[field].trim() !== ""
     );
-
-    // Button is disabled if role isn't selected OR not all required fields are filled
     setIsButtonDisabled(!role || !allRequiredFieldsFilled);
   }, [formData, role, getRequiredFields]);
 
@@ -114,22 +106,18 @@ const InClassRegister = () => {
     let errors = {};
     const requiredFields = getRequiredFields();
 
-    // 1. Validate role selection
     if (!role) {
       errors.role = "⚠ Please select a role";
       isValid = false;
     }
 
-    // 2. Validate all required fields
     requiredFields.forEach((field) => {
       if (!formData[field].trim()) {
-        // Use more specific messages for conditional fields
         if (field === "studentId")
           errors.studentId = "⚠ Student ID is required";
         else if (field === "facultyId")
           errors.facultyId = "⚠ Faculty ID is required";
         else errors[field] = "⚠ Please fill out this field";
-
         isValid = false;
       }
     });
@@ -138,16 +126,61 @@ const InClassRegister = () => {
     return isValid;
   };
 
-  const handleSubmit = (e) => {
+  // 🚨 UPDATED: Handle registration via API call 🚨
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setRegisterMessage("");
 
-    if (validateForm()) {
-      // API call logic here.
-      setRegisterMessage("✅ Registration successful!");
-      console.log("Registered with:", { ...formData, role });
-      // navigate('/login');
-    } else {
+    if (!validateForm()) {
       setRegisterMessage("❌ Please correct the errors above.");
+      return;
+    }
+
+    // Determine the unique roll_no based on the role selected
+    let roll_no = null;
+    if (role === "Student") {
+      roll_no = formData.studentId;
+    } else if (role === "Faculty") {
+      roll_no = formData.facultyId;
+    }
+
+    // Prepare the payload for the backend API
+    const registrationPayload = {
+      name: formData.fullName,
+      email: formData.email,
+      password: formData.password,
+      role: role.toLowerCase(), // Backend expects lowercase
+      roll_no: roll_no,
+      // The backend User model currently does not handle collegeName/department,
+      // but we keep them here in case the backend is updated later:
+      collegeName: formData.collegeName,
+      department: formData.department,
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/api/auth/register",
+        registrationPayload
+      );
+
+      // Handle successful registration (HTTP 201)
+      setRegisterMessage(`✅ Success! Redirecting to login.`);
+      console.log("Registration API Success:", response.data);
+
+      // Redirect to Login page after a delay
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (error) {
+      // Handle API error messages (e.g., email already exists)
+      const errorMessage =
+        error.response?.data?.message ||
+        (error.response?.status === 500
+          ? "Server crashed. Check backend console."
+          : "Registration failed. Please try again.");
+
+      setRegisterMessage(`Registration failed: ${errorMessage}`);
+      console.error("Registration API Error:", error.response || error.message);
     }
   };
 

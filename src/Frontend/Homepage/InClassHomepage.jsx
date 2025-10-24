@@ -2,49 +2,23 @@ import logo from "../assets/Logo1.jpg";
 import fav from "../assets/favicon.jpg";
 
 import React, { useState } from "react";
-// Assuming you are using React Router v6 for navigation
 import { useNavigate } from "react-router-dom";
-
-// Assuming 'homepage.css' styles are imported or managed via a styling solution.
+import "./InClassHomepage.css";
 
 const InClassHomepage = () => {
-  // State to manage the visibility of the mobile menu
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  // --- UI Handlers ---
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  // --- Navigation Handlers ---
-
-  const handleLoginClick = (e) => {
+  const handleAuthNavigation = (path) => (e) => {
     e.preventDefault();
-    navigate("/login");
-    setIsMenuOpen(false); // Close menu after navigation
+    navigate(path);
+    setIsMenuOpen(false);
   };
-
-  const handleRegisterClick = (e) => {
-    e.preventDefault();
-    navigate("/register");
-    setIsMenuOpen(false); // Close menu after navigation
-  };
-
-  const handleAuthButton = (e) => {
-    e.preventDefault();
-    // The main CTA button typically navigates to the primary auth page (Login)
-    navigate("/login");
-  };
-
-  // --- Component JSX ---
 
   return (
     <div className="inclass-homepage-wrapper">
       <header>
         <nav className="nav-bar">
-          {/* Left Section: Logo */}
           <div className="left-section">
             <div className="logo-section">
               <img src={fav} alt="InClass" className="logo-icon" />
@@ -52,7 +26,6 @@ const InClassHomepage = () => {
             </div>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="menu-content">
             <ul className="nav-links">
               <li>
@@ -69,13 +42,17 @@ const InClassHomepage = () => {
               </li>
             </ul>
             <div className="auth-buttons">
-              <a href="#" className="nav-btn" onClick={handleLoginClick}>
+              <a
+                href="#"
+                className="nav-btn"
+                onClick={handleAuthNavigation("/login")}
+              >
                 Login
               </a>
               <a
                 href="#"
                 className="nav-btn signup"
-                onClick={handleRegisterClick}
+                onClick={handleAuthNavigation("/register")}
               >
                 Register
               </a>
@@ -85,11 +62,9 @@ const InClassHomepage = () => {
             </div>
           </div>
 
-          {/* Hamburger Menu Icon - Toggle Handler Attached */}
           <div
             className={`menu-icon ${isMenuOpen ? "open" : ""}`}
-            id="menuIcon"
-            onClick={toggleMenu}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-expanded={isMenuOpen}
             aria-controls="mobileMenu"
           >
@@ -99,9 +74,8 @@ const InClassHomepage = () => {
           </div>
         </nav>
 
-        {/* Mobile Menu - Controlled by isMenuOpen state */}
         <div
-          className={`mobile-menu ${isMenuOpen ? "open" : ""}`}
+          className={`mobile-menu ${isMenuOpen ? "show" : ""}`}
           id="mobileMenu"
         >
           <ul className="nav-links">
@@ -147,7 +121,6 @@ const InClassHomepage = () => {
         </div>
       </header>
 
-      {/* Main Hero Content */}
       <div className="container">
         <img src={logo} alt="InClass" className="logo" />
         <h1>
@@ -159,12 +132,15 @@ const InClassHomepage = () => {
           system using time-restricted session codes. <br />
           No proxy, just presence.
         </p>
-        <a href="#" className="login-btn" onClick={handleAuthButton}>
+        <a
+          href="#"
+          className="login-btn"
+          onClick={handleAuthNavigation("/login")}
+        >
           Login / Register
         </a>
       </div>
 
-      {/* Footer */}
       <footer>
         <div className="row_2">
           <div className="footer-links">

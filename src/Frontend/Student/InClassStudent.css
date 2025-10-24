@@ -1,4 +1,4 @@
-/* InClassStudentPortal.module.css (Student-specific styles) */
+/* src/StudentPortal/InClassStudentPortal.module.css */
 
 /* --- Base Layout --- */
 .portal-page-wrapper {
@@ -29,7 +29,6 @@
 .brand-name {
   font-weight: bold;
   font-size: 1.5rem;
-  color: #2f795d;
 }
 
 .logout-btn {
@@ -108,13 +107,15 @@
   }
 }
 
-/* --- Session Card (Student-specific appearance) --- */
+/* --- Session Card (CRITICAL FIX APPLIED HERE) --- */
 .session-card {
   background: linear-gradient(135deg, #e0f2f1, #ffffff);
   border: 1px solid #b6f0d3;
   padding: 25px;
   border-radius: 15px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  /* 🚨 FIX: Set min-height to prevent layout shift 🚨 */
+  min-height: 320px;
 }
 
 .session-card.active {
@@ -145,6 +146,7 @@
   margin-bottom: 20px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -164,7 +166,80 @@
   opacity: 0.9;
 }
 
-/* --- History Card (Student History) --- */
+/* --- Session Code Input --- */
+.session-code-input {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 2px; /* This makes the text wide and bold */
+}
+
+.session-code-input:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+}
+
+/* --- Session Status Messages --- */
+.session-message {
+  padding: 8px;
+  margin-top: 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.session-message.success {
+  background-color: #e6fff3;
+  color: #10b981;
+  border: 1px solid #10b981;
+}
+
+.session-message.error {
+  background-color: #fce4e4;
+  color: #c93535;
+  border: 1px solid #c93535;
+}
+
+/* --- Attendance Marked Status --- */
+.session-marked {
+  text-align: center;
+}
+.marked-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+.marked-status i {
+  font-size: 2.5rem;
+  color: #10b981;
+}
+.marked-status span {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #10b981;
+}
+.marked-time {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* --- Inactive Session Status --- */
+.session-inactive {
+  text-align: center;
+  padding: 30px 0;
+  color: #999;
+}
+
+/* --- History Card --- */
 .history-card {
   background: white;
   padding: 25px;
@@ -225,3 +300,35 @@
   font-size: 0.8rem;
   margin-top: 20px;
 }
+
+/* InClassStudentPortal.module.css (Additions/Modifications) */
+
+/* ... (Existing styles for .session-card, .join-btn, .timer, etc. remain) ... */
+
+/* --- Pre-Start and Security Info --- */
+.session-pre-start {
+  text-align: center;
+}
+.security-note {
+  font-size: 0.85rem;
+  color: #c93535; /* Red for emphasis on warning */
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+.security-info {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 25px;
+}
+
+/* Ensure the submit button background color is updated based on context */
+.secure-form .join-btn {
+  /* Retain existing join-btn styles */
+  background: linear-gradient(to right, #3b82f6, #007bff);
+}
+.session-pre-start .join-btn {
+  /* Use a clear CTA color for starting the secure session */
+  background: linear-gradient(to right, #10b981, #2f795d);
+}
+
+/* ... (Remaining CSS is unchanged) ... */
