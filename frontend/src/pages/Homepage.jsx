@@ -1,15 +1,14 @@
-import logo from "../assets/Logo1.jpg";
-import fav from "../assets/favicon.jpg";
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./InClassHomepage.css";
+import logo from "../assets/Logo1.jpg";
+import fav from "../assets/favicon.jpg";
+import "./Homepage.css";
 
-const InClassHomepage = () => {
+const Homepage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleAuthNavigation = (path) => (e) => {
+  const handleNavigation = (path) => (e) => {
     e.preventDefault();
     navigate(path);
     setIsMenuOpen(false);
@@ -29,30 +28,35 @@ const InClassHomepage = () => {
           <div className="menu-content">
             <ul className="nav-links">
               <li>
-                <a href="#">Home</a>
+                <a href="#" onClick={handleNavigation("/")}>
+                  Home
+                </a>
               </li>
               <li>
                 <a href="#">Features</a>
               </li>
               <li>
-                <a href="#">About</a>
+                <a href="#" onClick={handleNavigation("/about")}>
+                  About
+                </a>
               </li>
               <li>
                 <a href="#">Contact</a>
               </li>
             </ul>
+
             <div className="auth-buttons">
               <a
                 href="#"
                 className="nav-btn"
-                onClick={handleAuthNavigation("/login")}
+                onClick={handleNavigation("/login")}
               >
                 Login
               </a>
               <a
                 href="#"
                 className="nav-btn signup"
-                onClick={handleAuthNavigation("/register")}
+                onClick={handleNavigation("/register")}
               >
                 Register
               </a>
@@ -62,6 +66,7 @@ const InClassHomepage = () => {
             </div>
           </div>
 
+          {/* Hamburger Menu Icon (Mobile) */}
           <div
             className={`menu-icon ${isMenuOpen ? "open" : ""}`}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -74,13 +79,14 @@ const InClassHomepage = () => {
           </div>
         </nav>
 
+        {/* Mobile Menu Links */}
         <div
           className={`mobile-menu ${isMenuOpen ? "show" : ""}`}
           id="mobileMenu"
         >
           <ul className="nav-links">
             <li>
-              <a href="#">
+              <a href="#" onClick={handleNavigation("/")}>
                 <i className="fas fa-home" /> Home
               </a>
             </li>
@@ -90,7 +96,7 @@ const InClassHomepage = () => {
               </a>
             </li>
             <li>
-              <a href="#">
+              <a href="#" onClick={handleNavigation("/about")}>
                 <i className="fa-solid fa-address-card" /> About
               </a>
             </li>
@@ -100,22 +106,19 @@ const InClassHomepage = () => {
               </a>
             </li>
           </ul>
+
           <div className="social_media">
             <p>
-              <i className="fa-brands fa-youtube" />
-              Youtube
+              <i className="fa-brands fa-youtube" /> Youtube
             </p>
             <p>
-              <i className="fa-brands fa-facebook-f" />
-              Facebok
+              <i className="fa-brands fa-facebook-f" /> Facebook
             </p>
             <p>
-              <i className="fa-brands fa-x" />
-              Twitter
+              <i className="fa-brands fa-x" /> Twitter
             </p>
             <p>
-              <i className="fa-brands fa-instagram" />
-              Instagram
+              <i className="fa-brands fa-instagram" /> Instagram
             </p>
           </div>
         </div>
@@ -124,19 +127,14 @@ const InClassHomepage = () => {
       <div className="container">
         <img src={logo} alt="InClass" className="logo" />
         <h1>
-          Welcome to <br />
-          InClass
+          Welcome to <br /> InClass
         </h1>
         <p className="description">
           Smart, secure, and supervised attendance <br />
           system using time-restricted session codes. <br />
           No proxy, just presence.
         </p>
-        <a
-          href="#"
-          className="login-btn"
-          onClick={handleAuthNavigation("/login")}
-        >
+        <a href="#" className="login-btn" onClick={handleNavigation("/login")}>
           Login / Register
         </a>
       </div>
@@ -158,4 +156,4 @@ const InClassHomepage = () => {
   );
 };
 
-export default InClassHomepage;
+export default Homepage;

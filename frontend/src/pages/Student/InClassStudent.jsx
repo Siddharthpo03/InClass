@@ -5,7 +5,7 @@ import "./InClassStudent.css"; // Corrected CSS path
 
 // --- Mock Data ---
 const mockUserData = {
-  name: "Alex Johnson",
+  name: "Siddharth",
   role: "Student",
   id: "STU12345",
   department: "Computer Science",
