@@ -2,7 +2,7 @@ services:
   - type: web
     name: inclass-backend
     env: node
-    rootDir: InClass/backend
+    rootDir: backend
     plan: free
     buildCommand: npm install
     startCommand: npm start
