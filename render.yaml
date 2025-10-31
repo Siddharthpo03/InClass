@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: inclass-backend
+    env: node
+    rootDir: InClass/backend
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
