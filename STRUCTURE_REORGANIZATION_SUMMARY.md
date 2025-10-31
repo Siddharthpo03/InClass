@@ -120,3 +120,4 @@ import Homepage from "./pages/Homepage";
 - The backend structure is already correct
 - The database file (inclass.db) stays at the root level for easy access
 - This reorganization will make the codebase more professional and easier to maintain
+

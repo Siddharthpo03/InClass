@@ -1,0 +1,7 @@
+# Rename/upload this file as ".htaccess" in your Hostinger public_html directory
+# SPA rewrite rules for React/Vite
+RewriteEngine On
+RewriteBase /
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]

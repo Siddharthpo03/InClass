@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "./InClassAbout.css";
+import "./About.css";
 
 // Assuming you have a reusable Footer or Header, but we keep the JSX self-contained here.
 // In a real app, you would reuse the Header/Footer components from InClassHomepage.jsx.
