@@ -14,6 +14,10 @@ dist
 dist-ssr
 *.local
 
+# Ignore backend env and local DB
+backend/.env
+inclass.db
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

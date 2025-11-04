@@ -22,6 +22,8 @@ pool.query("SELECT NOW()", (err, res) => {
       "❌ FATAL: Database connection failed. Check db.js and .env.",
       err.message
     );
+    // Fail fast in production/CI so deploys don't run with a broken DB
+    process.exit(1);
   } else {
     console.log("✅ PostgreSQL connected successfully. Date:", res.rows[0].now);
   }

@@ -11,3 +11,25 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
+  - type: static
+    name: inclass-frontend
+    rootDir: frontend
+    plan: free
+    buildCommand: npm ci && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+
+databases:
+  - name: inclass-db
+    engine: postgresql
+    plan: starter
+    # Do not include credentials here. Render will generate DATABASE_URL after provisioning.
+    # Copy the DATABASE_URL into the backend service environment in the dashboard or via `render.yaml` secrets.
+# Notes:
+# - This file defines an Express web service (`inclass-backend`), a static site (`inclass-frontend`),
+#   and a managed PostgreSQL database (`inclass-db`).
+# - Environment variables that contain secrets (DATABASE_URL, JWT_SECRET, EMAIL_PASS, etc.)
+#   should be added in the Render dashboard or using the Render CLI. We intentionally do not
+#   place secret values in the repo.
