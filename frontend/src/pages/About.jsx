@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "./About.css";
+import styles from "./About.module.css";
 
 // Assuming you have a reusable Footer or Header, but we keep the JSX self-contained here.
 // In a real app, you would reuse the Header/Footer components from InClassHomepage.jsx.
@@ -8,35 +8,45 @@ import "./About.css";
 const InClassAbout = () => {
   const navigate = useNavigate();
 
+  const classNames = (...classes) =>
+    classes
+      .flat()
+      .filter(Boolean)
+      .map((cls) => styles[cls] || cls)
+      .join(" ")
+      .trim();
+
   const handleBackToHome = () => {
     navigate("/");
   };
 
   return (
-    <div className="about-page-wrapper">
-      <header className="about-header">
-        <div className="header-content">
-          <span className="brand-name">InClass Attendance System</span>
-          <button className="back-btn" onClick={handleBackToHome}>
+    <div className={classNames("about-page-wrapper")}>
+      <header className={classNames("about-header")}>
+        <div className={classNames("header-content")}>
+          <span className={classNames("brand-name")}>
+            InClass Attendance System
+          </span>
+          <button className={classNames("back-btn")} onClick={handleBackToHome}>
             <i className="bx bx-arrow-back" /> Back to Home
           </button>
         </div>
       </header>
 
-      <div className="about-container">
-        <section className="hero-section">
+      <div className={classNames("about-container")}>
+        <section className={classNames("hero-section")}>
           <h1>Our Mission: Secure, Seamless Presence.</h1>
-          <p className="subtitle">
+          <p className={classNames("subtitle")}>
             InClass revolutionizes university attendance tracking by replacing
             outdated paper sheets and unreliable proximity methods with a
             modern, secure session-based system.
           </p>
         </section>
 
-        <section className="feature-section">
+        <section className={classNames("feature-section")}>
           <h2>Core Features & Technology</h2>
-          <div className="feature-grid">
-            <div className="feature-card">
+          <div className={classNames("feature-grid")}>
+            <div className={classNames("feature-card")}>
               <i className="bx bx-shield-alt-2" />
               <h4>Anti-Proxy Security</h4>
               <p>
@@ -76,10 +86,10 @@ const InClassAbout = () => {
           </div>
         </section>
 
-        <section className="cta-section">
+        <section className={classNames("cta-section")}>
           <h2>Ready to Experience Smart Attendance?</h2>
           <button
-            className="register-cta-btn"
+            className={classNames("register-cta-btn")}
             onClick={() => navigate("/register")}
           >
             Get Started Today
@@ -87,7 +97,7 @@ const InClassAbout = () => {
         </section>
       </div>
 
-      <footer className="about-footer">
+      <footer className={classNames("about-footer")}>
         <p>InClass | Driving efficiency for the Smart Campus.</p>
       </footer>
     </div>

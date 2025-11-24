@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/apiClient";
-import "./InClassFaculty.css";
+import styles from "./InClassFaculty.module.css";
 
 // Temporary mock roster (will be replaced by real DB data)
 const mockStudentsByCourse = {
@@ -49,6 +49,14 @@ const InClassFaculty = () => {
   const [numClasses, setNumClasses] = useState("");
   const [registrationError, setRegistrationError] = useState("");
   const [dashboardMessage, setDashboardMessage] = useState("");
+
+  const classNames = (...classes) =>
+    classes
+      .flat()
+      .filter(Boolean)
+      .map((cls) => styles[cls] || cls)
+      .join(" ")
+      .trim();
 
   // ------------------ FUNCTIONS ------------------
 
@@ -243,7 +251,7 @@ const InClassFaculty = () => {
   if (!facultyProfile) {
     return (
       <div
-        className="portal-page-wrapper"
+        className={classNames("portal-page-wrapper")}
         style={{ justifyContent: "center", alignItems: "center" }}
       >
         <p>Loading Faculty Profile...</p>
@@ -266,31 +274,31 @@ const InClassFaculty = () => {
   const presentCount = liveAttendanceList.filter((s) => s.present).length;
 
   return (
-    <div className="portal-page-wrapper">
-      <header className="portal-header">
-        <div className="header-left">
-          <span className="brand-name">InClass Faculty Portal</span>
+    <div className={classNames("portal-page-wrapper")}>
+      <header className={classNames("portal-header")}>
+        <div className={classNames("header-left")}>
+          <span className={classNames("brand-name")}>InClass Faculty Portal</span>
         </div>
-        <div className="header-right">
-          <button className="logout-btn" onClick={handleLogout}>
-            <i className="bx bx-log-out" /> Logout
+        <div className={classNames("header-right")}>
+          <button className={classNames("logout-btn")} onClick={handleLogout}>
+            <i className={classNames("bx bx-log-out")} /> Logout
           </button>
         </div>
       </header>
 
-      <div className="portal-container">
+      <div className={classNames("portal-container")}>
         {/* Profile Section */}
-        <div className="profile-card">
-          <div className="profile-info">
+        <div className={classNames("profile-card")}>
+          <div className={classNames("profile-info")}>
             <h2>Hello, {staticFacultyData.name}.</h2>
-            <p className="user-details">
+            <p className={classNames("user-details")}>
               {staticFacultyData.role} | {staticFacultyData.id}
             </p>
-            <p className="college-details">
+            <p className={classNames("college-details")}>
               {staticFacultyData.department}, {staticFacultyData.college}
             </p>
           </div>
-          <div className="attendance-summary">
+          <div className={classNames("attendance-summary")}>
             <p style={{ fontSize: "1.2rem", color: "#10b981" }}>
               Courses Taught: {registeredCourses.length}
             </p>
@@ -316,16 +324,16 @@ const InClassFaculty = () => {
           </div>
         )}
 
-        <div className="content-grid">
+        <div className={classNames("content-grid")}>
           {/* Session Management */}
-          <div className={`session-card ${activeSession ? "active" : ""}`}>
+          <div className={classNames("session-card", activeSession && "active")}>
             <h3>Attendance Session Management</h3>
             {!activeSession ? (
-              <div className="session-controls">
+              <div className={classNames("session-controls")}>
                 <select
                   value={selectedCourseId}
                   onChange={(e) => setSelectedCourseId(e.target.value)}
-                  className="course-select"
+                  className={classNames("course-select")}
                   disabled={!!activeSession || registeredCourses.length === 0}
                 >
                   <option value="">-- Select Course --</option>
@@ -336,7 +344,7 @@ const InClassFaculty = () => {
                   ))}
                 </select>
                 <button
-                  className="join-btn"
+                  className={classNames("join-btn")}
                   onClick={generateSessionCode}
                   style={{ background: "#10b981" }}
                   disabled={!selectedCourseId || registeredCourses.length === 0}
@@ -350,21 +358,21 @@ const InClassFaculty = () => {
                 )}
               </div>
             ) : (
-              <div className="active-session-details">
-                <p className="course-title">{activeSession.courseName}</p>
-                <p className="code-display">
+              <div className={classNames("active-session-details")}>
+                <p className={classNames("course-title")}>{activeSession.courseName}</p>
+                <p className={classNames("code-display")}>
                   Code:{" "}
-                  <span className="highlight-code">{activeSession.code}</span>
+                  <span className={classNames("highlight-code")}>{activeSession.code}</span>
                 </p>
-                <p className="stats-live">
+                <p className={classNames("stats-live")}>
                   Present: {presentCount} / {studentsInRoster} Roster
                 </p>
-                <div className="timer">
-                  <i className="bx bx-time-five" /> Ends in:{" "}
+                <div className={classNames("timer")}>
+                  <i className={classNames("bx bx-time-five")} /> Ends in:{" "}
                   <strong>{formatTime(timer)}</strong>
                 </div>
                 <button
-                  className="join-btn"
+                  className={classNames("join-btn")}
                   onClick={() => endSession(false)}
                   style={{ background: "#c93535" }}
                 >
@@ -375,32 +383,35 @@ const InClassFaculty = () => {
           </div>
 
           {/* Attendance / Roster Section */}
-          <div className="history-card">
+          <div className={classNames("history-card")}>
             <h3>
               {activeSession
                 ? "Live Attendance Roster"
                 : "Course Roster & Stats"}
             </h3>
-            <p className="roster-info">
+            <p className={classNames("roster-info")}>
               {currentSelectedCourse?.title || "Select a course"} Roster:{" "}
               {studentsInRoster} students
             </p>
-            <ul className="live-attendance-list">
+            <ul className={classNames("live-attendance-list")}>
               {liveAttendanceList.length > 0 ? (
                 liveAttendanceList.map((student) => (
                   <li
                     key={student.id}
-                    className={`attendance-row ${
-                      student.present ? "present" : "absent"
-                    } ${student.overridden ? "overridden" : ""}`}
+                    className={classNames(
+                      "attendance-row",
+                      student.present ? "present" : "absent",
+                      student.overridden && "overridden"
+                    )}
                   >
-                    <span className="student-name">
+                    <span className={classNames("student-name")}>
                       {student.name} ({student.roll_no})
                     </span>
                     <span
-                      className={`status-badge ${
+                      className={classNames(
+                        "status-badge",
                         student.present ? "present-badge" : "absent-badge"
-                      }`}
+                      )}
                     >
                       {student.present
                         ? "PRESENT"
@@ -410,27 +421,29 @@ const InClassFaculty = () => {
                       {student.overridden && " (M)"}
                     </span>
                     {student.statusTime && (
-                      <span className="timestamp">@{student.statusTime}</span>
+                      <span className={classNames("timestamp")}>@{student.statusTime}</span>
                     )}
                     {activeSession && (
                       <button
-                        className={`override-btn ${
+                        className={classNames(
+                          "override-btn",
                           student.present ? "mark-absent" : "mark-present"
-                        }`}
+                        )}
                         onClick={() => handleManualOverride(student.id)}
                         title={student.present ? "Mark Absent" : "Mark Present"}
                       >
                         <i
-                          className={`bx ${
+                          className={classNames(
+                            "bx",
                             student.present ? "bx-x-circle" : "bx-check-circle"
-                          }`}
+                          )}
                         />
                       </button>
                     )}
                   </li>
                 ))
               ) : (
-                <li className="empty-roster">
+                <li className={classNames("empty-roster")}>
                   No students loaded for this course.
                 </li>
               )}
@@ -439,7 +452,7 @@ const InClassFaculty = () => {
             {!activeSession && currentSelectedCourse && (
               <a
                 href="#"
-                className="view-link"
+                className={classNames("view-link")}
                 onClick={(e) => {
                   e.preventDefault();
                   handleViewReport(selectedCourseId);
@@ -447,16 +460,16 @@ const InClassFaculty = () => {
               >
                 View Full Attendance Report (
                 {currentSelectedCourse.numClasses || 0} classes total)
-                <i className="bx bx-chevron-right"></i>
+                <i className={classNames("bx bx-chevron-right")}></i>
               </a>
             )}
           </div>
         </div>
 
         {/* Course Registration Section */}
-        <div className="registration-toggle-area">
+        <div className={classNames("registration-toggle-area")}>
           <button
-            className="register-course-toggle-btn"
+            className={classNames("register-course-toggle-btn")}
             onClick={() => {
               setIsRegistering((prev) => !prev);
               setRegistrationError("");
@@ -469,18 +482,18 @@ const InClassFaculty = () => {
           {isRegistering && (
             <form
               onSubmit={handleCourseRegistration}
-              className="register-course-form"
+              className={classNames("register-course-form")}
             >
               <h4>Add New Course to Roster</h4>
               {registrationError && (
-                <p className="registration-error">{registrationError}</p>
+                <p className={classNames("registration-error")}>{registrationError}</p>
               )}
               <input
                 type="text"
                 placeholder="Course Code (e.g., CS401)"
                 value={newCourseCode}
                 onChange={(e) => setNewCourseCode(e.target.value.toUpperCase())}
-                className="course-select-dropdown"
+                className={classNames("course-select-dropdown")}
                 required
               />
               <input
@@ -488,7 +501,7 @@ const InClassFaculty = () => {
                 placeholder="Course Title (e.g., Database Systems)"
                 value={newCourseTitle}
                 onChange={(e) => setNewCourseTitle(e.target.value)}
-                className="course-select-dropdown"
+                className={classNames("course-select-dropdown")}
                 required
               />
               <input
@@ -496,13 +509,13 @@ const InClassFaculty = () => {
                 placeholder="Total Classes (e.g., 40)"
                 value={numClasses}
                 onChange={(e) => setNumClasses(e.target.value)}
-                className="num-classes-input"
+                className={classNames("num-classes-input")}
                 min="1"
                 required
               />
               <button
                 type="submit"
-                className="confirm-register-btn"
+                className={classNames("confirm-register-btn")}
                 disabled={!newCourseCode || !newCourseTitle || numClasses < 1}
               >
                 Finalize Course Registration
@@ -512,7 +525,7 @@ const InClassFaculty = () => {
         </div>
       </div>
 
-      <footer className="portal-footer">
+      <footer className={classNames("portal-footer")}>
         <p>&copy; 2025 InClass | Made for Smart Campus</p>
       </footer>
     </div>

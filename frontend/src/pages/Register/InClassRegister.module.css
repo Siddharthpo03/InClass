@@ -1,0 +1,184 @@
+/* InClass Register (module) - migrated from InClassRegister.css
+	 Contains both kebab-case and camelCase selectors to be compatible
+	 with existing JSX `className` usages like `styles.registerWrapper`.
+*/
+
+.register-wrapper,
+.registerWrapper {
+  width: 350px;
+  margin: 60px auto;
+  background: #ffffff;
+  padding: 25px 30px;
+  border-radius: 25px;
+  box-shadow: 0 5px 20px rgba(90, 180, 130, 0.3);
+}
+
+h1 {
+  text-align: center;
+  color: black;
+  margin-bottom: 25px;
+}
+
+.input-box,
+.inputBox {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.input-box input,
+.inputBox input,
+input {
+  background: linear-gradient(to right, #f8fffb, #e8fff6);
+  border: 1px solid #b6f0d3;
+  border-radius: 20px;
+  padding: 12px 20px;
+  cursor: text;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #222;
+  transition: all 0.3s ease;
+}
+
+.input-box input:focus,
+.inputBox input:focus {
+  box-shadow: 0 0 8px rgba(112, 224, 155, 0.4);
+}
+
+.input-box i,
+.inputBox i {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #4fb683;
+  font-size: 18px;
+}
+
+.dropdown,
+.dropdown {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.dropdown-selected,
+.dropdownSelected {
+  background: linear-gradient(to right, #f8fffb, #e8fff6);
+  border: 1px solid #b6f0d3;
+  border-radius: 20px;
+  padding: 12px 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #222;
+  transition: all 0.3s ease;
+}
+
+.dropdown-selected:hover,
+.dropdownSelected:hover {
+  box-shadow: 0 0 10px rgba(112, 224, 155, 0.3);
+}
+
+.arrow,
+.arrow {
+  transition: transform 0.3s ease;
+}
+
+.arrow.rotate,
+.rotate {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu,
+.dropdownMenu {
+  list-style: none;
+  padding: 0;
+  margin: 5px 0 0;
+  position: absolute;
+  width: 100%;
+  background: #f0fff8;
+  border: 1px solid #b6f0d3;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: none;
+  z-index: 10;
+}
+
+.dropdown-menu.show,
+.dropdownMenu.show {
+  display: block;
+  animation: dropdownFade 0.25s ease;
+}
+
+.dropdown-item,
+.dropdownItem {
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item:hover,
+.dropdownItem:hover {
+  background: #c9ffe3;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.button,
+.button {
+  width: 100%;
+  padding: 12px;
+  background: #2f795d;
+  border: none;
+  color: white;
+  border-radius: 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.button:hover,
+.button:hover {
+  background: #39a076;
+}
+
+.register-link,
+.registerLink {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.register-link a,
+.registerLink a {
+  color: #71e6b9;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.register-link a:hover,
+.registerLink a:hover {
+  text-decoration: underline;
+}
+
+.error-message,
+.errorMessage {
+  color: #d8000c;
+  font-size: 0.85rem;
+  margin-top: 0.35rem;
+}
+
+.input-error,
+.inputError {
+  border-color: #e55353;
+}

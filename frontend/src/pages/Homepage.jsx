@@ -2,11 +2,19 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/Logo1.jpg";
 import fav from "../assets/favicon.jpg";
-import "./Homepage.css";
+import styles from "./Homepage.module.css";
 
 const Homepage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  const classNames = (...classes) =>
+    classes
+      .flat()
+      .filter(Boolean)
+      .map((cls) => styles[cls] || cls)
+      .join(" ")
+      .trim();
 
   const handleNavigation = (path) => (e) => {
     e.preventDefault();
@@ -15,18 +23,18 @@ const Homepage = () => {
   };
 
   return (
-    <div className="inclass-homepage-wrapper">
+    <div className={classNames("wrapper")}>
       <header>
-        <nav className="nav-bar">
-          <div className="left-section">
-            <div className="logo-section">
-              <img src={fav} alt="InClass" className="logo-icon" />
-              <span className="brand-name">InClass</span>
+        <nav className={classNames("navBar")}>
+          <div className={classNames("leftSection")}>
+            <div className={classNames("logoSection")}>
+              <img src={fav} alt="InClass" className={classNames("logoIcon")} />
+              <span className={classNames("brandName")}>InClass</span>
             </div>
           </div>
 
-          <div className="menu-content">
-            <ul className="nav-links">
+          <div className={classNames("menuContent")}>
+            <ul className={classNames("navLinks")}>
               <li>
                 <a href="#" onClick={handleNavigation("/")}>
                   Home
@@ -45,22 +53,22 @@ const Homepage = () => {
               </li>
             </ul>
 
-            <div className="auth-buttons">
+            <div className={classNames("authButtons")}>
               <a
                 href="#"
-                className="nav-btn"
+                className={classNames("navBtn")}
                 onClick={handleNavigation("/login")}
               >
                 Login
               </a>
               <a
                 href="#"
-                className="nav-btn signup"
+                className={classNames("navBtn", "signup")}
                 onClick={handleNavigation("/register")}
               >
                 Register
               </a>
-              <button className="dark-mode-toggle">
+              <button className={classNames("darkModeToggle")}>
                 <i className="fa fa-moon" />
               </button>
             </div>
@@ -68,7 +76,7 @@ const Homepage = () => {
 
           {/* Hamburger Menu Icon (Mobile) */}
           <div
-            className={`menu-icon ${isMenuOpen ? "open" : ""}`}
+            className={classNames("menuIcon", isMenuOpen && "open")}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-expanded={isMenuOpen}
             aria-controls="mobileMenu"
@@ -81,10 +89,10 @@ const Homepage = () => {
 
         {/* Mobile Menu Links */}
         <div
-          className={`mobile-menu ${isMenuOpen ? "show" : ""}`}
+          className={classNames("mobileMenu", isMenuOpen && "show")}
           id="mobileMenu"
         >
-          <ul className="nav-links">
+          <ul className={classNames("navLinks")}>
             <li>
               <a href="#" onClick={handleNavigation("/")}>
                 <i className="fas fa-home" /> Home
@@ -107,7 +115,7 @@ const Homepage = () => {
             </li>
           </ul>
 
-          <div className="social_media">
+          <div className={classNames("socialMedia")}>
             <p>
               <i className="fa-brands fa-youtube" /> Youtube
             </p>
@@ -124,30 +132,34 @@ const Homepage = () => {
         </div>
       </header>
 
-      <div className="container">
-        <img src={logo} alt="InClass" className="logo" />
+      <div className={classNames("container")}>
+        <img src={logo} alt="InClass" className={classNames("logo")} />
         <h1>
           Welcome to <br /> InClass
         </h1>
-        <p className="description">
+        <p className={classNames("description")}>
           Smart, secure, and supervised attendance <br />
           system using time-restricted session codes. <br />
           No proxy, just presence.
         </p>
-        <a href="#" className="login-btn" onClick={handleNavigation("/login")}>
+        <a
+          href="#"
+          className={classNames("loginBtn")}
+          onClick={handleNavigation("/login")}
+        >
           Login / Register
         </a>
       </div>
 
       <footer>
-        <div className="row_2">
-          <div className="footer-links">
+        <div className={classNames("row2")}>
+          <div className={classNames("footerLinks")}>
             <a href="#">Terms of Use</a>
             <a href="#">Privacy Policy</a>
             <a href="#">Careers</a>
             <a href="#">Cookie Declaration</a>
           </div>
-          <div className="copyright">
+          <div className={classNames("copyright")}>
             <p>&copy; 2025 InClass | Made for Smart Campus</p>
           </div>
         </div>

@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./InClassLogin.css";
+import styles from "./InClassLogin.module.css";
+
+const classNames = (...classes) =>
+  classes
+    .flat()
+    .filter(Boolean)
+    .map((cls) => styles[cls] || cls)
+    .join(" ")
+    .trim();
 
 // Reusable Input Component
 const AuthInput = ({
@@ -13,18 +21,18 @@ const AuthInput = ({
   error,
   iconClass,
 }) => (
-  <div className="input-box">
+  <div className={classNames("input-box")}>
     <input
       type={type}
       placeholder={placeholder}
       name={name}
       value={value}
       onChange={onChange}
-      className={error ? "input-error" : ""}
+      className={classNames(error && "input-error")}
       required
     />
-    <i className={`bx ${iconClass}`} />
-    <span className="error-message">{error}</span>
+    <i className={classNames("bx", iconClass)} />
+    <span className={classNames("error-message")}>{error}</span>
   </div>
 );
 
@@ -144,8 +152,8 @@ const InClassLogin = () => {
   };
 
   return (
-    <div className="login-page-wrapper">
-      <div className="login-wrapper">
+    <div className={classNames("login-page-wrapper")}>
+      <div className={classNames("login-wrapper")}>
         <form id="loginForm" noValidate onSubmit={handleSubmit}>
           <h1>Login</h1>
 
@@ -163,22 +171,31 @@ const InClassLogin = () => {
           )}
 
           <div
-            className={`dropdown ${validationErrors.role ? "input-error" : ""}`}
+            className={classNames(
+              "dropdown",
+              validationErrors.role && "input-error"
+            )}
             ref={dropdownRef}
           >
             <div
-              className="dropdown-selected"
+              className={classNames("dropdown-selected")}
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
               {role || "Select Role"}
-              <span className={`arrow ${dropdownOpen ? "rotate" : ""}`}>▼</span>
+              <span
+                className={classNames("arrow", dropdownOpen && "rotate")}
+              >
+                ▼
+              </span>
             </div>
 
-            <ul className={`dropdown-menu ${dropdownOpen ? "show" : ""}`}>
+            <ul
+              className={classNames("dropdown-menu", dropdownOpen && "show")}
+            >
               {["Admin", "Student", "Faculty"].map((r) => (
                 <li
                   key={r}
-                  className="dropdown-item"
+                  className={classNames("dropdown-item")}
                   onClick={() => handleRoleSelect(r)}
                 >
                   {r}
@@ -187,7 +204,7 @@ const InClassLogin = () => {
             </ul>
 
             {validationErrors.role && (
-              <span className="error-message">{validationErrors.role}</span>
+              <span className={classNames("error-message")}>{validationErrors.role}</span>
             )}
           </div>
 
@@ -211,7 +228,7 @@ const InClassLogin = () => {
             iconClass="bxs-lock-alt"
           />
 
-          <div className="remember-forgot">
+          <div className={classNames("remember-forgot")}>
             <label>
               <input type="checkbox" /> Remember me
             </label>
@@ -220,11 +237,11 @@ const InClassLogin = () => {
             </a>
           </div>
 
-          <button type="submit" className="button" disabled={isButtonDisabled}>
+          <button type="submit" className={classNames("button")} disabled={isButtonDisabled}>
             Login
           </button>
 
-          <div className="register-link">
+          <div className={classNames("register-link")}>
             <p>
               Don't have an account?{" "}
               <a href="#" onClick={handleRegisterClick}>
