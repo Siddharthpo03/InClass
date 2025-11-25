@@ -9,6 +9,13 @@
   padding: 20px;
   animation: slideUp 0.5s ease-out;
   pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.cookieConsentOverlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(100%);
 }
 
 .cookieConsentBanner {

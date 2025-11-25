@@ -25,19 +25,30 @@ const CookieConsent = () => {
     const cookieConsent = localStorage.getItem("cookieConsent");
     const savedPreferences = localStorage.getItem("cookiePreferences");
 
-    if (!cookieConsent) {
-      // Show banner after a short delay for better UX
-      setTimeout(() => {
-        setIsVisible(true);
-      }, 1000);
-    } else if (savedPreferences) {
-      // Load saved preferences
+    // Load saved preferences if they exist
+    if (savedPreferences) {
       try {
         const prefs = JSON.parse(savedPreferences);
         setCookiePreferences(prefs);
       } catch (e) {
         // If parsing fails, use defaults
+        console.error("Error parsing cookie preferences:", e);
       }
+    }
+
+    // Show banner if no consent has been given
+    // This will show on first visit or if consent was cleared
+    if (!cookieConsent || cookieConsent === null || cookieConsent === "") {
+      // Show banner after a short delay for better UX
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+        console.log("Cookie consent banner displayed");
+      }, 1000);
+      
+      // Cleanup timer on unmount
+      return () => clearTimeout(timer);
+    } else {
+      console.log("Cookie consent already set:", cookieConsent);
     }
   }, []);
 
@@ -164,12 +175,16 @@ const CookieConsent = () => {
     return count;
   };
 
-  if (!isVisible) {
-    return null;
-  }
-
+  // Always render, but control visibility
   return (
-    <div className={styles.cookieConsentOverlay}>
+    <div 
+      className={styles.cookieConsentOverlay}
+      style={{ 
+        display: isVisible ? 'block' : 'none',
+        opacity: isVisible ? 1 : 0,
+        pointerEvents: isVisible ? 'auto' : 'none'
+      }}
+    >
       <div className={styles.cookieConsentBanner}>
         <div className={styles.cookieConsentHeader}>
           <div className={styles.cookieIcon}>
