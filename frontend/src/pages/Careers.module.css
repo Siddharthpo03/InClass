@@ -1,0 +1,676 @@
+/* Careers Page - Most Beautiful Design */
+
+:global(body) {
+  background: linear-gradient(to top, #d4f5eb 0%, #ffffff 100%);
+  background-attachment: fixed;
+  transition: background 0.3s ease;
+}
+
+:global(body.darkMode) {
+  background: linear-gradient(to top, #1a1a2e 0%, #16213e 100%);
+  background-attachment: fixed;
+}
+
+.careersPageWrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+  color: #111827;
+  transition: color 0.3s ease;
+}
+
+:global(body.darkMode) .careersPageWrapper {
+  color: #e5e7eb;
+}
+
+.careersContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  flex-grow: 1;
+  margin-top: 80px;
+  margin-bottom: 80px;
+}
+
+/* ===== Hero Section ===== */
+.heroSection {
+  text-align: center;
+  padding: 100px 0 80px;
+  margin-bottom: 80px;
+  position: relative;
+}
+
+.heroBadge {
+  display: inline-block;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  color: white;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  animation: fadeInUp 0.6s ease;
+}
+
+.heroSection h1 {
+  font-size: 4rem;
+  font-weight: 900;
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, #111827 0%, #374151 50%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  animation: fadeInUp 0.8s ease;
+}
+
+:global(body.darkMode) .heroSection h1 {
+  background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 50%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 1.3rem;
+  color: #6b7280;
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+  animation: fadeInUp 1s ease;
+}
+
+:global(body.darkMode) .subtitle {
+  color: #9ca3af;
+}
+
+/* ===== Benefits Section ===== */
+.benefitsSection {
+  margin-bottom: 80px;
+}
+
+.benefitsSection h2 {
+  text-align: center;
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 50px;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.01em;
+}
+
+:global(body.darkMode) .benefitsSection h2 {
+  background: linear-gradient(135deg, #34d399 0%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.benefitsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.benefitCard {
+  background: #ffffff;
+  padding: 35px 30px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.benefitCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, #10b981 0%, #3b82f6 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.benefitCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.benefitCard:hover::before {
+  transform: scaleX(1);
+}
+
+:global(body.darkMode) .benefitCard {
+  background: rgba(31, 41, 55, 0.8);
+  border-color: rgba(16, 185, 129, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+:global(body.darkMode) .benefitCard:hover {
+  background: rgba(31, 41, 55, 0.95);
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.3);
+}
+
+.benefitIcon {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 25px;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+  transition: all 0.4s ease;
+}
+
+.benefitCard:hover .benefitIcon {
+  transform: scale(1.15) rotate(10deg);
+  box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
+}
+
+.benefitIcon i {
+  font-size: 2.8rem;
+  color: white;
+}
+
+.benefitCard h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #111827;
+  letter-spacing: -0.01em;
+}
+
+:global(body.darkMode) .benefitCard h3 {
+  color: #f9fafb;
+}
+
+.benefitCard p {
+  font-size: 1.05rem;
+  color: #6b7280;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+:global(body.darkMode) .benefitCard p {
+  color: #9ca3af;
+}
+
+/* ===== Jobs Section ===== */
+.jobsSection {
+  margin-bottom: 80px;
+}
+
+.jobsSection h2 {
+  text-align: center;
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 50px;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.01em;
+}
+
+:global(body.darkMode) .jobsSection h2 {
+  background: linear-gradient(135deg, #34d399 0%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.jobsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 30px;
+}
+
+.jobCard {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(16, 185, 129, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.jobCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(to right, #10b981 0%, #3b82f6 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.jobCard:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 50px rgba(16, 185, 129, 0.25);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.jobCard:hover::before {
+  transform: scaleX(1);
+}
+
+:global(body.darkMode) .jobCard {
+  background: rgba(31, 41, 55, 0.8);
+  border-color: rgba(16, 185, 129, 0.2);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+:global(body.darkMode) .jobCard:hover {
+  background: rgba(31, 41, 55, 0.95);
+  box-shadow: 0 15px 50px rgba(16, 185, 129, 0.35);
+}
+
+.jobHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+  gap: 20px;
+}
+
+.jobTitleSection {
+  flex: 1;
+}
+
+.jobCard h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #111827;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+:global(body.darkMode) .jobCard h3 {
+  color: #f9fafb;
+}
+
+.jobMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.jobDepartment {
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.jobLocation,
+.jobType {
+  padding: 6px 14px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+:global(body.darkMode) .jobLocation,
+:global(body.darkMode) .jobType {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.jobLocation i,
+.jobType i {
+  font-size: 0.75rem;
+}
+
+.jobExperience {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
+  color: #10b981;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 2px solid rgba(16, 185, 129, 0.2);
+}
+
+:global(body.darkMode) .jobExperience {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.jobDescription {
+  font-size: 1.05rem;
+  color: #4b5563;
+  line-height: 1.8;
+  margin-bottom: 25px;
+  letter-spacing: 0.01em;
+}
+
+:global(body.darkMode) .jobDescription {
+  color: #9ca3af;
+}
+
+.jobRequirements {
+  margin-bottom: 30px;
+}
+
+.jobRequirements h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #111827;
+  letter-spacing: 0.01em;
+}
+
+:global(body.darkMode) .jobRequirements h4 {
+  color: #e5e7eb;
+}
+
+.jobRequirements ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.jobRequirements ul li {
+  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.8;
+  padding-left: 28px;
+  position: relative;
+  margin-bottom: 10px;
+  letter-spacing: 0.01em;
+}
+
+.jobRequirements ul li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+:global(body.darkMode) .jobRequirements ul li {
+  color: #9ca3af;
+}
+
+:global(body.darkMode) .jobRequirements ul li::before {
+  color: #34d399;
+}
+
+.applyButton {
+  width: 100%;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+  letter-spacing: 0.01em;
+  font-family: "Poppins", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.applyButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
+}
+
+.applyButton:active {
+  transform: translateY(-1px);
+}
+
+.applyButton i {
+  transition: transform 0.3s ease;
+}
+
+.applyButton:hover i {
+  transform: translateX(5px);
+}
+
+/* ===== CTA Section ===== */
+.ctaSection {
+  text-align: center;
+  padding: 80px 40px;
+  background: linear-gradient(to top, rgba(16, 185, 129, 0.05), rgba(59, 130, 246, 0.05));
+  border-radius: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ctaSection::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+  animation: pulse 4s ease-in-out infinite;
+}
+
+:global(body.darkMode) .ctaSection {
+  background: linear-gradient(to top, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+}
+
+.ctaSection h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #111827;
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 1;
+}
+
+:global(body.darkMode) .ctaSection h2 {
+  color: #f9fafb;
+}
+
+.ctaSection p {
+  font-size: 1.2rem;
+  color: #6b7280;
+  margin-bottom: 30px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.01em;
+}
+
+:global(body.darkMode) .ctaSection p {
+  color: #9ca3af;
+}
+
+.contactButton {
+  padding: 16px 40px;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+  letter-spacing: 0.01em;
+  font-family: "Poppins", sans-serif;
+  position: relative;
+  z-index: 1;
+}
+
+.contactButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
+}
+
+.contactButton:active {
+  transform: translateY(-1px);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .careersContainer {
+    padding: 20px 15px;
+    margin-top: 70px;
+    margin-bottom: 70px;
+  }
+
+  .heroSection {
+    padding: 50px 0 40px;
+    margin-bottom: 50px;
+  }
+
+  .heroSection h1 {
+    font-size: 2.5rem;
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+  }
+
+  .benefitsSection h2,
+  .jobsSection h2 {
+    font-size: 2rem;
+    margin-bottom: 30px;
+  }
+
+  .benefitsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .jobsGrid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .jobCard {
+    padding: 30px 25px;
+  }
+
+  .jobHeader {
+    flex-direction: column;
+  }
+
+  .jobExperience {
+    align-self: flex-start;
+  }
+
+  .ctaSection {
+    padding: 50px 20px;
+  }
+
+  .ctaSection h2 {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .careersContainer {
+    padding: 15px 10px;
+    margin-top: 65px;
+    margin-bottom: 65px;
+  }
+
+  .heroSection h1 {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .jobCard {
+    padding: 25px 20px;
+  }
+
+  .jobCard h3 {
+    font-size: 1.5rem;
+  }
+
+  .jobMeta {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ctaSection h2 {
+    font-size: 1.5rem;
+  }
+
+  .ctaSection p {
+    font-size: 1rem;
+  }
+}
+

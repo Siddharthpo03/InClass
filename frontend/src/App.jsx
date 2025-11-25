@@ -13,6 +13,10 @@ import About from "./pages/About";
 import Features from "./pages/Features";
 import Contact from "./pages/Contact";
 import Report from "./pages/Report";
+import TermsOfUse from "./pages/TermsOfUse";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Careers from "./pages/Careers";
+import CookieDeclaration from "./pages/CookieDeclaration";
 
 function App() {
   return (
@@ -29,6 +33,10 @@ function App() {
         <Route path="/features" element={<Features />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/report" element={<Report />} />
+        <Route path="/terms" element={<TermsOfUse />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/careers" element={<Careers />} />
+        <Route path="/cookies" element={<CookieDeclaration />} />
       </Routes>
     </div>
   );
