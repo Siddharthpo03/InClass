@@ -49,7 +49,8 @@ const InClassAbout = () => {
         style={{ marginTop: "80px", marginBottom: "80px" }}
       >
         <section className={classNames("hero-section")}>
-          <h1>Our Mission: Secure, Seamless Presence.</h1>
+          <div className={classNames("hero-badge")}>About InClass</div>
+          <h1>Our Mission: Secure, Seamless Presence</h1>
           <p className={classNames("subtitle")}>
             InClass revolutionizes university attendance tracking by replacing
             outdated paper sheets and unreliable proximity methods with a
@@ -61,7 +62,9 @@ const InClassAbout = () => {
           <h2>Core Features & Technology</h2>
           <div className={classNames("feature-grid")}>
             <div className={classNames("feature-card")}>
-              <i className="bx bx-shield-alt-2" />
+              <div className={classNames("feature-icon")}>
+                <i className="fas fa-shield-alt" />
+              </div>
               <h4>Anti-Proxy Security</h4>
               <p>
                 Attendance is marked via a time-sensitive session code within a
@@ -71,7 +74,9 @@ const InClassAbout = () => {
               </p>
             </div>
             <div className={classNames("feature-card")}>
-              <i className="bx bx-server" />
+              <div className={classNames("feature-icon")}>
+                <i className="fas fa-server" />
+              </div>
               <h4>Robust Backend</h4>
               <p>
                 Built with Node.js, Express, and PostgreSQL, ensuring high data
@@ -80,7 +85,9 @@ const InClassAbout = () => {
               </p>
             </div>
             <div className={classNames("feature-card")}>
-              <i className="bx bx-check-shield" />
+              <div className={classNames("feature-icon")}>
+                <i className="fas fa-user-shield" />
+              </div>
               <h4>Role-Based Access</h4>
               <p>
                 Dedicated portals for Students, Faculty, and Administrators
@@ -89,7 +96,9 @@ const InClassAbout = () => {
               </p>
             </div>
             <div className={classNames("feature-card")}>
-              <i className="bx bx-time" />
+              <div className={classNames("feature-icon")}>
+                <i className="fas fa-clock" />
+              </div>
               <h4>Real-Time Tracking</h4>
               <p>
                 Faculty receive instant feedback on attendance submission, and
