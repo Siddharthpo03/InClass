@@ -18,6 +18,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Careers from "./pages/Careers";
 import CookieDeclaration from "./pages/CookieDeclaration";
 import JobApplication from "./pages/JobApplication";
+import CookieConsent from "./components/CookieConsent";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Route path="/cookies" element={<CookieDeclaration />} />
         <Route path="/apply" element={<JobApplication />} />
       </Routes>
+      <CookieConsent />
     </div>
   );
 }

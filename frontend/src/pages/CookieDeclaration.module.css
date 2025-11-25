@@ -307,6 +307,157 @@
   color: #34d399;
 }
 
+/* ===== Preference Management ===== */
+.preferenceStatus {
+  margin: 25px 0;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+  border-radius: 12px;
+  border-left: 4px solid #10b981;
+}
+
+:global(body.darkMode) .preferenceStatus {
+  background: linear-gradient(to top, rgba(16, 185, 129, 0.15), rgba(59, 130, 246, 0.15));
+  border-left-color: #34d399;
+}
+
+.statusBadge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.05rem;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+:global(body.darkMode) .statusBadge {
+  color: #e5e7eb;
+}
+
+.statusBadge i {
+  color: #10b981;
+  font-size: 1.2rem;
+}
+
+:global(body.darkMode) .statusBadge i {
+  color: #34d399;
+}
+
+.statusBadge strong {
+  color: #10b981;
+  font-weight: 700;
+}
+
+:global(body.darkMode) .statusBadge strong {
+  color: #34d399;
+}
+
+.consentDate {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0;
+  font-style: italic;
+}
+
+:global(body.darkMode) .consentDate {
+  color: #9ca3af;
+}
+
+.preferenceActions {
+  margin-top: 30px;
+  padding-top: 30px;
+  border-top: 2px solid #e5e7eb;
+}
+
+:global(body.darkMode) .preferenceActions {
+  border-top-color: #374151;
+}
+
+.preferenceActions h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #111827;
+}
+
+:global(body.darkMode) .preferenceActions h3 {
+  color: #f9fafb;
+}
+
+.preferenceButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.prefButton {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  font-family: "Poppins", sans-serif;
+}
+
+.prefButton:hover {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.05);
+  transform: translateX(5px);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
+}
+
+:global(body.darkMode) .prefButton {
+  background: rgba(31, 41, 55, 0.8);
+  border-color: #374151;
+}
+
+:global(body.darkMode) .prefButton:hover {
+  border-color: #34d399;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.prefButton i {
+  font-size: 1.5rem;
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+:global(body.darkMode) .prefButton i {
+  color: #34d399;
+}
+
+.prefButton div {
+  flex: 1;
+}
+
+.prefButton strong {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 5px;
+}
+
+:global(body.darkMode) .prefButton strong {
+  color: #f9fafb;
+}
+
+.prefButton span {
+  display: block;
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+:global(body.darkMode) .prefButton span {
+  color: #9ca3af;
+}
+
 /* ===== Animations ===== */
 @keyframes fadeInUp {
   from {

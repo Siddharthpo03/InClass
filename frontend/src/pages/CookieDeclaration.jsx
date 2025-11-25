@@ -1,9 +1,20 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
+import {
+  getCookieConsent,
+  getConsentDate,
+  setCookieConsent,
+  setEssentialCookie,
+} from "../utils/cookieUtils";
 import styles from "./CookieDeclaration.module.css";
 
 const CookieDeclaration = () => {
+  const navigate = useNavigate();
+  const [currentConsent, setCurrentConsent] = useState(null);
+  const [consentDate, setConsentDate] = useState(null);
+
   // Initialize dark mode from localStorage on mount
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
@@ -19,7 +30,26 @@ const CookieDeclaration = () => {
     } else {
       document.body.classList.remove("darkMode");
     }
+
+    // Load current consent status
+    setCurrentConsent(getCookieConsent());
+    setConsentDate(getConsentDate());
   }, []);
+
+  const handleUpdateConsent = (consentType) => {
+    setCookieConsent(consentType);
+    setCurrentConsent(consentType);
+    setConsentDate(new Date().toISOString());
+    
+    // Initialize essential cookies
+    if (!document.cookie.includes("session_id")) {
+      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setEssentialCookie("session_id", sessionId, 3600);
+    }
+    
+    // Show success message
+    alert(`Cookie preferences updated! Your choice: ${consentType === "essential" ? "Essential Only" : consentType === "all" ? "All Cookies" : "Rejected Non-Essential"}`);
+  };
 
   return (
     <div className={styles.cookiePageWrapper}>
@@ -91,6 +121,75 @@ const CookieDeclaration = () => {
           </section>
 
           <section className={styles.cookieSection}>
+            <h2>Your Cookie Preferences</h2>
+            {currentConsent ? (
+              <div className={styles.preferenceStatus}>
+                <div className={styles.statusBadge}>
+                  <i className="fas fa-check-circle" />
+                  <span>
+                    Current Setting:{" "}
+                    <strong>
+                      {currentConsent === "essential"
+                        ? "Essential Only"
+                        : currentConsent === "all"
+                        ? "All Cookies"
+                        : "Rejected Non-Essential"}
+                    </strong>
+                  </span>
+                </div>
+                {consentDate && (
+                  <p className={styles.consentDate}>
+                    Last updated: {new Date(consentDate).toLocaleString()}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className={styles.preferenceStatus}>
+                <div className={styles.statusBadge}>
+                  <i className="fas fa-exclamation-circle" />
+                  <span>No preference set yet</span>
+                </div>
+              </div>
+            )}
+
+            <div className={styles.preferenceActions}>
+              <h3>Update Your Preferences</h3>
+              <div className={styles.preferenceButtons}>
+                <button
+                  className={styles.prefButton}
+                  onClick={() => handleUpdateConsent("essential")}
+                >
+                  <i className="fas fa-shield-alt" />
+                  <div>
+                    <strong>Essential Only</strong>
+                    <span>Only necessary cookies for website functionality</span>
+                  </div>
+                </button>
+                <button
+                  className={styles.prefButton}
+                  onClick={() => handleUpdateConsent("all")}
+                >
+                  <i className="fas fa-check-circle" />
+                  <div>
+                    <strong>Accept All</strong>
+                    <span>Essential + Analytics & Tracking cookies</span>
+                  </div>
+                </button>
+                <button
+                  className={styles.prefButton}
+                  onClick={() => handleUpdateConsent("rejected")}
+                >
+                  <i className="fas fa-times-circle" />
+                  <div>
+                    <strong>Reject Non-Essential</strong>
+                    <span>Only essential cookies, reject all others</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section className={styles.cookieSection}>
             <h2>Managing Cookies</h2>
             <p>
               You can control and manage cookies in various ways. Please keep in
@@ -100,7 +199,7 @@ const CookieDeclaration = () => {
             <ul>
               <li>Browser settings: Most browsers allow you to refuse or accept cookies</li>
               <li>Browser extensions: Use privacy-focused extensions</li>
-              <li>Our settings: Adjust preferences in your account settings</li>
+              <li>Our settings: Adjust preferences using the options above</li>
             </ul>
           </section>
 
