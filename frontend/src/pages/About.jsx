@@ -4,6 +4,22 @@ import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import styles from "./About.module.css";
 
+// Helper function for classNames
+const classNames = (...classes) => {
+  return classes
+    .filter(Boolean)
+    .map((cls) => {
+      if (typeof cls === "string") {
+        // Convert kebab-case to camelCase for CSS modules
+        const camelCase = cls.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+        return styles[camelCase] || styles[cls] || cls;
+      }
+      return null;
+    })
+    .filter(Boolean)
+    .join(" ");
+};
+
 const InClassAbout = () => {
   const navigate = useNavigate();
 
@@ -25,14 +41,14 @@ const InClassAbout = () => {
   }, []);
 
   return (
-    <div className="about-page-wrapper">
+    <div className={classNames("about-page-wrapper")}>
       <Navigation />
 
       <div
-        className="about-container"
+        className={classNames("about-container")}
         style={{ marginTop: "80px", marginBottom: "80px" }}
       >
-        <section className="hero-section">
+        <section className={classNames("hero-section")}>
           <h1>Our Mission: Secure, Seamless Presence.</h1>
           <p className={classNames("subtitle")}>
             InClass revolutionizes university attendance tracking by replacing
@@ -54,7 +70,7 @@ const InClassAbout = () => {
                 ensuring true presence.
               </p>
             </div>
-            <div className="feature-card">
+            <div className={classNames("feature-card")}>
               <i className="bx bx-server" />
               <h4>Robust Backend</h4>
               <p>
@@ -63,7 +79,7 @@ const InClassAbout = () => {
                 operations.
               </p>
             </div>
-            <div className="feature-card">
+            <div className={classNames("feature-card")}>
               <i className="bx bx-check-shield" />
               <h4>Role-Based Access</h4>
               <p>
@@ -72,7 +88,7 @@ const InClassAbout = () => {
                 role.
               </p>
             </div>
-            <div className="feature-card">
+            <div className={classNames("feature-card")}>
               <i className="bx bx-time" />
               <h4>Real-Time Tracking</h4>
               <p>
