@@ -181,7 +181,7 @@ const Careers = () => {
                 </div>
                 <button
                   className={styles.applyButton}
-                  onClick={() => navigate("/contact")}
+                  onClick={() => navigate("/apply", { state: { job } })}
                 >
                   Apply Now
                   <i className="fas fa-arrow-right" />

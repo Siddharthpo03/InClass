@@ -17,6 +17,7 @@ import TermsOfUse from "./pages/TermsOfUse";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Careers from "./pages/Careers";
 import CookieDeclaration from "./pages/CookieDeclaration";
+import JobApplication from "./pages/JobApplication";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/careers" element={<Careers />} />
         <Route path="/cookies" element={<CookieDeclaration />} />
+        <Route path="/apply" element={<JobApplication />} />
       </Routes>
     </div>
   );
