@@ -458,6 +458,323 @@
   color: #9ca3af;
 }
 
+/* ===== Active Cookies Section ===== */
+.activeCookiesSection {
+  margin: 30px 0;
+  padding: 25px;
+  background: linear-gradient(to top, rgba(16, 185, 129, 0.08), rgba(59, 130, 246, 0.08));
+  border-radius: 15px;
+  border-left: 4px solid #10b981;
+}
+
+:global(body.darkMode) .activeCookiesSection {
+  background: linear-gradient(to top, rgba(16, 185, 129, 0.12), rgba(59, 130, 246, 0.12));
+  border-left-color: #34d399;
+}
+
+.activeCookiesSection h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+:global(body.darkMode) .activeCookiesSection h3 {
+  color: #f9fafb;
+}
+
+.activeCookiesSection h3 i {
+  color: #10b981;
+}
+
+:global(body.darkMode) .activeCookiesSection h3 i {
+  color: #34d399;
+}
+
+.activeCookiesList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activeCookieItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+:global(body.darkMode) .activeCookieItem {
+  background: rgba(31, 41, 55, 0.8);
+  border-color: #374151;
+}
+
+.cookieName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.cookieName i {
+  color: #10b981;
+  font-size: 1.1rem;
+}
+
+:global(body.darkMode) .cookieName i {
+  color: #34d399;
+}
+
+.cookieName strong {
+  font-size: 0.95rem;
+  color: #111827;
+  font-weight: 600;
+}
+
+:global(body.darkMode) .cookieName strong {
+  color: #e5e7eb;
+}
+
+.cookieTypeBadge {
+  padding: 4px 10px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+:global(body.darkMode) .cookieTypeBadge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.cookieStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #10b981;
+  font-weight: 600;
+}
+
+:global(body.darkMode) .cookieStatus {
+  color: #34d399;
+}
+
+.cookieStatus i {
+  font-size: 0.6rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.noCookies {
+  color: #6b7280;
+  font-style: italic;
+  margin: 0;
+}
+
+:global(body.darkMode) .noCookies {
+  color: #9ca3af;
+}
+
+/* ===== Granular Controls ===== */
+.granularControls {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.cookieControl {
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+:global(body.darkMode) .cookieControl {
+  background: rgba(31, 41, 55, 0.6);
+  border-color: #374151;
+}
+
+.cookieControl:hover {
+  border-color: #10b981;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
+}
+
+:global(body.darkMode) .cookieControl:hover {
+  border-color: #34d399;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+}
+
+.controlHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.controlInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.controlInfo i {
+  font-size: 1.5rem;
+  color: #10b981;
+  width: 40px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+:global(body.darkMode) .controlInfo i {
+  color: #34d399;
+}
+
+.controlInfo strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+:global(body.darkMode) .controlInfo strong {
+  color: #f9fafb;
+}
+
+.controlInfo span {
+  display: block;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+:global(body.darkMode) .controlInfo span {
+  color: #9ca3af;
+}
+
+.controlDescription {
+  font-size: 0.85rem;
+  color: #4b5563;
+  margin: 0;
+  line-height: 1.6;
+  padding-left: 52px;
+}
+
+:global(body.darkMode) .controlDescription {
+  color: #9ca3af;
+}
+
+/* ===== Toggle Switch (same as CookieConsent) ===== */
+.toggleContainer {
+  flex-shrink: 0;
+}
+
+.toggle {
+  display: none;
+}
+
+.toggleLabel {
+  position: relative;
+  display: inline-block;
+  width: 56px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.toggleSlider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #d1d5db;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+}
+
+:global(body.darkMode) .toggleSlider {
+  background-color: #4b5563;
+}
+
+.toggleSlider::before {
+  content: "";
+  position: absolute;
+  height: 24px;
+  width: 24px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle:checked + .toggleLabel .toggleSlider {
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+}
+
+.toggle:checked + .toggleLabel .toggleSlider::before {
+  transform: translateX(26px);
+}
+
+.toggle:disabled + .toggleLabel {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toggle:disabled + .toggleLabel .toggleSlider {
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+}
+
+/* ===== Quick Actions ===== */
+.quickActions {
+  margin-top: 30px;
+  padding-top: 30px;
+  border-top: 2px solid #e5e7eb;
+}
+
+:global(body.darkMode) .quickActions {
+  border-top-color: #374151;
+}
+
+.quickActions h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+:global(body.darkMode) .quickActions h3 {
+  color: #f9fafb;
+}
+
+.quickActions h3 i {
+  color: #10b981;
+}
+
+:global(body.darkMode) .quickActions h3 i {
+  color: #34d399;
+}
+
 /* ===== Animations ===== */
 @keyframes fadeInUp {
   from {
