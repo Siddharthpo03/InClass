@@ -1,29 +1,37 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Navigation from "../components/Navigation";
+import Footer from "../components/Footer";
 import "./About.css";
-
-// Assuming you have a reusable Footer or Header, but we keep the JSX self-contained here.
-// In a real app, you would reuse the Header/Footer components from InClassHomepage.jsx.
 
 const InClassAbout = () => {
   const navigate = useNavigate();
 
-  const handleBackToHome = () => {
-    navigate("/");
-  };
+  // Initialize dark mode from localStorage on mount
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem("darkMode");
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+
+    const shouldBeDark =
+      savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
+
+    if (shouldBeDark) {
+      document.body.classList.add("darkMode");
+    } else {
+      document.body.classList.remove("darkMode");
+    }
+  }, []);
 
   return (
     <div className="about-page-wrapper">
-      <header className="about-header">
-        <div className="header-content">
-          <span className="brand-name">InClass Attendance System</span>
-          <button className="back-btn" onClick={handleBackToHome}>
-            <i className="bx bx-arrow-back" /> Back to Home
-          </button>
-        </div>
-      </header>
+      <Navigation />
 
-      <div className="about-container">
+      <div
+        className="about-container"
+        style={{ marginTop: "80px", marginBottom: "80px" }}
+      >
         <section className="hero-section">
           <h1>Our Mission: Secure, Seamless Presence.</h1>
           <p className="subtitle">
@@ -87,9 +95,7 @@ const InClassAbout = () => {
         </section>
       </div>
 
-      <footer className="about-footer">
-        <p>InClass | Driving efficiency for the Smart Campus.</p>
-      </footer>
+      <Footer />
     </div>
   );
 };

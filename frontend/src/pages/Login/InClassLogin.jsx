@@ -1,7 +1,25 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import "./InClassLogin.css";
+import apiClient from "../../utils/apiClient";
+import Footer from "../../components/Footer";
+import styles from "./InClassLogin.module.css";
+
+// Helper function for classNames
+const classNames = (...classes) => {
+  return classes
+    .filter(Boolean)
+    .map((cls) => {
+      if (typeof cls === "string") {
+        // Convert kebab-case to camelCase for CSS modules
+        const camelCase = cls.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+        return styles[camelCase] || styles[cls] || cls;
+      }
+      // If it's a boolean or other type, return as is (will be filtered out)
+      return null;
+    })
+    .filter(Boolean)
+    .join(" ");
+};
 
 // Reusable Input Component
 const AuthInput = ({
@@ -13,18 +31,18 @@ const AuthInput = ({
   error,
   iconClass,
 }) => (
-  <div className="input-box">
+  <div className={styles.inputBox}>
     <input
       type={type}
       placeholder={placeholder}
       name={name}
       value={value}
       onChange={onChange}
-      className={error ? "input-error" : ""}
+      className={error ? styles.inputError : ""}
       required
     />
     <i className={`bx ${iconClass}`} />
-    <span className="error-message">{error}</span>
+    {error && <span className={styles.errorMessage}>{error}</span>}
   </div>
 );
 
@@ -38,6 +56,22 @@ const InClassLogin = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [validationErrors, setValidationErrors] = useState({});
   const [loginMessage, setLoginMessage] = useState("");
+
+  // Initialize dark mode from localStorage on mount
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem("darkMode");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    const shouldBeDark = savedDarkMode !== null 
+      ? savedDarkMode === "true" 
+      : prefersDark;
+    
+    if (shouldBeDark) {
+      document.body.classList.add("darkMode");
+    } else {
+      document.body.classList.remove("darkMode");
+    }
+  }, []);
 
   const handleFormChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -98,14 +132,11 @@ const InClassLogin = () => {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:4000/api/auth/login",
-        {
-          email: formData.username,
-          password: formData.password,
-          role: role.toLowerCase(),
-        }
-      );
+      const response = await apiClient.post("/auth/login", {
+        email: formData.username,
+        password: formData.password,
+        role: role.toLowerCase(),
+      });
 
       const { token, role: userRole } = response.data;
       localStorage.setItem("inclass_token", token);
@@ -144,18 +175,34 @@ const InClassLogin = () => {
   };
 
   return (
-    <div className="login-page-wrapper">
-      <div className="login-wrapper">
+    <div className={styles.loginPageWrapper}>
+      <a
+        href="#"
+        className={styles.reportButton}
+        onClick={(e) => {
+          e.preventDefault();
+          navigate("/report");
+        }}
+        title="Report an Issue"
+      >
+        Report
+      </a>
+      <div className={styles.loginWrapper}>
         <form id="loginForm" noValidate onSubmit={handleSubmit}>
           <h1>Login</h1>
 
           {loginMessage && (
             <div
               style={{
-                color: loginMessage.startsWith("✅") ? "green" : "red",
+                color: loginMessage.startsWith("✅") ? "#10b981" : "#ef4444",
                 marginBottom: "15px",
                 textAlign: "center",
                 fontWeight: 600,
+                padding: "10px",
+                borderRadius: "8px",
+                backgroundColor: loginMessage.startsWith("✅") 
+                  ? "rgba(16, 185, 129, 0.1)" 
+                  : "rgba(239, 68, 68, 0.1)",
               }}
             >
               {loginMessage}
@@ -163,22 +210,25 @@ const InClassLogin = () => {
           )}
 
           <div
-            className={`dropdown ${validationErrors.role ? "input-error" : ""}`}
+            className={classNames(
+              styles.dropdown,
+              validationErrors.role ? styles.inputError : ""
+            )}
             ref={dropdownRef}
           >
             <div
-              className="dropdown-selected"
+              className={styles.dropdownSelected}
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
               {role || "Select Role"}
-              <span className={`arrow ${dropdownOpen ? "rotate" : ""}`}>▼</span>
+              <span className={classNames(styles.arrow, dropdownOpen ? styles.rotate : "")}>▼</span>
             </div>
 
-            <ul className={`dropdown-menu ${dropdownOpen ? "show" : ""}`}>
+            <ul className={classNames(styles.dropdownMenu, dropdownOpen ? styles.show : "")}>
               {["Admin", "Student", "Faculty"].map((r) => (
                 <li
                   key={r}
-                  className="dropdown-item"
+                  className={styles.dropdownItem}
                   onClick={() => handleRoleSelect(r)}
                 >
                   {r}
@@ -187,7 +237,7 @@ const InClassLogin = () => {
             </ul>
 
             {validationErrors.role && (
-              <span className="error-message">{validationErrors.role}</span>
+              <span className={styles.errorMessage}>{validationErrors.role}</span>
             )}
           </div>
 
@@ -211,7 +261,7 @@ const InClassLogin = () => {
             iconClass="bxs-lock-alt"
           />
 
-          <div className="remember-forgot">
+          <div className={styles.rememberForgot}>
             <label>
               <input type="checkbox" /> Remember me
             </label>
@@ -220,11 +270,11 @@ const InClassLogin = () => {
             </a>
           </div>
 
-          <button type="submit" className="button" disabled={isButtonDisabled}>
+          <button type="submit" className={styles.button} disabled={isButtonDisabled}>
             Login
           </button>
 
-          <div className="register-link">
+          <div className={styles.registerLink}>
             <p>
               Don't have an account?{" "}
               <a href="#" onClick={handleRegisterClick}>
@@ -234,6 +284,7 @@ const InClassLogin = () => {
           </div>
         </form>
       </div>
+      <Footer />
     </div>
   );
 };

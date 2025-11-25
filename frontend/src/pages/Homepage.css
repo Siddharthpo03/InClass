@@ -58,6 +58,7 @@ body {
 .logo-icon {
   width: 30px;
   height: 30px;
+  border-radius: 2px;
   margin-right: 10px;
 }
 
@@ -377,4 +378,3 @@ footer {
   left: 0;
   color: #9ca3af;
 }
-

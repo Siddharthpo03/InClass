@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// Corrected to use the standard file naming convention
+import Navigation from "../../components/Navigation";
+import Footer from "../../components/Footer";
 import "./InClassAdmin.css";
 
 const mockAdminData = {
@@ -25,6 +26,22 @@ const InClassAdminPanel = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
 
+  // Initialize dark mode from localStorage on mount
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem("darkMode");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    const shouldBeDark = savedDarkMode !== null 
+      ? savedDarkMode === "true" 
+      : prefersDark;
+    
+    if (shouldBeDark) {
+      document.body.classList.add("darkMode");
+    } else {
+      document.body.classList.remove("darkMode");
+    }
+  }, []);
+
   const handleLogout = () => {
     navigate("/login");
   };
@@ -35,18 +52,9 @@ const InClassAdminPanel = () => {
 
   return (
     <div className="portal-page-wrapper">
-      <header className="portal-header">
-        <div className="header-left">
-          <span className="brand-name">InClass Admin Panel</span>
-        </div>
-        <div className="header-right">
-          <button className="logout-btn" onClick={handleLogout}>
-            <i className="bx bx-log-out" /> Logout
-          </button>
-        </div>
-      </header>
-
-      <div className="portal-container">
+      <Navigation />
+      
+      <div className="portal-container" style={{ marginTop: "80px", marginBottom: "80px" }}>
         {/* Profile Card / Welcome */}
         <div className="profile-card">
           <div className="profile-info">
@@ -161,9 +169,7 @@ const InClassAdminPanel = () => {
         </div>
       </div>
 
-      <footer className="portal-footer">
-        <p>&copy; 2025 InClass Admin System</p>
-      </footer>
+      <Footer />
     </div>
   );
 };

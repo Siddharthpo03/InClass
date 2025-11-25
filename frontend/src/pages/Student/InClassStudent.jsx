@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import apiClient from "../../utils/apiClient"; // 🚨 IMPORT API CLIENT 🚨
-import "./InClassStudent.css"; // Corrected CSS path
+import apiClient from "../../utils/apiClient";
+import Navigation from "../../components/Navigation";
+import Footer from "../../components/Footer";
+import "./InClassStudent.css";
 
 // --- Mock Data ---
 const mockUserData = {
@@ -29,6 +31,22 @@ const mockUserData = {
 
 const InClassStudent = () => {
   const navigate = useNavigate();
+
+  // Initialize dark mode from localStorage on mount
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem("darkMode");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    const shouldBeDark = savedDarkMode !== null 
+      ? savedDarkMode === "true" 
+      : prefersDark;
+    
+    if (shouldBeDark) {
+      document.body.classList.add("darkMode");
+    } else {
+      document.body.classList.remove("darkMode");
+    }
+  }, []);
   const portalRef = useRef(null);
   const intervalRef = useRef(null);
 
@@ -290,22 +308,9 @@ const InClassStudent = () => {
 
   return (
     <div className="portal-page-wrapper" ref={portalRef}>
-      <header className="portal-header">
-        <div className="header-left">
-          <span className="brand-name">InClass Student Portal</span>
-        </div>
-        <div className="header-right">
-          <button
-            className="logout-btn"
-            onClick={handleLogout}
-            disabled={isSessionActive}
-          >
-            <i className="bx bx-log-out" /> Logout
-          </button>
-        </div>
-      </header>
-
-      <div className="portal-container">
+      <Navigation />
+      
+      <div className="portal-container" style={{ marginTop: "80px", marginBottom: "80px" }}>
         <div className="profile-card">
           <div className="profile-info">
             <h2>Welcome back, {mockUserData.name}!</h2>
@@ -352,9 +357,7 @@ const InClassStudent = () => {
         </div>
       </div>
 
-      <footer className="portal-footer">
-        <p>&copy; 2025 InClass | Made for Smart Campus</p>
-      </footer>
+      <Footer />
     </div>
   );
 };

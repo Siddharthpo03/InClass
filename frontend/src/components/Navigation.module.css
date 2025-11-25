@@ -1,0 +1,709 @@
+/* ===== Global Font Enhancement ===== */
+:global(body) {
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* ===== Navbar Container ===== */
+.navBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+  gap: 20px;
+}
+
+:global(body.darkMode) .navBar {
+  background-color: #1f2937;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== Left Section (Menu Icon + Logo) ===== */
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 100px;
+}
+
+.menuIcon {
+  display: none;
+  font-size: 26px;
+  width: 25px;
+  height: 18px;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #333;
+  cursor: pointer;
+  z-index: 1100;
+  transition: color 0.3s ease;
+}
+
+:global(body.darkMode) .menuIcon {
+  color: #e5e7eb;
+}
+
+.menuIcon span {
+  display: block;
+  height: 3px;
+  background: #333;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+:global(body.darkMode) .menuIcon span {
+  background: #e5e7eb;
+}
+
+.menuIcon.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.menuIcon.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.menuIcon.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+.logoSection {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.logoSection:hover {
+  opacity: 0.8;
+}
+
+.logoIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 2px;
+  margin-right: 10px;
+  transition: opacity 0.3s ease;
+  object-fit: contain;
+}
+
+.logoIcon:hover {
+  opacity: 0.9;
+}
+
+.brandName {
+  font-weight: bold;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  user-select: none;
+}
+
+:global(body.darkMode) .brandName {
+  color: #e5e7eb;
+}
+
+/* ===== Navigation Links ===== */
+.menuContent {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.navLinks {
+  display: flex;
+  gap: 25px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navLinks li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  letter-spacing: 0.01em;
+  font-feature-settings: "liga" 1;
+  position: relative;
+  padding: 8px 0;
+}
+
+:global(body.darkMode) .navLinks li a {
+  color: #e5e7eb;
+}
+
+.navLinks li a::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  transition: width 0.3s ease;
+}
+
+.navLinks a:hover::after,
+.navLinks a.active::after {
+  width: 100%;
+}
+
+.navLinks a:hover,
+.navLinks a.active {
+  color: #007bff;
+}
+
+:global(body.darkMode) .navLinks a:hover,
+:global(body.darkMode) .navLinks a.active {
+  color: #60a5fa;
+}
+
+/* ===== Auth Buttons ===== */
+.authButtons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.reportBtn {
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  font-family: "Poppins", sans-serif;
+}
+
+.reportBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.navBtn {
+  text-decoration: none;
+  padding: 8px 16px;
+  border: 1px solid #007bff;
+  border-radius: 8px;
+  color: #007bff;
+  transition: transform 0.3s ease;
+  font-weight: 600;
+  text-align: left;
+  display: inline-block;
+}
+
+:global(body.darkMode) .navBtn {
+  border-color: #60a5fa;
+  color: #60a5fa;
+}
+
+.navBtn:hover {
+  transform: scale(1.05);
+}
+
+:global(body.darkMode) .navBtn:hover {
+  transform: scale(1.05);
+}
+
+.navBtnSignup {
+  background: linear-gradient(to right, #10b981, #3b82f6);
+  color: white;
+  border: none;
+  transition: transform 0.3s ease;
+}
+
+.navBtnSignup:hover {
+  transform: scale(1.05);
+}
+
+/* ===== Dark Mode Toggle ===== */
+.darkModeToggle {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #333;
+  padding: 8px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  z-index: 10;
+  margin-left: 10px;
+}
+
+.darkModeToggle i {
+  font-size: 18px;
+  display: block;
+}
+
+:global(body.darkMode) .darkModeToggle {
+  color: #fbbf24;
+}
+
+.darkModeToggle:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: scale(1.1);
+}
+
+:global(body.darkMode) .darkModeToggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ===== Mobile Menu Overlay ===== */
+.mobileMenuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ===== Mobile Menu Styles ===== */
+.mobileMenu {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 85%;
+  max-width: 320px;
+  height: 100%;
+  background: #ffffff;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  z-index: 1001;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+:global(body.darkMode) .mobileMenu {
+  background: #1f2937;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.6);
+}
+
+.mobileMenu.show {
+  right: 0;
+}
+
+/* ===== Mobile Menu Header ===== */
+.mobileMenuHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(to right, #f9fafb, #ffffff);
+}
+
+:global(body.darkMode) .mobileMenuHeader {
+  border-bottom-color: #374151;
+  background: linear-gradient(to right, #111827, #1f2937);
+}
+
+.mobileMenuHeader h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+:global(body.darkMode) .mobileMenuHeader h3 {
+  color: #f9fafb;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.closeButton:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #111827;
+  transform: rotate(90deg);
+}
+
+:global(body.darkMode) .closeButton {
+  color: #9ca3af;
+}
+
+:global(body.darkMode) .closeButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f9fafb;
+}
+
+/* ===== Mobile Navigation Links ===== */
+.mobileNavLinks {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 10px 0;
+  flex: 1;
+}
+
+.mobileNavLinks li {
+  margin: 4px 0;
+}
+
+.mobileNavLinks a {
+  text-decoration: none;
+  color: #374151;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  border-radius: 8px;
+  margin: 0 12px;
+}
+
+.mobileNavLinks a i {
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
+  color: #6b7280;
+  transition: all 0.3s ease;
+}
+
+.mobileNavLinks a span {
+  flex: 1;
+}
+
+:global(body.darkMode) .mobileNavLinks a {
+  color: #e5e7eb;
+}
+
+:global(body.darkMode) .mobileNavLinks a i {
+  color: #9ca3af;
+}
+
+.mobileNavLinks a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 0;
+  background: linear-gradient(to top, #10b981 0%, #3b82f6 100%);
+  border-radius: 0 4px 4px 0;
+  transition: height 0.3s ease;
+}
+
+.mobileNavLinks a:hover,
+.mobileNavLinks a.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding-left: 24px;
+}
+
+.mobileNavLinks a:hover::before,
+.mobileNavLinks a.active::before {
+  height: 60%;
+}
+
+.mobileNavLinks a:hover i,
+.mobileNavLinks a.active i {
+  color: #10b981;
+  transform: scale(1.1);
+}
+
+:global(body.darkMode) .mobileNavLinks a:hover,
+:global(body.darkMode) .mobileNavLinks a.active {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+:global(body.darkMode) .mobileNavLinks a:hover i,
+:global(body.darkMode) .mobileNavLinks a.active i {
+  color: #34d399;
+}
+
+/* ===== Mobile Auth Section ===== */
+.mobileAuthSection {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+:global(body.darkMode) .mobileAuthSection {
+  border-top-color: #374151;
+  border-bottom-color: #374151;
+}
+
+.mobileReportBtn,
+.mobileNavBtn,
+.mobileNavBtnSignup {
+  text-decoration: none;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  letter-spacing: 0.01em;
+}
+
+.mobileReportBtn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.mobileReportBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.mobileNavBtn {
+  background: transparent;
+  border: 2px solid #007bff;
+  color: #007bff;
+}
+
+.mobileNavBtn:hover {
+  background: #007bff;
+  color: white;
+  transform: translateY(-2px);
+}
+
+:global(body.darkMode) .mobileNavBtn {
+  border-color: #60a5fa;
+  color: #60a5fa;
+}
+
+:global(body.darkMode) .mobileNavBtn:hover {
+  background: #60a5fa;
+  color: #1f2937;
+}
+
+.mobileNavBtnSignup {
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.mobileNavBtnSignup:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.mobileNavBtn i,
+.mobileNavBtnSignup i,
+.mobileReportBtn i {
+  font-size: 1rem;
+}
+
+/* ===== Mobile Menu Footer ===== */
+.mobileMenuFooter {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mobileDarkModeSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-radius: 10px;
+}
+
+:global(body.darkMode) .mobileDarkModeSection {
+  background: #111827;
+}
+
+.mobileDarkModeSection span:first-child {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+:global(body.darkMode) .mobileDarkModeSection span:first-child {
+  color: #9ca3af;
+}
+
+.mobileDarkModeToggle {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #374151;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.mobileDarkModeToggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+:global(body.darkMode) .mobileDarkModeToggle {
+  color: #fbbf24;
+}
+
+:global(body.darkMode) .mobileDarkModeToggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mobileDarkModeToggle i {
+  font-size: 1.1rem;
+}
+
+.socialMedia {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding-top: 10px;
+}
+
+.socialMedia a {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.socialMedia a:hover {
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  color: white;
+  transform: translateY(-3px) scale(1.1);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+:global(body.darkMode) .socialMedia a {
+  background: #374151;
+  color: #9ca3af;
+}
+
+:global(body.darkMode) .socialMedia a:hover {
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  color: white;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .navBar {
+    padding: 12px 20px;
+  }
+
+  .menuIcon {
+    display: flex;
+    order: 3;
+  }
+
+  .menuContent {
+    display: none;
+  }
+
+  .authButtons {
+    display: none;
+  }
+
+  /* Hide dark mode toggle in nav bar on mobile */
+  .navBar > .darkModeToggle {
+    display: none;
+  }
+
+  .leftSection {
+    gap: 15px;
+  }
+
+  .logoIcon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .brandName {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobileMenu {
+    width: 90%;
+    max-width: 300px;
+  }
+
+  .navBar {
+    padding: 10px 15px;
+  }
+}

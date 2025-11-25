@@ -1,11 +1,21 @@
 /* src/StudentPortal/InClassStudentPortal.module.css */
 
+:global(body) {
+  background: linear-gradient(to top, #d4f5eb 0%, #ffffff 100%);
+  background-attachment: fixed;
+  transition: background 0.3s ease;
+}
+
+:global(body.darkMode) {
+  background: linear-gradient(to top, #1a1a2e 0%, #16213e 100%);
+  background-attachment: fixed;
+}
+
 /* --- Base Layout --- */
 .portal-page-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f0fdf7;
 }
 
 .portal-container {
@@ -109,7 +119,7 @@
 
 /* --- Session Card (CRITICAL FIX APPLIED HERE) --- */
 .session-card {
-  background: linear-gradient(135deg, #e0f2f1, #ffffff);
+  background: linear-gradient(to top, #e0f2f1, #ffffff);
   border: 1px solid #b6f0d3;
   padding: 25px;
   border-radius: 15px;

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/apiClient";
+import Navigation from "../../components/Navigation";
+import Footer from "../../components/Footer";
 import "./InClassFaculty.css";
 
 // Temporary mock roster (will be replaced by real DB data)
@@ -34,6 +36,22 @@ const mockStudentsByCourse = {
 
 const InClassFaculty = () => {
   const navigate = useNavigate();
+
+  // Initialize dark mode from localStorage on mount
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem("darkMode");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    const shouldBeDark = savedDarkMode !== null 
+      ? savedDarkMode === "true" 
+      : prefersDark;
+    
+    if (shouldBeDark) {
+      document.body.classList.add("darkMode");
+    } else {
+      document.body.classList.remove("darkMode");
+    }
+  }, []);
 
   // ------------------ STATE VARIABLES ------------------
   const [facultyProfile, setFacultyProfile] = useState(null);
@@ -267,18 +285,9 @@ const InClassFaculty = () => {
 
   return (
     <div className="portal-page-wrapper">
-      <header className="portal-header">
-        <div className="header-left">
-          <span className="brand-name">InClass Faculty Portal</span>
-        </div>
-        <div className="header-right">
-          <button className="logout-btn" onClick={handleLogout}>
-            <i className="bx bx-log-out" /> Logout
-          </button>
-        </div>
-      </header>
-
-      <div className="portal-container">
+      <Navigation />
+      
+      <div className="portal-container" style={{ marginTop: "80px", marginBottom: "80px" }}>
         {/* Profile Section */}
         <div className="profile-card">
           <div className="profile-info">
@@ -512,9 +521,7 @@ const InClassFaculty = () => {
         </div>
       </div>
 
-      <footer className="portal-footer">
-        <p>&copy; 2025 InClass | Made for Smart Campus</p>
-      </footer>
+      <Footer />
     </div>
   );
 };

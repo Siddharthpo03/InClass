@@ -121,3 +121,6 @@ import Homepage from "./pages/Homepage";
 - The database file (inclass.db) stays at the root level for easy access
 - This reorganization will make the codebase more professional and easier to maintain
 
+
+
+

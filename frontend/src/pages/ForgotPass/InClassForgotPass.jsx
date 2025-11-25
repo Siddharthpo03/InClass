@@ -1,9 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Navigation from "../../components/Navigation";
+import Footer from "../../components/Footer";
 import "./InClassForgotPass.css";
 
 const InClassForgotPass = () => {
   const navigate = useNavigate();
+
+  // Initialize dark mode from localStorage on mount
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem("darkMode");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    const shouldBeDark = savedDarkMode !== null 
+      ? savedDarkMode === "true" 
+      : prefersDark;
+    
+    if (shouldBeDark) {
+      document.body.classList.add("darkMode");
+    } else {
+      document.body.classList.remove("darkMode");
+    }
+  }, []);
   const [email, setEmail] = useState("");
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
@@ -110,7 +128,9 @@ const InClassForgotPass = () => {
 
   return (
     <div className="forgot-password-page-wrapper">
-      <div className="forgot-password-wrapper">{renderContent()}</div>
+      <Navigation />
+      <div className="forgot-password-wrapper" style={{ marginTop: "80px", marginBottom: "80px" }}>{renderContent()}</div>
+      <Footer />
     </div>
   );
 };

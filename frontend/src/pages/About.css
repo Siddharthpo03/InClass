@@ -1,10 +1,20 @@
 /* src/About/InClassAbout.module.css */
 
+:global(body) {
+  background: linear-gradient(to top, #d4f5eb 0%, #ffffff 100%);
+  background-attachment: fixed;
+  transition: background 0.3s ease;
+}
+
+:global(body.darkMode) {
+  background: linear-gradient(to top, #1a1a2e 0%, #16213e 100%);
+  background-attachment: fixed;
+}
+
 .about-page-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #ffffff; /* White background */
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #111827;
 }
@@ -146,6 +156,49 @@
 
 .register-cta-btn:hover {
   opacity: 0.9;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .about-container {
+    padding: 20px 15px;
+    margin-top: 70px;
+    margin-bottom: 70px;
+  }
+
+  .about-container h1 {
+    font-size: 2rem;
+  }
+
+  .about-container h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-container {
+    padding: 15px 10px;
+    margin-top: 65px;
+    margin-bottom: 65px;
+  }
+
+  .about-container h1 {
+    font-size: 1.75rem;
+  }
+
+  .about-container h2 {
+    font-size: 1.25rem;
+  }
+
+  .about-container p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .about-container h1 {
+    font-size: 1.5rem;
+  }
 }
 
 /* --- Footer --- */

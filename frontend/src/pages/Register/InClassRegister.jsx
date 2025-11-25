@@ -1,7 +1,25 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // 🚨 NEW IMPORT 🚨
-import "./InClassRegister.css";
+import apiClient from "../../utils/apiClient";
+import Footer from "../../components/Footer";
+import styles from "./InClassRegister.module.css";
+
+// Helper function for classNames
+const classNames = (...classes) => {
+  return classes
+    .filter(Boolean)
+    .map((cls) => {
+      if (typeof cls === "string") {
+        // Convert kebab-case to camelCase for CSS modules
+        const camelCase = cls.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+        return styles[camelCase] || styles[cls] || cls;
+      }
+      // If it's a boolean or other type, return as is (will be filtered out)
+      return null;
+    })
+    .filter(Boolean)
+    .join(" ");
+};
 
 // Reusable Input Component (Abstraction)
 const AuthInput = ({
@@ -13,18 +31,18 @@ const AuthInput = ({
   error,
   iconClass,
 }) => (
-  <div className="input-box">
+  <div className={styles.inputBox}>
     <input
       type={type}
       placeholder={placeholder}
       name={name}
       value={value}
       onChange={onChange}
-      className={error ? "input-error" : ""}
+      className={error ? styles.inputError : ""}
       required
     />
     <i className={`bx ${iconClass}`} />
-    <span className="error-message">{error}</span>
+    {error && <span className={styles.errorMessage}>{error}</span>}
   </div>
 );
 
@@ -47,6 +65,23 @@ const InClassRegister = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [validationErrors, setValidationErrors] = useState({});
   const [registerMessage, setRegisterMessage] = useState("");
+
+  // Force light mode on register page for better visibility
+  // Initialize dark mode from localStorage on mount
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem("darkMode");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    const shouldBeDark = savedDarkMode !== null 
+      ? savedDarkMode === "true" 
+      : prefersDark;
+    
+    if (shouldBeDark) {
+      document.body.classList.add("darkMode");
+    } else {
+      document.body.classList.remove("darkMode");
+    }
+  }, []);
 
   const handleFormChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -158,10 +193,7 @@ const InClassRegister = () => {
     };
 
     try {
-      const response = await axios.post(
-        "http://localhost:4000/api/auth/register",
-        registrationPayload
-      );
+      const response = await apiClient.post("/auth/register", registrationPayload);
 
       // Handle successful registration (HTTP 201)
       setRegisterMessage(`✅ Success! Redirecting to login.`);
@@ -185,8 +217,19 @@ const InClassRegister = () => {
   };
 
   return (
-    <div className="register-page-wrapper">
-      <div className="register-wrapper">
+    <div className={styles.registerPageWrapper}>
+      <a
+        href="#"
+        className={styles.reportButton}
+        onClick={(e) => {
+          e.preventDefault();
+          navigate("/report");
+        }}
+        title="Report an Issue"
+      >
+        Report
+      </a>
+      <div className={styles.registerWrapper}>
         <form id="registerForm" noValidate onSubmit={handleSubmit}>
           <h1>Register</h1>
 
@@ -194,10 +237,15 @@ const InClassRegister = () => {
           {registerMessage && (
             <div
               style={{
-                color: registerMessage.startsWith("✅") ? "green" : "red",
+                color: registerMessage.startsWith("✅") ? "#10b981" : "#ef4444",
                 marginBottom: "15px",
                 textAlign: "center",
                 fontWeight: 600,
+                padding: "10px",
+                borderRadius: "8px",
+                backgroundColor: registerMessage.startsWith("✅") 
+                  ? "rgba(16, 185, 129, 0.1)" 
+                  : "rgba(239, 68, 68, 0.1)",
               }}
             >
               {registerMessage}
@@ -206,28 +254,33 @@ const InClassRegister = () => {
 
           {/* Dropdown Role */}
           <div
-            className={`dropdown ${validationErrors.role ? "input-error" : ""}`}
+            className={classNames(
+              styles.dropdown,
+              validationErrors.role ? styles.inputError : ""
+            )}
             ref={dropdownRef}
           >
             <div
-              className="dropdown-selected"
+              className={styles.dropdownSelected}
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
               {role || "Select Role"}{" "}
-              <span className={`arrow ${dropdownOpen ? "rotate" : ""}`}>▼</span>
+              <span className={classNames(styles.arrow, dropdownOpen ? styles.rotate : "")}>▼</span>
             </div>
-            <ul className={`dropdown-menu ${dropdownOpen ? "show" : ""}`}>
+            <ul className={classNames(styles.dropdownMenu, dropdownOpen ? styles.show : "")}>
               {["Admin", "Student", "Faculty"].map((r) => (
                 <li
                   key={r}
-                  className="dropdown-item"
+                  className={styles.dropdownItem}
                   onClick={() => handleRoleSelect(r)}
                 >
                   {r}
                 </li>
               ))}
             </ul>
-            <span className="error-message">{validationErrors.role}</span>
+            {validationErrors.role && (
+              <span className={styles.errorMessage}>{validationErrors.role}</span>
+            )}
           </div>
 
           <AuthInput
@@ -312,12 +365,12 @@ const InClassRegister = () => {
           )}
 
           {/* Submit */}
-          <button type="submit" className="button" disabled={isButtonDisabled}>
+          <button type="submit" className={styles.button} disabled={isButtonDisabled}>
             Register
           </button>
 
           {/* Login link */}
-          <div className="register-link">
+          <div className={styles.registerLink}>
             <p>
               Already have an account?{" "}
               <a
@@ -333,6 +386,7 @@ const InClassRegister = () => {
           </div>
         </form>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -1,0 +1,307 @@
+/* ===== Report Page ===== */
+:global(body) {
+  background: linear-gradient(to top, #d4f5eb 0%, #ffffff 100%);
+  background-attachment: fixed;
+  transition: background 0.3s ease;
+}
+
+:global(body.darkMode) {
+  background: linear-gradient(to top, #1a1a2e 0%, #16213e 100%);
+  background-attachment: fixed;
+}
+
+.report-page-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.report-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  width: 100%;
+}
+
+/* ===== Hero Section ===== */
+.hero-section {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.hero-section h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #111827 0%, #374151 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+:global(body.darkMode) .hero-section h1 {
+  background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-section .subtitle {
+  font-size: 1.1rem;
+  color: #4b5563;
+  line-height: 1.7;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+:global(body.darkMode) .hero-section .subtitle {
+  color: #9ca3af;
+}
+
+/* ===== Report Form ===== */
+.report-form {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+:global(body.darkMode) .report-form {
+  background: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-row .form-group {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #111827;
+  font-size: 0.95rem;
+}
+
+:global(body.darkMode) .form-group label {
+  color: #e5e7eb;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: "Poppins", sans-serif;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background: #ffffff;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+:global(body.darkMode) .form-group input,
+:global(body.darkMode) .form-group select,
+:global(body.darkMode) .form-group textarea {
+  background: #111827;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group select {
+  cursor: pointer;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 180px;
+}
+
+.submit-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+:global(body.darkMode) .submit-message {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: #10b981;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.cancel-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "Poppins", sans-serif;
+}
+
+:global(body.darkMode) .cancel-btn {
+  color: #9ca3af;
+  border-color: #374151;
+}
+
+.cancel-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+:global(body.darkMode) .cancel-btn:hover {
+  background: #374151;
+  border-color: #6b7280;
+}
+
+.submit-btn {
+  padding: 12px 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  color: white;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  letter-spacing: 0.01em;
+  font-family: "Poppins", sans-serif;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .report-container {
+    padding: 20px 15px;
+    margin-top: 70px;
+    margin-bottom: 70px;
+  }
+
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+
+  .hero-section .subtitle {
+    font-size: 1rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .report-container {
+    padding: 15px 10px;
+    margin-top: 65px;
+    margin-bottom: 65px;
+  }
+
+  .hero-section h1 {
+    font-size: 1.75rem;
+  }
+
+  .hero-section .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .report-form {
+    padding: 20px 15px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 15px;
+    padding: 12px 15px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .submit-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-section h1 {
+    font-size: 1.5rem;
+  }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+
+  .report-form {
+    padding: 24px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
+  }
+}
+

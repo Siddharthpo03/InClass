@@ -1,0 +1,507 @@
+/* InClassLogin.module.css */
+
+:global(body) {
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(to top, #cbf6e9 0%, #ffffff 100%);
+  background-attachment: fixed;
+  transition: background 0.3s ease;
+}
+
+:global(body.darkMode) {
+  background: linear-gradient(to top, #1a1a2e 0%, #16213e 100%);
+  background-attachment: fixed;
+}
+
+.loginPageWrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  padding-top: 80px; /* Space for navigation */
+  padding-bottom: 80px; /* Space for footer */
+  position: relative;
+  box-sizing: border-box;
+}
+
+.reportButton {
+  position: fixed;
+  top: 70px;
+  right: 15px;
+  z-index: 1000;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  text-decoration: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  letter-spacing: 0.01em;
+  font-family: "Poppins", sans-serif;
+  white-space: nowrap;
+}
+
+.reportButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.loginWrapper {
+  width: 100%;
+  max-width: 420px;
+  background: #d4f5eb;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  color: black;
+  border-radius: 15px;
+  padding: 30px 25px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+:global(body.darkMode) .loginWrapper {
+  background: rgba(31, 41, 55, 0.9);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.loginWrapper form {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.loginWrapper h1 {
+  font-size: 42px;
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  font-feature-settings: "liga" 1, "kern" 1;
+}
+
+:global(body.darkMode) .loginWrapper h1 {
+  background: linear-gradient(to right, #34d399, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Dropdown Styles */
+.dropdown {
+  position: relative;
+  width: 100%;
+  margin-bottom: 25px;
+  box-sizing: border-box;
+}
+
+.dropdownSelected {
+  width: 100%;
+  height: 50px;
+  background: linear-gradient(to right, #f8fffb, #e8fff6);
+  border: 1px solid #b6f0d3;
+  outline: none;
+  border-radius: 40px;
+  font-size: 16px;
+  color: #222;
+  padding: 0 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+:global(body.darkMode) .dropdownSelected {
+  background: rgba(17, 24, 39, 0.8);
+  border-color: rgba(75, 85, 99, 0.5);
+  color: #e5e7eb;
+}
+
+.dropdownSelected:hover {
+  box-shadow: 0 0 10px rgba(112, 224, 155, 0.3);
+}
+
+.dropdownSelected:focus {
+  box-shadow: 0 0 8px rgba(112, 224, 155, 0.4);
+}
+
+.arrow {
+  transition: transform 0.3s ease;
+  font-size: 12px;
+}
+
+.arrow.rotate {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  list-style: none;
+  padding: 0;
+  margin: 5px 0 0;
+  position: absolute;
+  width: 100%;
+  background: #f0fff8;
+  border: 1px solid #b6f0d3;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: none;
+  z-index: 10;
+}
+
+:global(body.darkMode) .dropdownMenu {
+  background: rgba(31, 41, 55, 0.95);
+  border-color: rgba(75, 85, 99, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.dropdownMenu.show {
+  display: block;
+  animation: dropdownFade 0.25s ease;
+}
+
+.dropdownItem {
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #222;
+}
+
+:global(body.darkMode) .dropdownItem {
+  color: #e5e7eb;
+}
+
+.dropdownItem:hover {
+  background: #c9ffe3;
+}
+
+:global(body.darkMode) .dropdownItem:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Input Box Styles */
+.inputBox {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  border-radius: 40px;
+  margin: 25px 0;
+  box-sizing: border-box;
+}
+
+.inputBox input {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, #f8fffb, #e8fff6);
+  border: 1px solid #b6f0d3;
+  outline: none;
+  border-radius: 40px;
+  font-size: 16px;
+  color: #222;
+  padding: 0 45px 0 20px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+:global(body.darkMode) .inputBox input {
+  background: rgba(17, 24, 39, 0.8);
+  border-color: rgba(75, 85, 99, 0.5);
+  color: #e5e7eb;
+}
+
+.inputBox input::placeholder {
+  color: #666;
+}
+
+:global(body.darkMode) .inputBox input::placeholder {
+  color: #9ca3af;
+}
+
+.inputBox input:focus {
+  box-shadow: 0 0 8px rgba(112, 224, 155, 0.4);
+  border-color: #10b981;
+}
+
+:global(body.darkMode) .inputBox input:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 8px rgba(96, 165, 250, 0.4);
+}
+
+/* Input Error Styles */
+.inputError {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Dropdown Error Styles */
+.dropdown.inputError .dropdownSelected {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.3) !important;
+}
+
+.inputBox i {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #4fb683;
+  pointer-events: none;
+}
+
+:global(body.darkMode) .inputBox i {
+  color: #60a5fa;
+}
+
+.errorMessage {
+  display: block;
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 5px;
+  margin-left: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Remember Forgot */
+.rememberForgot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14.5px;
+  margin: -15px 0 20px;
+  align-items: center;
+}
+
+.rememberForgot label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #222;
+}
+
+:global(body.darkMode) .rememberForgot label {
+  color: #e5e7eb;
+}
+
+.rememberForgot label input {
+  accent-color: #10b981;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+:global(body.darkMode) .rememberForgot label input {
+  accent-color: #60a5fa;
+}
+
+.rememberForgot a {
+  color: #222;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+:global(body.darkMode) .rememberForgot a {
+  color: #60a5fa;
+}
+
+.rememberForgot a:hover {
+  text-decoration: underline;
+  color: #10b981;
+}
+
+:global(body.darkMode) .rememberForgot a:hover {
+  color: #93c5fd;
+}
+
+/* Button */
+.button {
+  width: 100%;
+  height: 50px;
+  background: linear-gradient(to right, #10b981, #3b82f6);
+  border: none;
+  outline: none;
+  border-radius: 40px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  cursor: pointer;
+  font-size: 16px;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.7;
+  transform: none;
+}
+
+/* Register Link */
+.registerLink {
+  font-size: 14.5px;
+  text-align: center;
+  margin-top: 25px;
+}
+
+.registerLink p {
+  color: #222;
+  margin: 0;
+}
+
+:global(body.darkMode) .registerLink p {
+  color: #9ca3af;
+}
+
+.registerLink a {
+  color: #10b981;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+:global(body.darkMode) .registerLink a {
+  color: #60a5fa;
+}
+
+.registerLink a:hover {
+  text-decoration: underline;
+  color: #059669;
+}
+
+:global(body.darkMode) .registerLink a:hover {
+  color: #93c5fd;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .loginPageWrapper {
+    padding: 10px;
+    padding-top: 70px;
+    padding-bottom: 70px;
+  }
+
+  .loginWrapper {
+    padding: 25px 20px;
+    border-radius: 12px;
+  }
+
+  .loginWrapper h1 {
+    font-size: 32px;
+    margin-bottom: 25px;
+  }
+
+  .reportButton {
+    top: 65px;
+    right: 10px;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .loginPageWrapper {
+    padding: 8px;
+    padding-top: 65px;
+    padding-bottom: 65px;
+  }
+
+  .loginWrapper {
+    padding: 20px 15px;
+    border-radius: 10px;
+  }
+
+  .loginWrapper h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+
+  .reportButton {
+    top: 60px;
+    right: 8px;
+    padding: 7px 12px;
+    font-size: 0.75rem;
+  }
+
+  .dropdownSelected,
+  .inputBox input {
+    font-size: 15px;
+    padding: 10px 40px 10px 18px;
+  }
+
+  .button {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 360px) {
+  .loginWrapper {
+    padding: 18px 12px;
+  }
+
+  .loginWrapper h1 {
+    font-size: 24px;
+  }
+
+  .reportButton {
+    padding: 6px 10px;
+    font-size: 0.7rem;
+  }
+}
