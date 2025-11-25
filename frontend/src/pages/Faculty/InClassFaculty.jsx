@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/apiClient";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
-import "./InClassFaculty.css";
+import styles from "./InClassFaculty.module.css";
 
 // Temporary mock roster (will be replaced by real DB data)
 const mockStudentsByCourse = {

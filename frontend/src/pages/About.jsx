@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
-import "./About.css";
+import styles from "./About.module.css";
 
 const InClassAbout = () => {
   const navigate = useNavigate();

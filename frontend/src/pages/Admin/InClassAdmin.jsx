@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
-import "./InClassAdmin.css";
+import styles from "./InClassAdmin.module.css";
 
 const mockAdminData = {
   name: "System Administrator",

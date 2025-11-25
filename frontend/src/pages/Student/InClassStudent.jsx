@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/apiClient";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
-import "./InClassStudent.css";
+import styles from "./InClassStudent.module.css";
 
 // --- Mock Data ---
 const mockUserData = {
