@@ -56,6 +56,14 @@ const InClassStudent = () => {
   const [sessionMessage, setSessionMessage] = useState("");
   const [timer, setTimer] = useState(0);
 
+  const classNames = (...classes) =>
+    classes
+      .flat()
+      .filter(Boolean)
+      .map((cls) => styles[cls] || cls)
+      .join(" ")
+      .trim();
+
   // --- Logout Handler ---
   const handleLogout = () => {
     // Clear interval before logging out
@@ -221,7 +229,7 @@ const InClassStudent = () => {
   const renderSessionCardContent = () => {
     if (!mockUserData.currentSession.isActive && !isAttendanceMarked) {
       return (
-        <div className="session-inactive">
+        <div className={classNames("session-inactive")}>
           <h3>No Active Attendance Session</h3>
           <p>Please check back at the scheduled class time.</p>
         </div>
@@ -230,33 +238,33 @@ const InClassStudent = () => {
 
     if (isAttendanceMarked) {
       return (
-        <div className="session-marked">
+        <div className={classNames("session-marked")}>
           <h3>Attendance Status</h3>
-          <p className="course-title">
+          <p className={classNames("course-title")}>
             {mockUserData.currentSession.courseName}
           </p>
-          <div className="marked-status">
-            <i className="bx bx-check-circle" />
+          <div className={classNames("marked-status")}>
+            <i className={classNames("bx bx-check-circle")} />
             <span>Attendance Marked!</span>
           </div>
-          <p className="marked-time">You are recorded as PRESENT.</p>
-          <p className="session-message success">{sessionMessage}</p>
+          <p className={classNames("marked-time")}>You are recorded as PRESENT.</p>
+          <p className={classNames("session-message success")}>{sessionMessage}</p>
         </div>
       );
     }
 
     if (isSessionActive) {
       return (
-        <form onSubmit={handleCodeSubmit} className="secure-form">
+        <form onSubmit={handleCodeSubmit} className={classNames("secure-form")}>
           <h3>Enter Secure Attendance Code</h3>
-          <p className="course-title">
+          <p className={classNames("course-title")}>
             {mockUserData.currentSession.courseName}
           </p>
-          <p className="security-note">
+          <p className={classNames("security-note")}>
             ⚠️ **DO NOT** switch tabs or exit fullscreen until submitted.
           </p>
-          <div className="timer">
-            <i className="bx bx-time-five" />
+          <div className={classNames("timer")}>
+            <i className={classNames("bx bx-time-five")} />
             Time Remaining:{" "}
             {`${Math.floor(timer / 60)}:${("0" + (timer % 60)).slice(-2)}`}
           </div>
@@ -266,22 +274,23 @@ const InClassStudent = () => {
             value={sessionCode}
             onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
             placeholder="ENTER 6-DIGIT CODE"
-            className="session-code-input"
+            className={classNames("session-code-input")}
             maxLength="6"
             required
           />
 
           {sessionMessage && (
             <p
-              className={`session-message ${
+              className={classNames(
+                "session-message",
                 sessionMessage.startsWith("✅") ? "success" : "error"
-              }`}
+              )}
             >
               {sessionMessage}
             </p>
           )}
 
-          <button type="submit" className="join-btn" disabled={timer <= 0}>
+          <button type="submit" className={classNames("join-btn")} disabled={timer <= 0}>
             Mark My Attendance
           </button>
         </form>
@@ -289,17 +298,17 @@ const InClassStudent = () => {
     }
 
     return (
-      <div className="session-pre-start">
+      <div className={classNames("session-pre-start")}>
         <h3>Active Attendance Session Available</h3>
-        <p className="course-title">{mockUserData.currentSession.courseName}</p>
-        <p className="instructor">
+        <p className={classNames("course-title")}>{mockUserData.currentSession.courseName}</p>
+        <p className={classNames("instructor")}>
           Taught by: {mockUserData.currentSession.instructor}
         </p>
-        <p className="security-info">
+        <p className={classNames("security-info")}>
           Clicking the button will lock your screen to ensure attendance
           integrity. Exiting or switching tabs will result in an ABSENT mark.
         </p>
-        <button className="join-btn" onClick={handleStartSession}>
+        <button className={classNames("join-btn")} onClick={handleStartSession}>
           Start Attendance Session
         </button>
       </div>
@@ -314,16 +323,16 @@ const InClassStudent = () => {
         <div className="profile-card">
           <div className="profile-info">
             <h2>Welcome back, {mockUserData.name}!</h2>
-            <p className="user-details">
+            <p className={classNames("user-details")}>
               {mockUserData.role} | {mockUserData.id}
             </p>
-            <p className="college-details">
+            <p className={classNames("college-details")}>
               {mockUserData.department}, {mockUserData.college}
             </p>
           </div>
-          <div className="attendance-summary">
-            <div className="attendance-circle">
-              <span className="percentage-text">
+          <div className={classNames("attendance-summary")}>
+            <div className={classNames("attendance-circle")}>
+              <span className={classNames("percentage-text")}>
                 {mockUserData.attendancePercentage}%
               </span>
             </div>
@@ -331,27 +340,30 @@ const InClassStudent = () => {
           </div>
         </div>
 
-        <div className="content-grid">
-          <div className="session-card active">
+        <div className={classNames("content-grid")}>
+          <div className={classNames("session-card active")}>
             {renderSessionCardContent()}
           </div>
 
-          <div className="history-card">
+          <div className={classNames("history-card")}>
             <h3>Recent Attendance History</h3>
-            <ul className="history-list">
+            <ul className={classNames("history-list")}>
               {mockUserData.attendanceHistory.map((item, index) => (
                 <li
                   key={index}
-                  className={`history-item ${item.status.toLowerCase()}`}
+                  className={classNames(
+                    "history-item",
+                    item.status.toLowerCase()
+                  )}
                 >
-                  <span className="history-date">{item.date}</span>
-                  <span className="history-course">{item.course}</span>
-                  <span className="history-status">{item.status}</span>
+                  <span className={classNames("history-date")}>{item.date}</span>
+                  <span className={classNames("history-course")}>{item.course}</span>
+                  <span className={classNames("history-status")}>{item.status}</span>
                 </li>
               ))}
             </ul>
-            <a href="#" className="view-all-link">
-              View Full Report <i className="bx bx-chevron-right"></i>
+            <a href="#" className={classNames("view-all-link")}>
+              View Full Report <i className={classNames("bx bx-chevron-right")}></i>
             </a>
           </div>
         </div>

@@ -15,8 +15,8 @@ services:
     name: inclass-frontend
     rootDir: frontend
     plan: free
-    # Ensure devDependencies (vite) are installed during build
-    buildCommand: npm ci --include=dev && npm run build
+    # Use an explicit cd so the build runs correctly even if Render runs at repo root
+    buildCommand: cd frontend && npm ci --include=dev && npm run build
     publishPath: dist
     envVars:
       - key: VITE_API_BASE_URL

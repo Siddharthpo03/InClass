@@ -56,19 +56,19 @@ const InClassAdminPanel = () => {
       
       <div className="portal-container" style={{ marginTop: "80px", marginBottom: "80px" }}>
         {/* Profile Card / Welcome */}
-        <div className="profile-card">
-          <div className="profile-info">
+        <div className={classNames("profile-card")}>
+          <div className={classNames("profile-info")}>
             <h2>Welcome, {mockAdminData.name}.</h2>
-            <p className="user-details">
+            <p className={classNames("user-details")}>
               Role: {mockAdminData.role} | ID: {mockAdminData.id}
             </p>
-            <p className="college-details" style={{ color: "#c93535" }}>
+            <p className={classNames("college-details")} style={{ color: "#c93535" }}>
               WARNING: Handle permissions with care.
             </p>
           </div>
-          <div className="admin-status">
+          <div className={classNames("admin-status")}>
             <span
-              className="percentage-text"
+              className={classNames("percentage-text")}
               style={{ fontSize: "1.2rem", color: "#10b981" }}
             >
               Status: Operational
@@ -78,17 +78,18 @@ const InClassAdminPanel = () => {
         </div>
 
         {/* --- Navigation Tabs --- */}
-        <div className="admin-tabs">
+        <div className={classNames("admin-tabs")}>
           <button
-            className={`tab-btn ${
-              activeTab === "dashboard" ? "active-tab" : ""
-            }`}
+            className={classNames(
+              "tab-btn",
+              activeTab === "dashboard" && "active-tab"
+            )}
             onClick={() => setActiveTab("dashboard")}
           >
             <i className="bx bx-tachometer" /> Dashboard Metrics
           </button>
           <button
-            className={`tab-btn ${activeTab === "users" ? "active-tab" : ""}`}
+            className={classNames("tab-btn", activeTab === "users" && "active-tab")}
             onClick={() => setActiveTab("users")}
           >
             <i className="bx bx-group" /> User Management
@@ -96,19 +97,21 @@ const InClassAdminPanel = () => {
         </div>
 
         {/* --- Content Area --- */}
-        <div className="content-area">
+        <div className={classNames("content-area")}>
           {activeTab === "dashboard" && (
-            <div className="metrics-grid">
+            <div className={classNames("metrics-grid")}>
               {Object.keys(mockAdminData.stats).map((key) => (
-                <div key={key} className="metric-card">
-                  <p className="metric-value">{mockAdminData.stats[key]}</p>
-                  <p className="metric-label">
+                <div key={key} className={classNames("metric-card")}>
+                  <p className={classNames("metric-value")}>
+                    {mockAdminData.stats[key]}
+                  </p>
+                  <p className={classNames("metric-label")}>
                     {key.replace(/([A-Z])/g, " $1").toUpperCase()}
                   </p>
                 </div>
               ))}
 
-              <div className="recent-activity-card">
+              <div className={classNames("recent-activity-card")}>
                 <h4>Recent Registrations</h4>
                 <ul>
                   {mockAdminData.recentRegistrations.map((reg) => (
@@ -122,40 +125,40 @@ const InClassAdminPanel = () => {
           )}
 
           {activeTab === "users" && (
-            <div className="user-management">
+            <div className={classNames("user-management")}>
               <h3>User Accounts Overview</h3>
-              <p className="user-count">
+              <p className={classNames("user-count")}>
                 Total Active Users: {mockAdminData.stats.totalUsers}
               </p>
-              <div className="user-list-card">
-                <div className="user-search">
+              <div className={classNames("user-list-card")}>
+                <div className={classNames("user-search")}>
                   <input
                     type="text"
                     placeholder="Search by name, ID, or role..."
                   />
-                  <button className="search-btn">Search</button>
+                  <button className={classNames("search-btn")}>Search</button>
                 </div>
 
                 {mockAdminData.recentRegistrations.map((user) => (
-                  <div key={user.id} className="user-row">
-                    <span className="user-info">
+                  <div key={user.id} className={classNames("user-row")}>
+                    <span className={classNames("user-info")}>
                       <strong>{user.name}</strong> ({user.role})
                     </span>
-                    <div className="user-actions">
+                    <div className={classNames("user-actions")}>
                       <button
-                        className="action-btn view-btn"
+                        className={classNames("action-btn", "view-btn")}
                         onClick={() => handleUserAction("View Details", user)}
                       >
                         View
                       </button>
                       <button
-                        className="action-btn reset-btn"
+                        className={classNames("action-btn", "reset-btn")}
                         onClick={() => handleUserAction("Reset Password", user)}
                       >
                         Reset Pwd
                       </button>
                       <button
-                        className="action-btn delete-btn"
+                        className={classNames("action-btn", "delete-btn")}
                         onClick={() => handleUserAction("Delete", user)}
                       >
                         Delete

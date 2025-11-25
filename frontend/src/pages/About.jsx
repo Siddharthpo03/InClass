@@ -34,17 +34,17 @@ const InClassAbout = () => {
       >
         <section className="hero-section">
           <h1>Our Mission: Secure, Seamless Presence.</h1>
-          <p className="subtitle">
+          <p className={classNames("subtitle")}>
             InClass revolutionizes university attendance tracking by replacing
             outdated paper sheets and unreliable proximity methods with a
             modern, secure session-based system.
           </p>
         </section>
 
-        <section className="feature-section">
+        <section className={classNames("feature-section")}>
           <h2>Core Features & Technology</h2>
-          <div className="feature-grid">
-            <div className="feature-card">
+          <div className={classNames("feature-grid")}>
+            <div className={classNames("feature-card")}>
               <i className="bx bx-shield-alt-2" />
               <h4>Anti-Proxy Security</h4>
               <p>
@@ -84,10 +84,10 @@ const InClassAbout = () => {
           </div>
         </section>
 
-        <section className="cta-section">
+        <section className={classNames("cta-section")}>
           <h2>Ready to Experience Smart Attendance?</h2>
           <button
-            className="register-cta-btn"
+            className={classNames("register-cta-btn")}
             onClick={() => navigate("/register")}
           >
             Get Started Today

@@ -1,0 +1,204 @@
+/* Admin Panel (module) - migrated from InClassAdmin.css */
+
+.portal-page-wrapper,
+.portalPageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f0fdf7;
+}
+
+.portal-container,
+.portalContainer {
+  flex-grow: 1;
+  padding: 20px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 20px auto;
+}
+
+.portal-header,
+.portalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: #d9f7ec;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.brand-name {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.logout-btn {
+  background: none;
+  border: 1px solid #c93535;
+  color: #c93535;
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.logout-btn:hover {
+  background: #c93535;
+  color: white;
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(201, 53, 53, 0.2);
+  margin-bottom: 20px;
+}
+
+.profile-info h2 {
+  font-size: 1.8rem;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.user-details,
+.college-details {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.admin-status {
+  margin-left: auto;
+  text-align: center;
+}
+
+.portal-footer {
+  text-align: center;
+  padding: 10px;
+  background-color: #d9f7ec;
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: 20px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  border: none;
+  background-color: #eee;
+  color: #333;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.tab-btn:hover {
+  background-color: #ddd;
+}
+
+.tab-btn.active-tab {
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-bottom: 2px solid #c93535;
+  color: #c93535;
+}
+
+.content-area {
+  background: white;
+  padding: 25px;
+  border-radius: 0 15px 15px 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.metric-card {
+  background: #f0f8ff;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid #d0e0ff;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #3b82f6;
+  margin-bottom: 5px;
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.recent-activity-card {
+  grid-column: span 4;
+  background: #fff9f9;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #ffebeb;
+}
+
+.recent-activity-card h4 {
+  color: #c93535;
+  margin-bottom: 10px;
+}
+
+.user-search {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.user-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.action-btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.view-btn {
+  background: #3b82f6;
+}
+
+.reset-btn {
+  background: #ffc107;
+  color: #333;
+}
+
+.delete-btn {
+  background: #c93535;
+}
