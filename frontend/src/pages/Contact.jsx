@@ -65,6 +65,7 @@ const Contact = () => {
         style={{ marginTop: "80px", marginBottom: "80px" }}
       >
         <section className="hero-section">
+          <div className="hero-badge">Contact Us</div>
           <h1>Get in Touch</h1>
           <p className="subtitle">
             Have questions or need support? We're here to help. Reach out to us

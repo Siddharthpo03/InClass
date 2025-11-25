@@ -1,4 +1,4 @@
-/* ===== Features Page ===== */
+/* ===== Features Page - Modern Design ===== */
 :global(body) {
   background: linear-gradient(to top, #d4f5eb 0%, #ffffff 100%);
   background-attachment: fixed;
@@ -14,6 +14,13 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
 }
 
 .features-container {
@@ -26,19 +33,37 @@
 /* ===== Hero Section ===== */
 .hero-section {
   text-align: center;
+  padding: 80px 0 60px;
   margin-bottom: 60px;
+  position: relative;
+}
+
+.hero-badge {
+  display: inline-block;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  color: white;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  animation: fadeInUp 0.6s ease;
 }
 
 .hero-section h1 {
-  font-size: 2.5rem;
+  font-size: 3.5rem;
   font-weight: 800;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   background: linear-gradient(135deg, #111827 0%, #374151 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: -0.02em;
   line-height: 1.2;
+  animation: fadeInUp 0.8s ease;
 }
 
 :global(body.darkMode) .hero-section h1 {
@@ -49,11 +74,13 @@
 }
 
 .hero-section .subtitle {
-  font-size: 1.1rem;
-  color: #4b5563;
+  font-size: 1.25rem;
+  color: #6b7280;
   line-height: 1.7;
-  max-width: 700px;
+  max-width: 750px;
   margin: 0 auto;
+  letter-spacing: 0.01em;
+  animation: fadeInUp 1s ease;
 }
 
 :global(body.darkMode) .hero-section .subtitle {
@@ -70,57 +97,90 @@
 
 .feature-item {
   background: #ffffff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid #e5e7eb;
+  padding: 35px 30px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  text-align: center;
 }
 
-:global(body.darkMode) .feature-item {
-  background: #1f2937;
-  border-color: #374151;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+.feature-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, #10b981 0%, #3b82f6 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
 }
 
 .feature-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.feature-item:hover::before {
+  transform: scaleX(1);
+}
+
+:global(body.darkMode) .feature-item {
+  background: rgba(31, 41, 55, 0.8);
+  border-color: rgba(16, 185, 129, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 :global(body.darkMode) .feature-item:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  background: rgba(31, 41, 55, 0.95);
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.3);
 }
 
 .feature-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
   background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
-  font-size: 24px;
+  margin: 0 auto 25px;
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+  transition: all 0.4s ease;
+}
+
+.feature-item:hover .feature-icon {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 12px 35px rgba(16, 185, 129, 0.4);
+}
+
+.feature-icon i {
+  font-size: 2.5rem;
   color: white;
 }
 
 .feature-item h3 {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
   color: #111827;
   letter-spacing: -0.01em;
 }
 
 :global(body.darkMode) .feature-item h3 {
-  color: #e5e7eb;
+  color: #f9fafb;
 }
 
 .feature-item p {
-  font-size: 0.95rem;
-  color: #4b5563;
-  line-height: 1.6;
+  font-size: 1rem;
+  color: #6b7280;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
 }
 
 :global(body.darkMode) .feature-item p {
@@ -130,45 +190,90 @@
 /* ===== CTA Section ===== */
 .cta-section {
   text-align: center;
-  padding: 60px 20px;
-  background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
-  border-radius: 16px;
-  margin-top: 40px;
+  padding: 80px 0;
+  margin-top: 60px;
+  background: linear-gradient(to top, rgba(16, 185, 129, 0.05), rgba(59, 130, 246, 0.05));
+  border-radius: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-section::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+  animation: pulse 4s ease-in-out infinite;
 }
 
 :global(body.darkMode) .cta-section {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: linear-gradient(to top, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
 }
 
 .cta-section h2 {
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 2.2rem;
+  font-weight: 700;
   margin-bottom: 30px;
   color: #111827;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 1;
 }
 
 :global(body.darkMode) .cta-section h2 {
-  color: #e5e7eb;
+  color: #f9fafb;
 }
 
 .register-cta-btn {
-  padding: 14px 32px;
+  padding: 16px 40px;
   border-radius: 12px;
   background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
   color: white;
   border: none;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
   letter-spacing: 0.01em;
   font-family: "Poppins", sans-serif;
+  position: relative;
+  z-index: 1;
 }
 
 .register-cta-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
+}
+
+.register-cta-btn:active {
+  transform: translateY(-1px);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
 }
 
 /* ===== Responsive ===== */
@@ -179,12 +284,17 @@
     margin-bottom: 70px;
   }
 
+  .hero-section {
+    padding: 40px 0 40px;
+    margin-bottom: 40px;
+  }
+
   .hero-section h1 {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
 
   .hero-section .subtitle {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
 
   .features-grid-section {
@@ -193,7 +303,16 @@
   }
 
   .feature-item {
-    padding: 20px;
+    padding: 25px 20px;
+  }
+
+  .cta-section {
+    padding: 50px 20px;
+    margin-top: 40px;
+  }
+
+  .cta-section h2 {
+    font-size: 1.75rem;
   }
 }
 
@@ -205,46 +324,29 @@
   }
 
   .hero-section h1 {
-    font-size: 1.75rem;
+    font-size: 2rem;
   }
 
   .hero-section .subtitle {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 
   .feature-item {
-    padding: 15px;
-  }
-
-  .feature-item h3 {
-    font-size: 1.1rem;
-  }
-
-  .feature-item p {
-    font-size: 0.85rem;
-  }
-}
-
-@media (max-width: 360px) {
-  .hero-section h1 {
-    font-size: 1.5rem;
-  }
-
-  .features-grid-section {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .feature-item {
-    padding: 24px;
-  }
-
-  .cta-section {
-    padding: 40px 20px;
+    padding: 20px 15px;
   }
 
   .cta-section h2 {
     font-size: 1.5rem;
   }
+
+  .register-cta-btn {
+    padding: 14px 30px;
+    font-size: 1rem;
+  }
 }
 
+@media (max-width: 360px) {
+  .hero-section h1 {
+    font-size: 1.75rem;
+  }
+}

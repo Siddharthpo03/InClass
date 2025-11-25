@@ -33,6 +33,7 @@ const Features = () => {
         style={{ marginTop: "80px", marginBottom: "80px" }}
       >
         <section className="hero-section">
+          <div className="hero-badge">Features</div>
           <h1>Powerful Features for Modern Education</h1>
           <p className="subtitle">
             Discover how InClass transforms attendance management with
