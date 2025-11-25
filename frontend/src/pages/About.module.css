@@ -1,11 +1,21 @@
 /* About page (module) - migrated from About.css */
 
+:global(body) {
+  background: linear-gradient(to top, #d4f5eb 0%, #ffffff 100%);
+  background-attachment: fixed;
+  transition: background 0.3s ease;
+}
+
+:global(body.darkMode) {
+  background: linear-gradient(to top, #1a1a2e 0%, #16213e 100%);
+  background-attachment: fixed;
+}
+
 .about-page-wrapper,
 .aboutPageWrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #ffffff;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #111827;
 }
