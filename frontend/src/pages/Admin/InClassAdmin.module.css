@@ -1,4 +1,4 @@
-/* Admin Panel (module) - migrated from InClassAdmin.css */
+/* Professional Admin Dashboard Styles */
 
 :global(body) {
   background: linear-gradient(to top, #d4f5eb 0%, #ffffff 100%);
@@ -11,204 +11,425 @@
   background-attachment: fixed;
 }
 
-.portal-page-wrapper,
-.portalPageWrapper {
+.dashboardWrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-.portal-container,
-.portalContainer {
-  flex-grow: 1;
-  padding: 20px;
-  max-width: 1200px;
+.dashboardContainer {
+  flex: 1;
+  max-width: 1400px;
   width: 100%;
-  margin: 20px auto;
+  margin: 0 auto;
+  padding: 100px 24px 40px;
 }
 
-.portal-header,
-.portalHeader {
+/* Loading State */
+.loadingContainer,
+.errorContainer {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  padding: 15px 30px;
-  background-color: #d9f7ec;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.brand-name {
-  font-weight: bold;
-  font-size: 1.5rem;
-}
-
-.logout-btn {
-  background: none;
-  border: 1px solid #c93535;
-  color: #c93535;
-  padding: 8px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-}
-
-.logout-btn:hover {
-  background: #c93535;
-  color: white;
-}
-
-.profile-card {
-  display: flex;
-  align-items: center;
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(201, 53, 53, 0.2);
-  margin-bottom: 20px;
-}
-
-.profile-info h2 {
-  font-size: 1.8rem;
-  margin-bottom: 5px;
-  color: #333;
-}
-
-.user-details,
-.college-details {
-  color: #666;
-  font-size: 0.95rem;
-}
-
-.admin-status {
-  margin-left: auto;
-  text-align: center;
-}
-
-.portal-footer {
-  text-align: center;
-  padding: 10px;
-  background-color: #d9f7ec;
-  color: #666;
-  font-size: 0.8rem;
-  margin-top: 20px;
-}
-
-.admin-tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.tab-btn {
-  padding: 10px 20px;
-  border: none;
-  background-color: #eee;
-  color: #333;
-  cursor: pointer;
-  border-radius: 8px 8px 0 0;
-  font-weight: 600;
-  transition: background-color 0.2s;
-}
-
-.tab-btn:hover {
-  background-color: #ddd;
-}
-
-.tab-btn.active-tab {
-  background-color: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  border-bottom: 2px solid #c93535;
-  color: #c93535;
-}
-
-.content-area {
-  background: white;
-  padding: 25px;
-  border-radius: 0 15px 15px 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  justify-content: center;
+  min-height: 100vh;
   gap: 20px;
 }
 
-.metric-card {
-  background: #f0f8ff;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  border: 1px solid #d0e0ff;
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #dc2626;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-.metric-value {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #3b82f6;
-  margin-bottom: 5px;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.metric-label {
-  font-size: 0.8rem;
-  color: #666;
+/* Dashboard Header */
+.dashboardHeader {
+  margin-bottom: 32px;
 }
 
-.recent-activity-card {
-  grid-column: span 4;
-  background: #fff9f9;
-  padding: 20px;
-  border-radius: 10px;
-  border: 1px solid #ffebeb;
-}
-
-.recent-activity-card h4 {
-  color: #c93535;
-  margin-bottom: 10px;
-}
-
-.user-search {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.search-btn {
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.user-row {
+.headerContent {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.action-btn {
-  padding: 6px 10px;
-  border: none;
-  border-radius: 5px;
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  padding: 32px 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(220, 38, 38, 0.3);
   color: white;
+}
+
+:global(body.darkMode) .headerContent {
+  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+}
+
+.welcomeSection {
+  flex: 1;
+}
+
+.welcomeTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: white;
+}
+
+.welcomeSubtitle {
+  font-size: 1rem;
+  margin: 0 0 4px 0;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.welcomeDetails {
+  font-size: 0.9rem;
+  margin: 0;
+  opacity: 0.8;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.statusBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.badgeCircle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.badgeLabel {
+  font-size: 0.875rem;
+  margin: 0;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.85rem;
+  transition: all 0.3s ease;
 }
 
-.view-btn {
-  background: #3b82f6;
+.logoutButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
 }
 
-.reset-btn {
-  background: #ffc107;
-  color: #333;
+.logoutButton i {
+  font-size: 1.25rem;
 }
 
-.delete-btn {
-  background: #c93535;
+/* Admin Tabs */
+.adminTabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+:global(body.darkMode) .adminTabs {
+  border-bottom-color: #334155;
+}
+
+.tabBtn {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #6b7280;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  margin-bottom: -2px;
+}
+
+:global(body.darkMode) .tabBtn {
+  color: #9ca3af;
+}
+
+.tabBtn:hover {
+  color: #dc2626;
+}
+
+:global(body.darkMode) .tabBtn:hover {
+  color: #fca5a5;
+}
+
+.tabBtn.activeTab {
+  color: #dc2626;
+  border-bottom-color: #dc2626;
+}
+
+:global(body.darkMode) .tabBtn.activeTab {
+  color: #fca5a5;
+  border-bottom-color: #fca5a5;
+}
+
+.tabBtn i {
+  font-size: 1.25rem;
+}
+
+/* Content Area */
+.contentArea {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+:global(body.darkMode) .contentArea {
+  background: #1e293b;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Metrics Grid */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.metricCard {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+:global(body.darkMode) .metricCard {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.metricIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.metricContent {
+  flex: 1;
+}
+
+.metricValue {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: #1f2937;
+}
+
+:global(body.darkMode) .metricValue {
+  color: #f9fafb;
+}
+
+.metricLabel {
+  font-size: 0.875rem;
+  margin: 0;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+:global(body.darkMode) .metricLabel {
+  color: #9ca3af;
+}
+
+/* User Management */
+.userManagement {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.userManagement h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: #1f2937;
+}
+
+:global(body.darkMode) .userManagement h3 {
+  color: #f9fafb;
+}
+
+.userCount {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+:global(body.darkMode) .userCount {
+  color: #9ca3af;
+}
+
+.userListCard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.userSearch {
+  display: flex;
+  gap: 12px;
+}
+
+.userSearch input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 1rem;
+  background: white;
+  color: #1f2937;
+}
+
+:global(body.darkMode) .userSearch input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f9fafb;
+}
+
+.userSearch input:focus {
+  outline: none;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+}
+
+.searchBtn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.searchBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9ca3af;
+}
+
+.emptyState i {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboardContainer {
+    padding: 100px 16px 32px;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .headerActions {
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .adminTabs {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tabBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .contentArea {
+    padding: 20px;
+  }
+
+  .userSearch {
+    flex-direction: column;
+  }
+
+  .logoutButton {
+    width: 100%;
+    justify-content: center;
+  }
 }

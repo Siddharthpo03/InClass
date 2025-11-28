@@ -1,0 +1,254 @@
+.photoUploadWrapper {
+  width: 100%;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.label i {
+  font-size: 18px;
+  color: var(--primary-color, #6366f1);
+}
+
+.uploadArea {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+  border: 2px dashed var(--input-border, #d1d5db);
+  border-radius: 12px;
+  background: var(--input-bg, #f9fafb);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.uploadArea:hover {
+  border-color: var(--primary-color, #6366f1);
+  background: var(--input-bg-hover, #f3f4f6);
+}
+
+.uploadArea.dragging {
+  border-color: var(--primary-color, #6366f1);
+  background: rgba(99, 102, 241, 0.05);
+  border-style: solid;
+}
+
+.uploadArea.error {
+  border-color: #ef4444;
+}
+
+.uploadArea.hasPreview {
+  min-height: 250px;
+  border-style: solid;
+  border-color: var(--input-border, #d1d5db);
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.uploadPlaceholder i {
+  font-size: 48px;
+  color: var(--text-secondary, #6b7280);
+}
+
+.uploadText {
+  color: var(--text-primary, #1f2937);
+  font-size: 14px;
+  margin: 0;
+}
+
+.uploadTextBold {
+  font-weight: 600;
+  color: var(--primary-color, #6366f1);
+}
+
+.uploadHint {
+  color: var(--text-secondary, #6b7280);
+  font-size: 12px;
+  margin: 0;
+}
+
+.previewContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.removeButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.removeButton:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+.removeButton i {
+  font-size: 20px;
+}
+
+.errorText {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.errorText i {
+  font-size: 16px;
+}
+
+/* Dark mode support */
+:global(.darkMode) .label {
+  color: #f9fafb;
+}
+
+:global(.darkMode) .uploadArea {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+:global(.darkMode) .uploadArea:hover {
+  background: #374151;
+  border-color: #6366f1;
+}
+
+:global(.darkMode) .uploadArea.dragging {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+:global(.darkMode) .uploadText {
+  color: #f9fafb;
+}
+
+:global(.darkMode) .uploadHint {
+  color: #9ca3af;
+}
+
+:global(.darkMode) .uploadPlaceholder i {
+  color: #9ca3af;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .uploadArea {
+    min-height: 180px;
+  }
+
+  .uploadArea.hasPreview {
+    min-height: 220px;
+  }
+
+  .uploadPlaceholder {
+    padding: 20px 16px;
+  }
+
+  .uploadPlaceholder i {
+    font-size: 40px;
+  }
+
+  .uploadText {
+    font-size: 13px;
+  }
+
+  .uploadHint {
+    font-size: 11px;
+  }
+
+  .previewContainer {
+    min-height: 220px;
+    padding: 12px;
+  }
+
+  .removeButton {
+    width: 32px;
+    height: 32px;
+    top: 8px;
+    right: 8px;
+  }
+
+  .removeButton i {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .uploadArea {
+    min-height: 160px;
+  }
+
+  .uploadArea.hasPreview {
+    min-height: 200px;
+  }
+
+  .uploadPlaceholder {
+    padding: 16px 12px;
+    gap: 10px;
+  }
+
+  .uploadPlaceholder i {
+    font-size: 36px;
+  }
+
+  .label {
+    font-size: 13px;
+  }
+
+  .label i {
+    font-size: 16px;
+  }
+
+  .previewContainer {
+    min-height: 200px;
+  }
+}

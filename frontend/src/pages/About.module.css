@@ -287,6 +287,123 @@
   transform: translateY(-1px);
 }
 
+/* ===== Ownership Section ===== */
+.ownership-section {
+  text-align: center;
+  padding: 60px 20px;
+  margin: 60px 0;
+  background: #fef3c7;
+  border-radius: 16px;
+  border: 2px solid #f59e0b;
+}
+
+:global(body.darkMode) .ownership-section {
+  background: #78350f;
+  border-color: #f59e0b;
+}
+
+.ownership-section h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 40px;
+}
+
+:global(body.darkMode) .ownership-section h2 {
+  color: #fbbf24;
+}
+
+.ownership-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ownership-card {
+  background: white;
+  padding: 28px;
+  border-radius: 12px;
+  border-left: 4px solid #f59e0b;
+  text-align: left;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+:global(body.darkMode) .ownership-card {
+  background: #451a03;
+  border-left-color: #f59e0b;
+}
+
+.ownership-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ownership-card h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 16px;
+}
+
+:global(body.darkMode) .ownership-card h3 {
+  color: #fbbf24;
+}
+
+.ownership-card p {
+  color: #78350f;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+:global(body.darkMode) .ownership-card p {
+  color: #fde68a;
+}
+
+.ownership-card strong {
+  color: #92400e;
+  font-weight: 700;
+}
+
+:global(body.darkMode) .ownership-card strong {
+  color: #fbbf24;
+}
+
+.ownership-note {
+  color: #78350f;
+  font-size: 1rem;
+  margin-top: 24px;
+  line-height: 1.6;
+}
+
+:global(body.darkMode) .ownership-note {
+  color: #fde68a;
+}
+
+.ownership-note a {
+  color: #92400e;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+:global(body.darkMode) .ownership-note a {
+  color: #fbbf24;
+}
+
+.ownership-note a:hover {
+  color: #b45309;
+  text-decoration: underline;
+}
+
+:global(body.darkMode) .ownership-note a:hover {
+  color: #fcd34d;
+}
+
 /* ===== Animations ===== */
 @keyframes fadeInUp {
   from {
@@ -343,6 +460,24 @@
 
   .feature-card {
     padding: 25px 20px;
+  }
+
+  .ownership-section {
+    padding: 40px 15px;
+    margin: 40px 0;
+  }
+
+  .ownership-section h2 {
+    font-size: 1.75rem;
+  }
+
+  .ownership-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .ownership-card {
+    padding: 20px;
   }
 
   .cta-section {

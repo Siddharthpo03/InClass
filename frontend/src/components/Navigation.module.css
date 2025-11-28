@@ -180,6 +180,7 @@
   display: flex;
   align-items: center;
   gap: 15px;
+  flex-shrink: 0;
 }
 
 .reportBtn {
@@ -674,6 +675,7 @@
     display: none;
   }
 
+  /* Auth buttons hidden on mobile - shown in mobile menu instead */
   .authButtons {
     display: none;
   }

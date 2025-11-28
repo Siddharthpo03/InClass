@@ -25,6 +25,12 @@ apiClient.interceptors.request.use(
       // Standard JWT Authorization header format
       config.headers["Authorization"] = `Bearer ${token}`;
     }
+    
+    // If FormData is being sent, let axios set Content-Type automatically (with boundary)
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+    
     return config;
   },
   (error) => {

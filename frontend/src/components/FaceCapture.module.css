@@ -1,0 +1,400 @@
+.faceCaptureWrapper {
+  width: 100%;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.label i {
+  font-size: 18px;
+  color: var(--primary-color, #6366f1);
+}
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.captureArea {
+  width: 100%;
+  border: 2px solid var(--input-border, #d1d5db);
+  border-radius: 12px;
+  background: var(--input-bg, #f9fafb);
+  overflow: hidden;
+}
+
+.videoContainer {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary, #6b7280);
+}
+
+.placeholder i {
+  font-size: 64px;
+  color: var(--text-secondary, #6b7280);
+}
+
+.placeholder p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.startButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--primary-color, #6366f1);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.startButton:hover {
+  background: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.video {
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  display: block;
+}
+
+.faceGuide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 250px;
+  border: 3px solid rgba(99, 102, 241, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+}
+
+.controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+}
+
+.captureButton,
+.cancelButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.captureButton {
+  background: #10b981;
+  color: white;
+}
+
+.captureButton:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.captureButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1f2937;
+}
+
+.cancelButton:hover {
+  background: white;
+  transform: translateY(-2px);
+}
+
+.previewContainer {
+  position: relative;
+  width: 100%;
+  border: 2px solid var(--input-border, #d1d5db);
+  border-radius: 12px;
+  background: var(--input-bg, #f9fafb);
+  overflow: hidden;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.retakeButton {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(99, 102, 241, 0.9);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.retakeButton:hover {
+  background: #6366f1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.errorText {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.errorText i {
+  font-size: 16px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dark mode support */
+:global(.darkMode) .label {
+  color: #f9fafb;
+}
+
+:global(.darkMode) .captureArea {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+:global(.darkMode) .placeholder {
+  color: #9ca3af;
+}
+
+:global(.darkMode) .placeholder i {
+  color: #9ca3af;
+}
+
+:global(.darkMode) .cancelButton {
+  background: rgba(31, 41, 55, 0.9);
+  color: #f9fafb;
+}
+
+:global(.darkMode) .cancelButton:hover {
+  background: #374151;
+}
+
+:global(.darkMode) .previewContainer {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.readyIndicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.readyIndicator i {
+  font-size: 16px;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .videoContainer {
+    min-height: 250px;
+  }
+
+  .placeholder {
+    padding: 32px 20px;
+  }
+
+  .placeholder i {
+    font-size: 56px;
+  }
+
+  .placeholder p {
+    font-size: 13px;
+  }
+
+  .startButton,
+  .captureButton,
+  .cancelButton,
+  .retakeButton {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .faceGuide {
+    width: 180px;
+    height: 220px;
+  }
+
+  .controls {
+    bottom: 16px;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .previewContainer {
+    min-height: 250px;
+    padding: 12px;
+  }
+
+  .previewImage {
+    max-height: 250px;
+  }
+
+  .retakeButton {
+    bottom: 12px;
+    right: 12px;
+    padding: 8px 16px;
+  }
+
+  .readyIndicator {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .videoContainer {
+    min-height: 220px;
+  }
+
+  .placeholder {
+    padding: 24px 16px;
+    gap: 12px;
+  }
+
+  .placeholder i {
+    font-size: 48px;
+  }
+
+  .label {
+    font-size: 13px;
+  }
+
+  .label i {
+    font-size: 16px;
+  }
+
+  .startButton,
+  .captureButton,
+  .cancelButton,
+  .retakeButton {
+    padding: 9px 18px;
+    font-size: 12px;
+  }
+
+  .faceGuide {
+    width: 160px;
+    height: 200px;
+  }
+
+  .controls {
+    bottom: 12px;
+    gap: 8px;
+  }
+
+  .previewContainer {
+    min-height: 220px;
+  }
+
+  .previewImage {
+    max-height: 220px;
+  }
+
+  .errorMessage {
+    padding: 10px;
+    font-size: 13px;
+  }
+}

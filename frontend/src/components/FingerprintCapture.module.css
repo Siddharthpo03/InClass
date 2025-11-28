@@ -1,0 +1,228 @@
+.fingerprintWrapper {
+  width: 100%;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.label i {
+  font-size: 18px;
+  color: var(--primary-color, #6366f1);
+}
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.enrollmentArea {
+  width: 100%;
+  border: 2px solid var(--input-border, #d1d5db);
+  border-radius: 12px;
+  background: var(--input-bg, #f9fafb);
+  overflow: hidden;
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px;
+  text-align: center;
+}
+
+.placeholder i {
+  font-size: 64px;
+  color: var(--primary-color, #6366f1);
+}
+
+.placeholder p {
+  margin: 0;
+  color: var(--text-primary, #1f2937);
+  font-size: 14px;
+}
+
+.deviceNameInput {
+  width: 100%;
+  max-width: 300px;
+}
+
+.deviceNameInput input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--input-border, #d1d5db);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.deviceNameInput input:focus {
+  border-color: var(--primary-color, #6366f1);
+}
+
+.enrollButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--primary-color, #6366f1);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.enrollButton:hover:not(:disabled) {
+  background: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.enrollButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hint {
+  color: var(--text-secondary, #6b7280);
+  font-size: 12px;
+  margin: 0;
+  font-style: italic;
+}
+
+.successContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px;
+  border: 2px solid #10b981;
+  border-radius: 12px;
+  background: #f0fdf4;
+}
+
+.successIcon {
+  font-size: 64px;
+  color: #10b981;
+}
+
+.successText {
+  color: #059669;
+  font-weight: 600;
+  font-size: 16px;
+  margin: 0;
+}
+
+.resetButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: white;
+  color: #6366f1;
+  border: 2px solid #6366f1;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.resetButton:hover {
+  background: #6366f1;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.errorText {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.errorText i {
+  font-size: 16px;
+}
+
+/* Dark mode support */
+:global(.darkMode) .label {
+  color: #f9fafb;
+}
+
+:global(.darkMode) .enrollmentArea {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+:global(.darkMode) .placeholder p {
+  color: #f9fafb;
+}
+
+:global(.darkMode) .deviceNameInput input {
+  background: #111827;
+  border-color: #374151;
+  color: #f9fafb;
+}
+
+:global(.darkMode) .deviceNameInput input:focus {
+  border-color: #6366f1;
+}
+
+:global(.darkMode) .successContainer {
+  background: #064e3b;
+  border-color: #10b981;
+}
+
+:global(.darkMode) .successText {
+  color: #34d399;
+}
+
+:global(.darkMode) .resetButton {
+  background: #1f2937;
+  border-color: #6366f1;
+  color: #6366f1;
+}
+
+:global(.darkMode) .resetButton:hover {
+  background: #6366f1;
+  color: white;
+}
+

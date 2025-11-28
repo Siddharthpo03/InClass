@@ -113,18 +113,47 @@ const TermsOfUse = () => {
                 <li>Attempt to gain unauthorized access to any portion of the service</li>
                 <li>Use automated systems to access the service without permission</li>
                 <li>Impersonate any person or entity</li>
+                <li>Sell, distribute, or transfer the software without authorization (BR01)</li>
+                <li>Create clones or breakdowns of the software without approval from Variance Technologies</li>
+                <li>Engage in any malpractice or fraudulent activities with the software</li>
+                <li>Attempt to reverse engineer, decompile, or disassemble the software</li>
+                <li>Share session codes publicly or with unauthorized individuals</li>
+                <li>Mark attendance for others or engage in proxy attendance</li>
               </ul>
+              <p>
+                <strong>Consequences:</strong> Violation of these prohibited activities, especially
+                malpractices with the software, will result in strict actions being taken by
+                Variance Technologies against both the institution and the user, including but
+                not limited to account termination, legal action, and reporting to relevant
+                authorities.
+              </p>
             </div>
           </section>
 
           <section className={styles.termsSection}>
             <div className={styles.sectionNumber}>06</div>
             <div className={styles.sectionContent}>
-              <h2>Intellectual Property</h2>
+              <h2>Intellectual Property & Ownership</h2>
               <p>
-                All content, features, and functionality of InClass are owned by us
-                and are protected by international copyright, trademark, patent, trade
-                secret, and other intellectual property laws.
+                All content, features, and functionality of InClass are owned by InClass
+                Powered By Variance Technologies and are protected by international copyright,
+                trademark, patent, trade secret, and other intellectual property laws.
+              </p>
+              <p>
+                <strong>Business Rule BR02:</strong> This Software Completely Belongs to InClass
+                Powered By Variance Technologies. All patents and copyrights are reserved on
+                Variance Technologies. If found any malpractices with the software, strict actions
+                can be taken by our team on the college and the user.
+              </p>
+              <p>
+                <strong>Business Rule BR01:</strong> No Selling of Software. The software is
+                proprietary and may not be sold, distributed, or transferred without explicit
+                written permission from Variance Technologies.
+              </p>
+              <p>
+                Study purpose breakdowns and clones are only accepted by the approval on Variance
+                Technologies only. Any unauthorized reproduction, distribution, or modification
+                of the software is strictly prohibited and may result in legal action.
               </p>
             </div>
           </section>

@@ -20,8 +20,40 @@ const classNames = (...classes) => {
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("inclass_token");
+      const role = localStorage.getItem("user_role");
+      
+      if (token && role) {
+        setIsLoggedIn(true);
+        setUserRole(role);
+      } else {
+        setIsLoggedIn(false);
+        setUserRole(null);
+      }
+    };
+
+    // Check on mount
+    checkAuth();
+
+    // Listen for storage changes (when user logs in/out in another tab)
+    window.addEventListener("storage", checkAuth);
+
+    // Check periodically to catch login/logout in same tab
+    const interval = setInterval(checkAuth, 1000);
+
+    return () => {
+      window.removeEventListener("storage", checkAuth);
+      clearInterval(interval);
+    };
+  }, []);
 
   // Dark mode initialization and persistence
   useEffect(() => {
@@ -58,10 +90,6 @@ const Navigation = () => {
     navigate(path);
     setIsMenuOpen(false);
   };
-
-  // Check if user is logged in
-  const token = localStorage.getItem("inclass_token");
-  const userRole = localStorage.getItem("user_role");
 
   return (
     <header>
@@ -126,7 +154,7 @@ const Navigation = () => {
             >
               Report
             </a>
-            {token ? (
+            {isLoggedIn && userRole ? (
               <a
                 href="#"
                 className={styles.navBtn}
@@ -140,6 +168,7 @@ const Navigation = () => {
                   href="#"
                   className={styles.navBtn}
                   onClick={handleNavigation("/login")}
+                  style={{ display: 'inline-block' }}
                 >
                   Login
                 </a>
@@ -147,6 +176,7 @@ const Navigation = () => {
                   href="#"
                   className={classNames(styles.navBtn, styles.navBtnSignup)}
                   onClick={handleNavigation("/register")}
+                  style={{ display: 'inline-block' }}
                 >
                   Register
                 </a>
@@ -254,7 +284,7 @@ const Navigation = () => {
             <i className="fas fa-flag" />
             <span>Report</span>
           </a>
-          {token ? (
+          {isLoggedIn && userRole ? (
             <a
               href="#"
               className={styles.mobileNavBtn}

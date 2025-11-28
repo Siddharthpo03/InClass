@@ -1,0 +1,37 @@
+.logoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.logoSvg {
+  /* Very subtle shadow, no animations */
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.logoCircle {
+  /* No transitions, static */
+}
+
+.bookCover {
+  /* Static, no animations */
+}
+
+.bookPages {
+  /* Static */
+}
+
+/* Dark mode support - adjust colors for better visibility */
+:global(body.darkMode) .logoSvg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+:global(body.darkMode) .bookCover {
+  fill: #ffffff;
+}
+
+:global(body.darkMode) .bookPages {
+  fill: #f1f5f9;
+}
+

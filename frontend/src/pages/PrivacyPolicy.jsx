@@ -119,6 +119,31 @@ const PrivacyPolicy = () => {
           </section>
 
           <section className={styles.policySection}>
+            <h2>Software Ownership & Business Rules</h2>
+            <p>
+              <strong>Ownership (BR02):</strong> This Software Completely Belongs to InClass
+              Powered By Variance Technologies. All patents and copyrights are reserved on
+              Variance Technologies. If found any malpractices with the software, strict actions
+              can be taken by our team on the college and the user.
+            </p>
+            <p>
+              <strong>No Selling Policy (BR01):</strong> The software is proprietary and may not
+              be sold, distributed, or transferred without explicit written permission from
+              Variance Technologies.
+            </p>
+            <p>
+              Study purpose breakdowns and clones are only accepted by the approval on Variance
+              Technologies only. Any unauthorized reproduction, distribution, or modification
+              of the software is strictly prohibited.
+            </p>
+            <p>
+              We reserve the right to monitor usage patterns and take appropriate action against
+              any misuse, malpractice, or violation of these business rules, including but not
+              limited to account suspension, termination, and legal proceedings.
+            </p>
+          </section>
+
+          <section className={styles.policySection}>
             <h2>Contact Us</h2>
             <p>
               If you have questions about this Privacy Policy, please contact us:

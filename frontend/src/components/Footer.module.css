@@ -1,78 +1,373 @@
-/* ===== Footer ===== */
+/* Modern Footer Styles - LinkedIn Inspired */
+
 .footer {
+  width: 100vw;
+  max-width: 100vw;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
   margin-top: auto;
-  width: 100%;
-  background: linear-gradient(to right, #baeadb, #b3c8eb);
-  font-size: 0.85rem;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  color: #9ca3af;
-  transition: background 0.3s ease;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 :global(body.darkMode) .footer {
-  background: linear-gradient(to right, #1e3a5f, #2d4a6e);
-  color: #6b7280;
+  background: #1e293b;
+  border-top-color: #334155;
 }
 
-.row2 {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-  width: 100%;
+.footerContainer {
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
-}
-
-.footerLinks {
   display: flex;
-  gap: 15px;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
-.footerLinks a {
-  font-size: 0.8rem;
+/* Main Footer Section */
+.footerMain {
+  padding: 48px 40px 32px;
+  border-bottom: 1px solid #e5e7eb;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
 }
 
-.footerLinks a {
-  text-decoration: none;
+:global(body.darkMode) .footerMain {
+  border-bottom-color: #334155;
+}
+
+.footerLogo {
+  margin-bottom: 32px;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoImage {
+  width: 40px;
+  height: 40px;
+  border-radius: 2px;
+  object-fit: cover;
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+:global(body.darkMode) .logoText {
+  background: linear-gradient(135deg, #a78bfa 0%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Footer Links Grid */
+.footerLinksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 32px;
+}
+
+.footerColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.columnTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
   color: #374151;
-  transition: color 0.3s ease;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-:global(body.darkMode) .footerLinks a {
-  color: #9ca3af;
-}
-
-.footerLinks a:hover {
-  color: #111827;
-}
-
-:global(body.darkMode) .footerLinks a:hover {
+:global(body.darkMode) .columnTitle {
   color: #e5e7eb;
 }
 
+.linkList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.linkList li {
+  margin: 0;
+}
+
+.linkList a {
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  display: inline-block;
+}
+
+:global(body.darkMode) .linkList a {
+  color: #9ca3af;
+}
+
+.linkList a:hover {
+  color: #667eea;
+  text-decoration: underline;
+}
+
+:global(body.darkMode) .linkList a:hover {
+  color: #a78bfa;
+}
+
+/* Bottom Footer Bar */
+.footerBottom {
+  padding: 16px 40px;
+  background: #ffffff;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.footerBottomContent {
+  max-width: 100%;
+  width: 100%;
+}
+
+:global(body.darkMode) .footerBottom {
+  background: #1e293b;
+}
+
+.footerBottomContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footerBottomLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bottomLogo {
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  object-fit: cover;
+}
+
 .copyright {
-  text-align: right;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
 }
 
 :global(body.darkMode) .copyright {
   color: #9ca3af;
 }
 
-.copyright p {
-  margin: 0;
+.footerBottomLinks {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-/* ===== Responsive ===== */
+.footerBottomLinks a {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+:global(body.darkMode) .footerBottomLinks a {
+  color: #9ca3af;
+}
+
+.footerBottomLinks a:hover {
+  color: #667eea;
+  text-decoration: underline;
+}
+
+:global(body.darkMode) .footerBottomLinks a:hover {
+  color: #a78bfa;
+}
+
+.languageSelector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+:global(body.darkMode) .languageSelector {
+  color: #9ca3af;
+}
+
+.languageSelector:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+:global(body.darkMode) .languageSelector:hover {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+.languageSelector i {
+  font-size: 0.875rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .footerLinksGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+}
+
 @media (max-width: 768px) {
-  .footerLinks {
-    display: none !important;
+  .footerMain {
+    padding: 32px 20px 24px;
+  }
+
+  .footerBottom {
+    padding: 16px 20px;
+  }
+
+  .footerLinksGrid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .footerColumn {
+    text-align: left;
+  }
+
+  .columnTitle {
+    font-size: 0.85rem;
+    margin-bottom: 14px;
+  }
+
+  .linkList {
+    gap: 10px;
+  }
+
+  .linkList a {
+    font-size: 0.85rem;
+    padding: 4px 0;
+  }
+
+  .footerBottomContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .footerBottomLeft {
+    width: 100%;
   }
 
   .copyright {
-    text-align: center;
+    font-size: 0.8rem;
+  }
+
+  .footerBottomLinks {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
     width: 100%;
+  }
+
+  .footerBottomLinks a {
+    font-size: 0.75rem;
+  }
+
+  .languageSelector {
+    align-self: flex-start;
+    font-size: 0.75rem;
+  }
+
+  .logoImage {
+    width: 36px;
+    height: 36px;
+  }
+
+  .logoText {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footerMain {
+    padding: 24px 16px 20px;
+  }
+
+  .footerBottom {
+    padding: 12px 16px;
+  }
+
+  .footerLinksGrid {
+    gap: 24px;
+  }
+
+  .columnTitle {
+    font-size: 0.8rem;
+  }
+
+  .linkList a {
+    font-size: 0.8rem;
+  }
+
+  .footerBottomLinks {
+    font-size: 0.7rem;
+    gap: 8px;
+  }
+
+  .footerBottomLinks a {
+    font-size: 0.7rem;
+  }
+
+  .copyright {
+    font-size: 0.75rem;
+  }
+
+  .logoImage {
+    width: 32px;
+    height: 32px;
+  }
+
+  .logoText {
+    font-size: 1.2rem;
+  }
+
+  .bottomLogo {
+    width: 20px;
+    height: 20px;
   }
 }

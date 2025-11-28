@@ -1,40 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import apiClient from "../../utils/apiClient";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import styles from "./InClassAdmin.module.css";
 
-const mockAdminData = {
-  name: "System Administrator",
-  role: "Admin",
-  id: "ADM001",
-  stats: {
-    totalUsers: 1250,
-    activeSessions: 3,
-    newRegistersToday: 25,
-    systemUptime: "99.98%",
-  },
-  recentRegistrations: [
-    { id: 1, name: "S. Smith", role: "Student", date: "2025-10-22" },
-    { id: 2, name: "D. Lopez", role: "Faculty", date: "2025-10-21" },
-    { id: 3, name: "A. Khan", role: "Student", date: "2025-10-21" },
-  ],
-};
-
-const InClassAdminPanel = () => {
-  // Component renamed to Panel
+const InClassAdmin = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [adminProfile, setAdminProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeSessions: 0,
+    newRegistersToday: 0,
+    systemUptime: "100%",
+  });
 
-  // Initialize dark mode from localStorage on mount
+  // Initialize dark mode
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    
-    const shouldBeDark = savedDarkMode !== null 
-      ? savedDarkMode === "true" 
-      : prefersDark;
-    
+    const shouldBeDark = savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
     if (shouldBeDark) {
       document.body.classList.add("darkMode");
     } else {
@@ -42,7 +29,58 @@ const InClassAdminPanel = () => {
     }
   }, []);
 
+  // Check authentication and fetch admin profile
+  useEffect(() => {
+    const checkAuthAndFetchProfile = async () => {
+      // First check if token exists
+      const token = localStorage.getItem("inclass_token");
+      const userRole = localStorage.getItem("user_role");
+
+      if (!token || !userRole) {
+        console.log("No token or role found, redirecting to login");
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      // Verify role is admin
+      if (userRole !== "admin") {
+        console.error("Unauthorized: Admin access required. Current role:", userRole);
+        localStorage.removeItem("inclass_token");
+        localStorage.removeItem("user_role");
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      // Fetch profile
+      try {
+        const response = await apiClient.get("/auth/profile");
+        console.log("Admin profile fetched:", response.data);
+        setAdminProfile(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch admin profile:", error);
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          localStorage.removeItem("inclass_token");
+          localStorage.removeItem("user_role");
+          navigate("/login", { replace: true });
+        } else {
+          // For other errors, still show the page but with error state
+          setLoading(false);
+        }
+      }
+    };
+
+    // Small delay to ensure localStorage is set after navigation
+    const timer = setTimeout(() => {
+      checkAuthAndFetchProfile();
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
   const handleLogout = () => {
+    localStorage.removeItem("inclass_token");
+    localStorage.removeItem("user_role");
     navigate("/login");
   };
 
@@ -50,122 +88,139 @@ const InClassAdminPanel = () => {
     alert(`${action} user: ${user.name} (Role: ${user.role})`);
   };
 
-  return (
-    <div className="portal-page-wrapper">
-      <Navigation />
-      
-      <div className="portal-container" style={{ marginTop: "80px", marginBottom: "80px" }}>
-        {/* Profile Card / Welcome */}
-        <div className={classNames("profile-card")}>
-          <div className={classNames("profile-info")}>
-            <h2>Welcome, {mockAdminData.name}.</h2>
-            <p className={classNames("user-details")}>
-              Role: {mockAdminData.role} | ID: {mockAdminData.id}
-            </p>
-            <p className={classNames("college-details")} style={{ color: "#c93535" }}>
-              WARNING: Handle permissions with care.
-            </p>
-          </div>
-          <div className={classNames("admin-status")}>
-            <span
-              className={classNames("percentage-text")}
-              style={{ fontSize: "1.2rem", color: "#10b981" }}
-            >
-              Status: Operational
-            </span>
-            <p>System Health</p>
-          </div>
-        </div>
+  const classNames = (...classes) =>
+    classes
+      .flat()
+      .filter(Boolean)
+      .map((cls) => styles[cls] || cls)
+      .join(" ")
+      .trim();
 
-        {/* --- Navigation Tabs --- */}
-        <div className={classNames("admin-tabs")}>
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loader}></div>
+        <p>Loading admin dashboard...</p>
+      </div>
+    );
+  }
+
+  if (!adminProfile) {
+    return (
+      <div className={styles.errorContainer}>
+        <p>Failed to load profile. Please try again.</p>
+        <button onClick={() => navigate("/login")}>Go to Login</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.dashboardWrapper}>
+      <Navigation />
+
+      <div className={styles.dashboardContainer}>
+        {/* Header Section */}
+        <header className={styles.dashboardHeader}>
+          <div className={styles.headerContent}>
+            <div className={styles.welcomeSection}>
+              <h1 className={styles.welcomeTitle}>Welcome, {adminProfile.name}!</h1>
+              <p className={styles.welcomeSubtitle}>
+                {adminProfile.role} • {adminProfile.id || "N/A"}
+              </p>
+              <p className={styles.welcomeDetails}>System Administrator</p>
+            </div>
+            <div className={styles.headerActions}>
+              <div className={styles.statusBadge}>
+                <div className={styles.badgeCircle}>
+                  <i className="bx bx-check-circle"></i>
+                </div>
+                <p className={styles.badgeLabel}>System Operational</p>
+              </div>
+              <button className={styles.logoutButton} onClick={handleLogout} title="Logout">
+                <i className="bx bx-log-out"></i>
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Navigation Tabs */}
+        <div className={styles.adminTabs}>
           <button
-            className={classNames(
-              "tab-btn",
-              activeTab === "dashboard" && "active-tab"
-            )}
+            className={`${styles.tabBtn} ${activeTab === "dashboard" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("dashboard")}
           >
-            <i className="bx bx-tachometer" /> Dashboard Metrics
+            <i className="bx bx-tachometer"></i>
+            Dashboard Metrics
           </button>
           <button
-            className={classNames("tab-btn", activeTab === "users" && "active-tab")}
+            className={`${styles.tabBtn} ${activeTab === "users" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("users")}
           >
-            <i className="bx bx-group" /> User Management
+            <i className="bx bx-group"></i>
+            User Management
           </button>
         </div>
 
-        {/* --- Content Area --- */}
-        <div className={classNames("content-area")}>
+        {/* Content Area */}
+        <div className={styles.contentArea}>
           {activeTab === "dashboard" && (
-            <div className={classNames("metrics-grid")}>
-              {Object.keys(mockAdminData.stats).map((key) => (
-                <div key={key} className={classNames("metric-card")}>
-                  <p className={classNames("metric-value")}>
-                    {mockAdminData.stats[key]}
-                  </p>
-                  <p className={classNames("metric-label")}>
-                    {key.replace(/([A-Z])/g, " $1").toUpperCase()}
-                  </p>
+            <div className={styles.metricsGrid}>
+              <div className={styles.metricCard}>
+                <div className={styles.metricIcon}>
+                  <i className="bx bx-user"></i>
                 </div>
-              ))}
-
-              <div className={classNames("recent-activity-card")}>
-                <h4>Recent Registrations</h4>
-                <ul>
-                  {mockAdminData.recentRegistrations.map((reg) => (
-                    <li key={reg.id}>
-                      {reg.name} ({reg.role}) - {reg.date}
-                    </li>
-                  ))}
-                </ul>
+                <div className={styles.metricContent}>
+                  <h3 className={styles.metricValue}>{stats.totalUsers}</h3>
+                  <p className={styles.metricLabel}>Total Users</p>
+                </div>
+              </div>
+              <div className={styles.metricCard}>
+                <div className={styles.metricIcon}>
+                  <i className="bx bx-calendar-check"></i>
+                </div>
+                <div className={styles.metricContent}>
+                  <h3 className={styles.metricValue}>{stats.activeSessions}</h3>
+                  <p className={styles.metricLabel}>Active Sessions</p>
+                </div>
+              </div>
+              <div className={styles.metricCard}>
+                <div className={styles.metricIcon}>
+                  <i className="bx bx-user-plus"></i>
+                </div>
+                <div className={styles.metricContent}>
+                  <h3 className={styles.metricValue}>{stats.newRegistersToday}</h3>
+                  <p className={styles.metricLabel}>New Registrations Today</p>
+                </div>
+              </div>
+              <div className={styles.metricCard}>
+                <div className={styles.metricIcon}>
+                  <i className="bx bx-server"></i>
+                </div>
+                <div className={styles.metricContent}>
+                  <h3 className={styles.metricValue}>{stats.systemUptime}</h3>
+                  <p className={styles.metricLabel}>System Uptime</p>
+                </div>
               </div>
             </div>
           )}
 
           {activeTab === "users" && (
-            <div className={classNames("user-management")}>
+            <div className={styles.userManagement}>
               <h3>User Accounts Overview</h3>
-              <p className={classNames("user-count")}>
-                Total Active Users: {mockAdminData.stats.totalUsers}
-              </p>
-              <div className={classNames("user-list-card")}>
-                <div className={classNames("user-search")}>
-                  <input
-                    type="text"
-                    placeholder="Search by name, ID, or role..."
-                  />
-                  <button className={classNames("search-btn")}>Search</button>
+              <p className={styles.userCount}>Total Active Users: {stats.totalUsers}</p>
+              <div className={styles.userListCard}>
+                <div className={styles.userSearch}>
+                  <input type="text" placeholder="Search by name, ID, or role..." />
+                  <button className={styles.searchBtn}>
+                    <i className="bx bx-search"></i>
+                    Search
+                  </button>
                 </div>
-
-                {mockAdminData.recentRegistrations.map((user) => (
-                  <div key={user.id} className={classNames("user-row")}>
-                    <span className={classNames("user-info")}>
-                      <strong>{user.name}</strong> ({user.role})
-                    </span>
-                    <div className={classNames("user-actions")}>
-                      <button
-                        className={classNames("action-btn", "view-btn")}
-                        onClick={() => handleUserAction("View Details", user)}
-                      >
-                        View
-                      </button>
-                      <button
-                        className={classNames("action-btn", "reset-btn")}
-                        onClick={() => handleUserAction("Reset Password", user)}
-                      >
-                        Reset Pwd
-                      </button>
-                      <button
-                        className={classNames("action-btn", "delete-btn")}
-                        onClick={() => handleUserAction("Delete", user)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                <div className={styles.emptyState}>
+                  <i className="bx bx-info-circle"></i>
+                  <p>User management features coming soon</p>
+                </div>
               </div>
             </div>
           )}
@@ -177,4 +232,4 @@ const InClassAdminPanel = () => {
   );
 };
 
-export default InClassAdminPanel;
+export default InClassAdmin;

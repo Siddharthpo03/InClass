@@ -109,6 +109,33 @@ const InClassAbout = () => {
           </div>
         </section>
 
+        <section className={classNames("ownership-section")}>
+          <h2>Software Ownership & Business Rules</h2>
+          <div className={classNames("ownership-grid")}>
+            <div className={classNames("ownership-card")}>
+              <h3>Ownership (BR02)</h3>
+              <p>
+                This Software Completely Belongs to <strong>InClass Powered By Variance Technologies</strong>.
+                All patents and copyrights are reserved on Variance Technologies. If found any
+                malpractices with the software, strict actions can be taken by our team on the
+                college and the user.
+              </p>
+            </div>
+            <div className={classNames("ownership-card")}>
+              <h3>No Selling Policy (BR01)</h3>
+              <p>
+                The software is proprietary and may not be sold, distributed, or transferred
+                without explicit written permission from Variance Technologies. Study purpose
+                breakdowns and clones are only accepted by the approval on Variance Technologies only.
+              </p>
+            </div>
+          </div>
+          <p className={classNames("ownership-note")}>
+            For questions about licensing, partnerships, or study purposes, please contact
+            <a href="/contact">Variance Technologies</a>.
+          </p>
+        </section>
+
         <section className={classNames("cta-section")}>
           <h2>Ready to Experience Smart Attendance?</h2>
           <button
