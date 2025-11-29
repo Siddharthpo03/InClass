@@ -37,10 +37,9 @@ router.get(
       return res.json({ exists: false, role: null });
     }
 
-    const result = await pool.query(
-      "SELECT role FROM users WHERE email = $1",
-      [email]
-    );
+    const result = await pool.query("SELECT role FROM users WHERE email = $1", [
+      email,
+    ]);
 
     if (result.rowCount === 0) {
       return res.json({ exists: false, role: null });
@@ -63,7 +62,7 @@ router.get(
     const userId = req.user.id;
 
     const result = await pool.query(
-      "SELECT name, email, role, roll_no, college, department FROM users WHERE id = $1",
+      "SELECT name, email, role, roll_no, college, department, college_id, department_id FROM users WHERE id = $1",
       [userId]
     );
 
@@ -89,8 +88,12 @@ router.get(
       userId: userId, // Add userId for fingerprint enrollment
       hasFingerprint: hasFingerprint,
       email: user.email,
-      department: user.department || (user.roll_no ? user.roll_no.substring(0, 3) : "N/A"),
+      department:
+        user.department ||
+        (user.roll_no ? user.roll_no.substring(0, 3) : "N/A"),
       college: user.college || "Tech University",
+      college_id: user.college_id,
+      department_id: user.department_id,
     });
   })
 );
@@ -103,7 +106,7 @@ router.post(
   "/register",
   upload.fields([
     { name: "passportPhoto", maxCount: 1 },
-    { name: "faceImage", maxCount: 1 }
+    { name: "faceImage", maxCount: 1 },
   ]), // Handle multiple file uploads
   asyncHandler(async (req, res) => {
     // Debug: Log what we received
@@ -113,17 +116,39 @@ router.post(
     console.log("📥 req.body type:", typeof req.body);
     console.log("📥 req.body keys:", req.body ? Object.keys(req.body) : "null");
     console.log("📥 req.files:", req.files);
-    console.log("📥 passportPhoto:", req.files?.passportPhoto ? { filename: req.files.passportPhoto[0].filename, size: req.files.passportPhoto[0].size } : null);
-    console.log("📥 faceImage:", req.files?.faceImage ? { filename: req.files.faceImage[0].filename, size: req.files.faceImage[0].size } : null);
-    
+    console.log(
+      "📥 passportPhoto:",
+      req.files?.passportPhoto
+        ? {
+            filename: req.files.passportPhoto[0].filename,
+            size: req.files.passportPhoto[0].size,
+          }
+        : null
+    );
+    console.log(
+      "📥 faceImage:",
+      req.files?.faceImage
+        ? {
+            filename: req.files.faceImage[0].filename,
+            size: req.files.faceImage[0].size,
+          }
+        : null
+    );
+
     // Check if req.body exists - multer should populate this
     if (!req.body) {
-      console.error("❌ req.body is undefined - multer may not have parsed the request");
-      console.error("❌ This usually means the request isn't multipart/form-data");
-      throw new ValidationError("Request body is missing. Please ensure the form is submitted correctly.");
+      console.error(
+        "❌ req.body is undefined - multer may not have parsed the request"
+      );
+      console.error(
+        "❌ This usually means the request isn't multipart/form-data"
+      );
+      throw new ValidationError(
+        "Request body is missing. Please ensure the form is submitted correctly."
+      );
     }
-    
-    if (typeof req.body !== 'object') {
+
+    if (typeof req.body !== "object") {
       console.error("❌ req.body is not an object:", typeof req.body, req.body);
       throw new ValidationError("Invalid request format. Please try again.");
     }
@@ -140,12 +165,27 @@ router.post(
     const country_code = req.body.country_code;
     const college = req.body.college;
     const department = req.body.department;
-    
-    console.log("📥 Parsed values:", { name, email, role, roll_no, mobile_number, country_code, college, department });
+    const college_id = req.body.college_id;
+    const department_id = req.body.department_id;
+
+    console.log("📥 Parsed values:", {
+      name,
+      email,
+      role,
+      roll_no,
+      mobile_number,
+      country_code,
+      college,
+      department,
+      college_id,
+      department_id,
+    });
 
     // Validate required fields - use individual variables
     if (!name || !email || !password || !role) {
-      throw new ValidationError("Missing required fields: name, email, password, and role are required.");
+      throw new ValidationError(
+        "Missing required fields: name, email, password, and role are required."
+      );
     }
 
     // Validate email format
@@ -155,7 +195,10 @@ router.post(
     validateRole(role);
 
     // Validate mobile number format if provided
-    if (mobile_number && !/^\d{10,15}$/.test(mobile_number.replace(/\s/g, ""))) {
+    if (
+      mobile_number &&
+      !/^\d{10,15}$/.test(mobile_number.replace(/\s/g, ""))
+    ) {
       throw new ValidationError("Invalid mobile number format");
     }
 
@@ -170,7 +213,7 @@ router.post(
       passportPhotoUrl = `/uploads/${req.files.passportPhoto[0].filename}`;
       console.log("📸 Passport photo saved:", passportPhotoUrl);
     }
-    
+
     // Handle face image upload (store for face recognition enrollment)
     let faceImagePath = null;
     if (req.files?.faceImage && req.files.faceImage[0]) {
@@ -180,27 +223,40 @@ router.post(
 
     // Insert user (PostgreSQL will handle unique constraint violations)
     console.log("💾 Inserting user into database...");
-    console.log("💾 Values:", { 
-      name, 
-      email, 
-      role, 
-      roll_no: roll_no || null, 
-      mobile_number: mobile_number || null, 
-      country_code: country_code || "+1", 
-      passport_photo_url: passportPhotoUrl 
+    console.log("💾 Values:", {
+      name,
+      email,
+      role,
+      roll_no: roll_no || null,
+      mobile_number: mobile_number || null,
+      country_code: country_code || "+1",
+      passport_photo_url: passportPhotoUrl,
     });
-    
+
     try {
       const result = await pool.query(
-        `INSERT INTO users (name, email, password, role, roll_no, mobile_number, country_code, passport_photo_url, college, department) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
-         RETURNING id, name, role, mobile_number, country_code, passport_photo_url, college, department`,
-        [name, email, hashedPassword, role, roll_no || null, mobile_number || null, country_code || "+1", passportPhotoUrl, college || null, department || null]
+        `INSERT INTO users (name, email, password, role, roll_no, mobile_number, country_code, passport_photo_url, college, department, college_id, department_id) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
+         RETURNING id, name, role, mobile_number, country_code, passport_photo_url, college, department, college_id, department_id`,
+        [
+          name,
+          email,
+          hashedPassword,
+          role,
+          roll_no || null,
+          mobile_number || null,
+          country_code || "+1",
+          passportPhotoUrl,
+          college || null,
+          department || null,
+          college_id || null,
+          department_id || null,
+        ]
       );
 
       console.log("✅ User inserted successfully, ID:", result.rows[0].id);
       const user = result.rows[0];
-      
+
       res.status(201).json({
         success: true,
         message: "User registered successfully.",
@@ -311,14 +367,26 @@ router.post(
     }
 
     // Check if student exists
-    const studentCheck = await pool.query("SELECT id, role FROM users WHERE id = $1", [studentId]);
-    if (studentCheck.rowCount === 0 || studentCheck.rows[0].role !== "student") {
+    const studentCheck = await pool.query(
+      "SELECT id, role FROM users WHERE id = $1",
+      [studentId]
+    );
+    if (
+      studentCheck.rowCount === 0 ||
+      studentCheck.rows[0].role !== "student"
+    ) {
       throw new NotFoundError("Student not found.");
     }
 
     // Check if faculty exists
-    const facultyCheck = await pool.query("SELECT id, role FROM users WHERE id = $1", [facultyId]);
-    if (facultyCheck.rowCount === 0 || facultyCheck.rows[0].role !== "faculty") {
+    const facultyCheck = await pool.query(
+      "SELECT id, role FROM users WHERE id = $1",
+      [facultyId]
+    );
+    if (
+      facultyCheck.rowCount === 0 ||
+      facultyCheck.rows[0].role !== "faculty"
+    ) {
       throw new NotFoundError("Faculty not found.");
     }
 
@@ -334,7 +402,8 @@ router.post(
 
     res.status(201).json({
       success: true,
-      message: "Registration request submitted successfully. Faculty will review your application.",
+      message:
+        "Registration request submitted successfully. Faculty will review your application.",
       pendingRequest: result.rows[0],
     });
   })
@@ -347,19 +416,20 @@ router.get(
   "/colleges",
   asyncHandler(async (req, res) => {
     const { search } = req.query;
-    
-    let query = "SELECT id, name, country, state, city, type FROM colleges WHERE is_active = true";
+
+    let query =
+      "SELECT id, name, country, state, city, type FROM colleges WHERE is_active = true";
     let params = [];
-    
+
     if (search && search.trim().length > 0) {
       query += " AND name ILIKE $1";
       params.push(`%${search.trim()}%`);
     }
-    
+
     query += " ORDER BY name ASC";
-    
+
     const result = await pool.query(query, params);
-    
+
     res.json({
       colleges: result.rows.map((row) => ({
         id: row.id,
@@ -380,19 +450,22 @@ router.get(
   "/departments",
   asyncHandler(async (req, res) => {
     const { search } = req.query;
-    
-    let query = "SELECT id, name, code, description FROM departments WHERE is_active = true";
+
+    let query =
+      "SELECT id, name, code, description FROM departments WHERE is_active = true";
     let params = [];
-    
+
     if (search && search.trim().length > 0) {
       query += " AND (name ILIKE $1 OR code ILIKE $1)";
       params.push(`%${search.trim()}%`);
     }
-    
+
     query += " ORDER BY name ASC";
-    
+
+    console.log("[Departments API] Query:", query, "Params:", params);
     const result = await pool.query(query, params);
-    
+    console.log("[Departments API] Found", result.rowCount, "departments");
+
     res.json({
       departments: result.rows.map((row) => ({
         id: row.id,
@@ -400,6 +473,154 @@ router.get(
         code: row.code,
         description: row.description,
       })),
+    });
+  })
+);
+
+// @route   POST /api/auth/send-otp
+// @desc    Send OTP to user's mobile number via SMS (Twilio)
+// @access  Public (during onboarding) or Private
+router.post(
+  "/send-otp",
+  asyncHandler(async (req, res) => {
+    const { userId } = req.body;
+    const authUser = req.user; // From auth middleware if present
+
+    const targetUserId = userId || (authUser ? authUser.id : null);
+    if (!targetUserId) {
+      throw new ValidationError(
+        "User ID is required. Please provide userId in request body or authenticate with a valid token."
+      );
+    }
+
+    // Get user mobile number and country code
+    const userResult = await pool.query(
+      "SELECT id, name, mobile_number, country_code FROM users WHERE id = $1",
+      [targetUserId]
+    );
+
+    if (userResult.rowCount === 0) {
+      throw new NotFoundError("User not found.");
+    }
+
+    const user = userResult.rows[0];
+
+    // Validate mobile number exists
+    if (!user.mobile_number) {
+      throw new ValidationError(
+        "Mobile number is required. Please update your profile with a valid mobile number."
+      );
+    }
+
+    // Format phone number with country code (E.164 format)
+    const countryCode = user.country_code || "+1";
+    // Remove any existing + from mobile_number if present
+    const cleanMobile = user.mobile_number
+      .replace(/^\+/, "")
+      .replace(/[\s\-\(\)]/g, "");
+    const phoneNumber = countryCode + cleanMobile;
+
+    // Send OTP via SMS using Twilio
+    const { sendOtpSms } = require("../utils/sms");
+    const smsResult = await sendOtpSms(phoneNumber);
+
+    if (!smsResult.success) {
+      console.error("Failed to send OTP SMS:", smsResult.error);
+      throw new ValidationError(
+        smsResult.error ||
+          "Failed to send OTP. Please check your mobile number and try again."
+      );
+    }
+
+    // Store verification SID in database for tracking (optional)
+    // Note: With Twilio Verify, we don't need to store OTP hash ourselves
+    // Twilio handles OTP generation and verification
+    await pool.query(
+      `INSERT INTO otps (user_id, otp_hash, expires_at, is_used)
+       VALUES ($1, $2, $3, FALSE)
+       ON CONFLICT DO NOTHING`,
+      [
+        targetUserId,
+        `twilio_${smsResult.sid}`,
+        new Date(Date.now() + 5 * 60 * 1000),
+      ] // 5 minutes
+    );
+
+    res.json({
+      success: true,
+      message: "OTP sent successfully to your mobile number.",
+      expiresIn: 300, // 5 minutes in seconds
+      phoneNumber: phoneNumber.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2"), // Masked phone number
+    });
+  })
+);
+
+// @route   POST /api/auth/verify-otp
+// @desc    Verify OTP using Twilio Verify API
+// @access  Public (during onboarding) or Private
+router.post(
+  "/verify-otp",
+  asyncHandler(async (req, res) => {
+    const { userId, otp } = req.body;
+    const authUser = req.user;
+
+    const targetUserId = userId || (authUser ? authUser.id : null);
+    if (!targetUserId) {
+      throw new ValidationError("User ID is required.");
+    }
+
+    if (!otp || otp.length < 4 || otp.length > 8) {
+      throw new ValidationError("Valid OTP code is required (4-8 digits).");
+    }
+
+    // Get user mobile number and country code
+    const userResult = await pool.query(
+      "SELECT id, mobile_number, country_code FROM users WHERE id = $1",
+      [targetUserId]
+    );
+
+    if (userResult.rowCount === 0) {
+      throw new NotFoundError("User not found.");
+    }
+
+    const user = userResult.rows[0];
+
+    if (!user.mobile_number) {
+      throw new ValidationError(
+        "Mobile number not found. Please update your profile."
+      );
+    }
+
+    // Format phone number with country code (E.164 format)
+    const countryCode = user.country_code || "+1";
+    // Remove any existing + from mobile_number if present
+    const cleanMobile = user.mobile_number
+      .replace(/^\+/, "")
+      .replace(/[\s\-\(\)]/g, "");
+    const phoneNumber = countryCode + cleanMobile;
+
+    // Verify OTP using Twilio
+    const { verifyOtpSms } = require("../utils/sms");
+    const verifyResult = await verifyOtpSms(phoneNumber, otp);
+
+    if (!verifyResult.success) {
+      throw new AuthenticationError(
+        verifyResult.error ||
+          "Invalid or expired OTP. Please request a new one."
+      );
+    }
+
+    // Mark OTP as used in database (if we stored it)
+    await pool.query(
+      `UPDATE otps SET is_used = TRUE 
+       WHERE user_id = $1 AND is_used = FALSE 
+       AND expires_at > CURRENT_TIMESTAMP`,
+      [targetUserId]
+    );
+
+    res.json({
+      success: true,
+      message: "OTP verified successfully.",
     });
   })
 );

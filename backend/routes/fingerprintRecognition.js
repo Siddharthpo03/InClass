@@ -6,6 +6,12 @@ const router = express.Router();
 const pool = require("../db");
 const auth = require("../middleware/auth");
 const {
+  asyncHandler,
+  ValidationError,
+  NotFoundError,
+  AuthenticationError,
+} = require("../utils/errorHandler");
+const {
   generateFingerprintRegistrationOptions,
   verifyFingerprintRegistration,
   generateFingerprintAuthenticationOptions,
@@ -351,6 +357,132 @@ router.delete("/enroll/:credentialId", auth(), async (req, res) => {
     res.status(500).json({ error: "Server error deleting fingerprint enrollment." });
   }
 });
+
+// ============================================
+// SKELETON ENDPOINTS FOR FACULTY-ONLY FINGERPRINT REGISTRATION
+// These are placeholders for vendor-specific fingerprint SDK integration
+// ============================================
+
+// @route   POST /api/fingerprint/register/options
+// @desc    Start fingerprint registration session (faculty-only, for student enrollment)
+// @access  Private (faculty)
+router.post(
+  "/register/options",
+  auth(["faculty"]),
+  asyncHandler(async (req, res) => {
+    const { studentId } = req.body;
+    const facultyId = req.user.id;
+
+    if (!studentId) {
+      throw new ValidationError("Student ID is required.");
+    }
+
+    // Verify student exists
+    const studentCheck = await pool.query(
+      "SELECT id, name, email FROM users WHERE id = $1 AND role = 'student'",
+      [studentId]
+    );
+
+    if (studentCheck.rowCount === 0) {
+      throw new NotFoundError("Student not found.");
+    }
+
+    const student = studentCheck.rows[0];
+
+    // Generate a session token for this registration
+    const crypto = require("crypto");
+    const sessionToken = crypto.randomBytes(32).toString("hex");
+
+    // Store session in database (or Redis in production)
+    // For now, we'll use a simple in-memory store
+    registrationChallenges.set(sessionToken, {
+      studentId: studentId,
+      facultyId: facultyId,
+      timestamp: Date.now(),
+    });
+
+    res.json({
+      success: true,
+      sessionToken: sessionToken,
+      student: {
+        id: student.id,
+        name: student.name,
+        email: student.email,
+      },
+      message: "Fingerprint registration session created. Use this sessionToken in the complete endpoint.",
+      note: "This is a skeleton endpoint. Integrate with your fingerprint vendor SDK here.",
+    });
+  })
+);
+
+// @route   POST /api/fingerprint/register/complete
+// @desc    Complete fingerprint registration (faculty-only, accepts encrypted template)
+// @access  Private (faculty)
+router.post(
+  "/register/complete",
+  auth(["faculty"]),
+  asyncHandler(async (req, res) => {
+    const { sessionToken, studentId, encryptedTemplate, vendor } = req.body;
+    const facultyId = req.user.id;
+
+    if (!sessionToken || !studentId || !encryptedTemplate) {
+      throw new ValidationError("Session token, student ID, and encrypted template are required.");
+    }
+
+    // Verify session
+    const session = registrationChallenges.get(sessionToken);
+    if (!session || session.studentId !== parseInt(studentId) || session.facultyId !== facultyId) {
+      throw new AuthenticationError("Invalid or expired session token.");
+    }
+
+    // Verify student exists
+    const studentCheck = await pool.query(
+      "SELECT id FROM users WHERE id = $1 AND role = 'student'",
+      [studentId]
+    );
+
+    if (studentCheck.rowCount === 0) {
+      throw new NotFoundError("Student not found.");
+    }
+
+    // Encrypt the template (if not already encrypted)
+    const { encrypt } = require("../utils/crypto");
+    let finalEncryptedTemplate;
+    try {
+      // If it's already a string, assume it's encrypted; otherwise encrypt it
+      if (typeof encryptedTemplate === "string") {
+        finalEncryptedTemplate = encryptedTemplate;
+      } else {
+        finalEncryptedTemplate = encrypt(JSON.stringify(encryptedTemplate));
+      }
+    } catch (error) {
+      throw new ValidationError("Failed to encrypt fingerprint template.");
+    }
+
+    // Store fingerprint template
+    await pool.query(
+      `INSERT INTO fingerprint_templates (user_id, student_id, encrypted_template, vendor, enrolled_by)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT DO NOTHING`,
+      [studentId, studentId, finalEncryptedTemplate, vendor || "custom", facultyId]
+    );
+
+    // Set fingerprint_enrolled flag
+    await pool.query(
+      "UPDATE users SET fingerprint_enrolled = TRUE WHERE id = $1",
+      [studentId]
+    );
+
+    // Clean up session
+    registrationChallenges.delete(sessionToken);
+
+    res.json({
+      success: true,
+      message: "Fingerprint template stored successfully.",
+      note: "This is a skeleton endpoint. Full vendor SDK integration required for production.",
+    });
+  })
+);
 
 module.exports = router;
 

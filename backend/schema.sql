@@ -17,6 +17,128 @@
 --
 -- ============================================
 
+-- IMPORTANT: Create colleges and departments tables FIRST before users table
+-- because users table has foreign key references to these tables
+
+-- 0. COLLEGES Table (Real-world colleges and universities) - MUST BE CREATED FIRST
+CREATE TABLE IF NOT EXISTS colleges (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    country VARCHAR(100) DEFAULT 'United States',
+    state VARCHAR(100),
+    city VARCHAR(100),
+    type VARCHAR(50) DEFAULT 'University', -- University, College, Institute, etc.
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 0. DEPARTMENTS Table (Academic departments) - MUST BE CREATED BEFORE USERS
+CREATE TABLE IF NOT EXISTS departments (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(20), -- Department code (e.g., CS, MATH, ENG)
+    description TEXT,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (name)
+);
+
+-- Colleges table indexes (created early for performance)
+CREATE INDEX IF NOT EXISTS idx_colleges_name ON colleges(name);
+CREATE INDEX IF NOT EXISTS idx_colleges_country ON colleges(country);
+CREATE INDEX IF NOT EXISTS idx_colleges_is_active ON colleges(is_active);
+
+-- Departments table indexes (created early for performance)
+CREATE INDEX IF NOT EXISTS idx_departments_name ON departments(name);
+CREATE INDEX IF NOT EXISTS idx_departments_code ON departments(code);
+CREATE INDEX IF NOT EXISTS idx_departments_is_active ON departments(is_active);
+
+-- Insert real-world colleges and universities (early insertion)
+INSERT INTO colleges (name, country, state, city, type) VALUES
+-- United States Universities
+('Massachusetts Institute of Technology', 'United States', 'Massachusetts', 'Cambridge', 'University'),
+('Harvard University', 'United States', 'Massachusetts', 'Cambridge', 'University'),
+('Stanford University', 'United States', 'California', 'Stanford', 'University'),
+('University of California, Berkeley', 'United States', 'California', 'Berkeley', 'University'),
+('California Institute of Technology', 'United States', 'California', 'Pasadena', 'Institute'),
+('Yale University', 'United States', 'Connecticut', 'New Haven', 'University'),
+('Princeton University', 'United States', 'New Jersey', 'Princeton', 'University'),
+('University of Chicago', 'United States', 'Illinois', 'Chicago', 'University'),
+('Columbia University', 'United States', 'New York', 'New York', 'University'),
+('University of Pennsylvania', 'United States', 'Pennsylvania', 'Philadelphia', 'University'),
+('Cornell University', 'United States', 'New York', 'Ithaca', 'University'),
+('University of Michigan', 'United States', 'Michigan', 'Ann Arbor', 'University'),
+('University of California, Los Angeles', 'United States', 'California', 'Los Angeles', 'University'),
+('University of Texas at Austin', 'United States', 'Texas', 'Austin', 'University'),
+('New York University', 'United States', 'New York', 'New York', 'University'),
+('Carnegie Mellon University', 'United States', 'Pennsylvania', 'Pittsburgh', 'University'),
+('University of Washington', 'United States', 'Washington', 'Seattle', 'University'),
+('University of Illinois at Urbana-Champaign', 'United States', 'Illinois', 'Urbana', 'University'),
+('Georgia Institute of Technology', 'United States', 'Georgia', 'Atlanta', 'Institute'),
+('Duke University', 'United States', 'North Carolina', 'Durham', 'University'),
+('Northwestern University', 'United States', 'Illinois', 'Evanston', 'University'),
+('Johns Hopkins University', 'United States', 'Maryland', 'Baltimore', 'University'),
+('University of California, San Diego', 'United States', 'California', 'San Diego', 'University'),
+('University of Wisconsin-Madison', 'United States', 'Wisconsin', 'Madison', 'University'),
+('University of Southern California', 'United States', 'California', 'Los Angeles', 'University'),
+('Rice University', 'United States', 'Texas', 'Houston', 'University'),
+('University of North Carolina at Chapel Hill', 'United States', 'North Carolina', 'Chapel Hill', 'University'),
+('Boston University', 'United States', 'Massachusetts', 'Boston', 'University'),
+('Pennsylvania State University', 'United States', 'Pennsylvania', 'University Park', 'University'),
+('Ohio State University', 'United States', 'Ohio', 'Columbus', 'University'),
+('Purdue University', 'United States', 'Indiana', 'West Lafayette', 'University'),
+-- Indian Universities
+('Indian Institute of Technology, Delhi', 'India', 'Delhi', 'New Delhi', 'Institute'),
+('Indian Institute of Technology, Bombay', 'India', 'Maharashtra', 'Mumbai', 'Institute'),
+('Indian Institute of Technology, Madras', 'India', 'Tamil Nadu', 'Chennai', 'Institute'),
+('Indian Institute of Technology, Kanpur', 'India', 'Uttar Pradesh', 'Kanpur', 'Institute'),
+('Indian Institute of Technology, Kharagpur', 'India', 'West Bengal', 'Kharagpur', 'Institute'),
+('Indian Institute of Science', 'India', 'Karnataka', 'Bangalore', 'Institute'),
+('Delhi University', 'India', 'Delhi', 'New Delhi', 'University'),
+('Jawaharlal Nehru University', 'India', 'Delhi', 'New Delhi', 'University'),
+('University of Mumbai', 'India', 'Maharashtra', 'Mumbai', 'University'),
+('University of Calcutta', 'India', 'West Bengal', 'Kolkata', 'University'),
+('Anna University', 'India', 'Tamil Nadu', 'Chennai', 'University'),
+('Birla Institute of Technology and Science', 'India', 'Rajasthan', 'Pilani', 'Institute'),
+('National Institute of Technology, Trichy', 'India', 'Tamil Nadu', 'Tiruchirappalli', 'Institute'),
+('Vellore Institute of Technology', 'India', 'Tamil Nadu', 'Vellore', 'Institute'),
+('Manipal Institute of Technology', 'India', 'Karnataka', 'Manipal', 'Institute')
+ON CONFLICT (name) DO NOTHING;
+
+-- Insert real-world academic departments (early insertion)
+INSERT INTO departments (name, code, description) VALUES
+('Computer Science', 'CS', 'Computer Science and Engineering'),
+('Electrical Engineering', 'EE', 'Electrical and Electronics Engineering'),
+('Mechanical Engineering', 'ME', 'Mechanical Engineering'),
+('Civil Engineering', 'CE', 'Civil Engineering'),
+('Chemical Engineering', 'CHE', 'Chemical Engineering'),
+('Aerospace Engineering', 'AE', 'Aerospace and Aeronautical Engineering'),
+('Biomedical Engineering', 'BME', 'Biomedical and Bioengineering'),
+('Mathematics', 'MATH', 'Mathematics and Applied Mathematics'),
+('Physics', 'PHY', 'Physics and Applied Physics'),
+('Chemistry', 'CHEM', 'Chemistry and Chemical Sciences'),
+('Biology', 'BIO', 'Biological Sciences'),
+('Biotechnology', 'BT', 'Biotechnology and Life Sciences'),
+('Information Technology', 'IT', 'Information Technology'),
+('Electronics and Communication Engineering', 'ECE', 'Electronics and Communication Engineering'),
+('Data Science', 'DS', 'Data Science and Analytics'),
+('Artificial Intelligence', 'AI', 'Artificial Intelligence and Machine Learning'),
+('Cybersecurity', 'CSEC', 'Cybersecurity and Information Security'),
+('Software Engineering', 'SE', 'Software Engineering'),
+('Business Administration', 'MBA', 'Business Administration and Management'),
+('Economics', 'ECON', 'Economics and Finance'),
+('English', 'ENG', 'English Language and Literature'),
+('History', 'HIST', 'History and Social Sciences'),
+('Psychology', 'PSY', 'Psychology and Behavioral Sciences'),
+('Architecture', 'ARCH', 'Architecture and Design'),
+('Pharmacy', 'PHARM', 'Pharmaceutical Sciences'),
+('Medicine', 'MED', 'Medical Sciences'),
+('Law', 'LAW', 'Law and Legal Studies'),
+('Education', 'EDU', 'Education and Teaching'),
+('Environmental Science', 'ENV', 'Environmental Science and Engineering'),
+('Materials Science', 'MS', 'Materials Science and Engineering')
+ON CONFLICT (name) DO NOTHING;
+
 -- 1. USERS Table (Handles Admin, Faculty, and Student roles)
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -64,6 +186,30 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                    WHERE table_name = 'users' AND column_name = 'department') THEN
         ALTER TABLE users ADD COLUMN department VARCHAR(255);
+    END IF;
+
+    -- Add college_id column if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'users' AND column_name = 'college_id') THEN
+        ALTER TABLE users ADD COLUMN college_id INTEGER REFERENCES colleges(id);
+    END IF;
+
+    -- Add department_id column if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'users' AND column_name = 'department_id') THEN
+        ALTER TABLE users ADD COLUMN department_id INTEGER REFERENCES departments(id);
+    END IF;
+
+    -- Add face_enrolled column if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'users' AND column_name = 'face_enrolled') THEN
+        ALTER TABLE users ADD COLUMN face_enrolled BOOLEAN DEFAULT FALSE;
+    END IF;
+
+    -- Add fingerprint_enrolled column if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'users' AND column_name = 'fingerprint_enrolled') THEN
+        ALTER TABLE users ADD COLUMN fingerprint_enrolled BOOLEAN DEFAULT FALSE;
     END IF;
 END $$;
 
@@ -259,121 +405,83 @@ CREATE INDEX IF NOT EXISTS idx_pending_students_student_id ON pending_students(s
 CREATE INDEX IF NOT EXISTS idx_pending_students_faculty_id ON pending_students(faculty_id);
 CREATE INDEX IF NOT EXISTS idx_pending_students_status ON pending_students(status);
 
--- 9. COLLEGES Table (Real-world colleges and universities)
-CREATE TABLE IF NOT EXISTS colleges (
+-- NOTE: COLLEGES and DEPARTMENTS tables, their indexes, and initial data
+-- are now created at the beginning of this file (before the USERS table)
+-- to avoid foreign key dependency issues
+
+-- 11. OTPS Table (One-Time Passwords for biometric onboarding)
+CREATE TABLE IF NOT EXISTS otps (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) UNIQUE NOT NULL,
-    country VARCHAR(100) DEFAULT 'United States',
-    state VARCHAR(100),
-    city VARCHAR(100),
-    type VARCHAR(50) DEFAULT 'University', -- University, College, Institute, etc.
-    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    otp_hash VARCHAR(255) NOT NULL, -- Hashed OTP
+    expires_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    is_used BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 10. DEPARTMENTS Table (Academic departments)
-CREATE TABLE IF NOT EXISTS departments (
+-- OTPs table indexes
+CREATE INDEX IF NOT EXISTS idx_otps_user_id ON otps(user_id);
+CREATE INDEX IF NOT EXISTS idx_otps_expires_at ON otps(expires_at);
+CREATE INDEX IF NOT EXISTS idx_otps_is_used ON otps(is_used);
+
+-- 12. COURSES Table (Course catalog - separate from classes which are faculty-specific instances)
+CREATE TABLE IF NOT EXISTS courses (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    code VARCHAR(20), -- Department code (e.g., CS, MATH, ENG)
+    faculty_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    course_code VARCHAR(20) NOT NULL,
+    course_name VARCHAR(255) NOT NULL,
     description TEXT,
+    credits INTEGER,
+    semester VARCHAR(50),
+    academic_year VARCHAR(20),
+    department_id INTEGER REFERENCES departments(id),
+    college_id INTEGER REFERENCES colleges(id),
     is_active BOOLEAN DEFAULT TRUE NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (name)
+    UNIQUE (faculty_id, course_code)
 );
 
--- Colleges table indexes
-CREATE INDEX IF NOT EXISTS idx_colleges_name ON colleges(name);
-CREATE INDEX IF NOT EXISTS idx_colleges_country ON colleges(country);
-CREATE INDEX IF NOT EXISTS idx_colleges_is_active ON colleges(is_active);
+-- Courses table indexes
+CREATE INDEX IF NOT EXISTS idx_courses_faculty_id ON courses(faculty_id);
+CREATE INDEX IF NOT EXISTS idx_courses_course_code ON courses(course_code);
+CREATE INDEX IF NOT EXISTS idx_courses_department_id ON courses(department_id);
+CREATE INDEX IF NOT EXISTS idx_courses_college_id ON courses(college_id);
+CREATE INDEX IF NOT EXISTS idx_courses_is_active ON courses(is_active);
 
--- Departments table indexes
-CREATE INDEX IF NOT EXISTS idx_departments_name ON departments(name);
-CREATE INDEX IF NOT EXISTS idx_departments_code ON departments(code);
-CREATE INDEX IF NOT EXISTS idx_departments_is_active ON departments(is_active);
+-- 13. STUDENT_REGISTRATIONS Table (Student course registration requests)
+CREATE TABLE IF NOT EXISTS student_registrations (
+    id SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE NOT NULL,
+    faculty_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+    rejection_reason TEXT,
+    requested_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at TIMESTAMP WITHOUT TIME ZONE,
+    UNIQUE (student_id, course_id)
+);
 
--- Insert real-world colleges and universities
-INSERT INTO colleges (name, country, state, city, type) VALUES
--- United States Universities
-('Massachusetts Institute of Technology', 'United States', 'Massachusetts', 'Cambridge', 'University'),
-('Harvard University', 'United States', 'Massachusetts', 'Cambridge', 'University'),
-('Stanford University', 'United States', 'California', 'Stanford', 'University'),
-('University of California, Berkeley', 'United States', 'California', 'Berkeley', 'University'),
-('California Institute of Technology', 'United States', 'California', 'Pasadena', 'Institute'),
-('Yale University', 'United States', 'Connecticut', 'New Haven', 'University'),
-('Princeton University', 'United States', 'New Jersey', 'Princeton', 'University'),
-('University of Chicago', 'United States', 'Illinois', 'Chicago', 'University'),
-('Columbia University', 'United States', 'New York', 'New York', 'University'),
-('University of Pennsylvania', 'United States', 'Pennsylvania', 'Philadelphia', 'University'),
-('Cornell University', 'United States', 'New York', 'Ithaca', 'University'),
-('University of Michigan', 'United States', 'Michigan', 'Ann Arbor', 'University'),
-('University of California, Los Angeles', 'United States', 'California', 'Los Angeles', 'University'),
-('University of Texas at Austin', 'United States', 'Texas', 'Austin', 'University'),
-('New York University', 'United States', 'New York', 'New York', 'University'),
-('Carnegie Mellon University', 'United States', 'Pennsylvania', 'Pittsburgh', 'University'),
-('University of Washington', 'United States', 'Washington', 'Seattle', 'University'),
-('University of Illinois at Urbana-Champaign', 'United States', 'Illinois', 'Urbana', 'University'),
-('Georgia Institute of Technology', 'United States', 'Georgia', 'Atlanta', 'Institute'),
-('Duke University', 'United States', 'North Carolina', 'Durham', 'University'),
-('Northwestern University', 'United States', 'Illinois', 'Evanston', 'University'),
-('Johns Hopkins University', 'United States', 'Maryland', 'Baltimore', 'University'),
-('University of California, San Diego', 'United States', 'California', 'San Diego', 'University'),
-('University of Wisconsin-Madison', 'United States', 'Wisconsin', 'Madison', 'University'),
-('University of Southern California', 'United States', 'California', 'Los Angeles', 'University'),
-('Rice University', 'United States', 'Texas', 'Houston', 'University'),
-('University of North Carolina at Chapel Hill', 'United States', 'North Carolina', 'Chapel Hill', 'University'),
-('Boston University', 'United States', 'Massachusetts', 'Boston', 'University'),
-('Pennsylvania State University', 'United States', 'Pennsylvania', 'University Park', 'University'),
-('Ohio State University', 'United States', 'Ohio', 'Columbus', 'University'),
-('Purdue University', 'United States', 'Indiana', 'West Lafayette', 'University'),
--- Indian Universities
-('Indian Institute of Technology, Delhi', 'India', 'Delhi', 'New Delhi', 'Institute'),
-('Indian Institute of Technology, Bombay', 'India', 'Maharashtra', 'Mumbai', 'Institute'),
-('Indian Institute of Technology, Madras', 'India', 'Tamil Nadu', 'Chennai', 'Institute'),
-('Indian Institute of Technology, Kanpur', 'India', 'Uttar Pradesh', 'Kanpur', 'Institute'),
-('Indian Institute of Technology, Kharagpur', 'India', 'West Bengal', 'Kharagpur', 'Institute'),
-('Indian Institute of Science', 'India', 'Karnataka', 'Bangalore', 'Institute'),
-('Delhi University', 'India', 'Delhi', 'New Delhi', 'University'),
-('Jawaharlal Nehru University', 'India', 'Delhi', 'New Delhi', 'University'),
-('University of Mumbai', 'India', 'Maharashtra', 'Mumbai', 'University'),
-('University of Calcutta', 'India', 'West Bengal', 'Kolkata', 'University'),
-('Anna University', 'India', 'Tamil Nadu', 'Chennai', 'University'),
-('Birla Institute of Technology and Science', 'India', 'Rajasthan', 'Pilani', 'Institute'),
-('National Institute of Technology, Trichy', 'India', 'Tamil Nadu', 'Tiruchirappalli', 'Institute'),
-('Vellore Institute of Technology', 'India', 'Tamil Nadu', 'Vellore', 'Institute'),
-('Manipal Institute of Technology', 'India', 'Karnataka', 'Manipal', 'Institute')
-ON CONFLICT (name) DO NOTHING;
+-- Student registrations table indexes
+CREATE INDEX IF NOT EXISTS idx_student_registrations_student_id ON student_registrations(student_id);
+CREATE INDEX IF NOT EXISTS idx_student_registrations_course_id ON student_registrations(course_id);
+CREATE INDEX IF NOT EXISTS idx_student_registrations_faculty_id ON student_registrations(faculty_id);
+CREATE INDEX IF NOT EXISTS idx_student_registrations_status ON student_registrations(status);
 
--- Insert real-world academic departments
-INSERT INTO departments (name, code, description) VALUES
-('Computer Science', 'CS', 'Computer Science and Engineering'),
-('Electrical Engineering', 'EE', 'Electrical and Electronics Engineering'),
-('Mechanical Engineering', 'ME', 'Mechanical Engineering'),
-('Civil Engineering', 'CE', 'Civil Engineering'),
-('Chemical Engineering', 'CHE', 'Chemical Engineering'),
-('Aerospace Engineering', 'AE', 'Aerospace and Aeronautical Engineering'),
-('Biomedical Engineering', 'BME', 'Biomedical and Bioengineering'),
-('Mathematics', 'MATH', 'Mathematics and Applied Mathematics'),
-('Physics', 'PHY', 'Physics and Applied Physics'),
-('Chemistry', 'CHEM', 'Chemistry and Chemical Sciences'),
-('Biology', 'BIO', 'Biological Sciences'),
-('Biotechnology', 'BT', 'Biotechnology and Life Sciences'),
-('Information Technology', 'IT', 'Information Technology'),
-('Electronics and Communication Engineering', 'ECE', 'Electronics and Communication Engineering'),
-('Data Science', 'DS', 'Data Science and Analytics'),
-('Artificial Intelligence', 'AI', 'Artificial Intelligence and Machine Learning'),
-('Cybersecurity', 'CSEC', 'Cybersecurity and Information Security'),
-('Software Engineering', 'SE', 'Software Engineering'),
-('Business Administration', 'MBA', 'Business Administration and Management'),
-('Economics', 'ECON', 'Economics and Finance'),
-('English', 'ENG', 'English Language and Literature'),
-('History', 'HIST', 'History and Social Sciences'),
-('Psychology', 'PSY', 'Psychology and Behavioral Sciences'),
-('Architecture', 'ARCH', 'Architecture and Design'),
-('Pharmacy', 'PHARM', 'Pharmaceutical Sciences'),
-('Medicine', 'MED', 'Medical Sciences'),
-('Law', 'LAW', 'Law and Legal Studies'),
-('Education', 'EDU', 'Education and Teaching'),
-('Environmental Science', 'ENV', 'Environmental Science and Engineering'),
-('Materials Science', 'MS', 'Materials Science and Engineering')
-ON CONFLICT (name) DO NOTHING;
+-- 14. FINGERPRINT_TEMPLATES Table (Vendor-specific fingerprint templates - skeleton for future integration)
+CREATE TABLE IF NOT EXISTS fingerprint_templates (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    registration_id VARCHAR(255), -- Vendor-specific registration ID
+    student_id INTEGER REFERENCES users(id) ON DELETE CASCADE, -- Student whose fingerprint is registered
+    encrypted_template TEXT NOT NULL, -- AES-256 encrypted fingerprint template
+    vendor VARCHAR(50), -- Vendor name (e.g., 'suprema', 'zkteco', 'custom')
+    enrolled_by INTEGER REFERENCES users(id) ON DELETE SET NULL, -- Faculty who enrolled it
+    enrolled_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL
+);
+
+-- Fingerprint templates table indexes
+CREATE INDEX IF NOT EXISTS idx_fingerprint_templates_user_id ON fingerprint_templates(user_id);
+CREATE INDEX IF NOT EXISTS idx_fingerprint_templates_student_id ON fingerprint_templates(student_id);
+CREATE INDEX IF NOT EXISTS idx_fingerprint_templates_vendor ON fingerprint_templates(vendor);
+CREATE INDEX IF NOT EXISTS idx_fingerprint_templates_is_active ON fingerprint_templates(is_active);

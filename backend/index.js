@@ -15,13 +15,15 @@ dotenv.config();
 const app = express();
 
 // --- Middleware ---
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "*",
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "*",
+    credentials: true,
+  })
+);
 // Body parsing middleware - but multer will handle multipart/form-data
 app.use(express.json());
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Serve uploaded files statically
 const path = require("path");
@@ -48,13 +50,18 @@ pool.query("SELECT NOW()", (err, res) => {
 setTimeout(() => {
   try {
     const faceRecognition = require("./utils/faceRecognition");
-    if (faceRecognition && typeof faceRecognition.loadModels === 'function') {
+    if (faceRecognition && typeof faceRecognition.loadModels === "function") {
       faceRecognition.loadModels().catch((err) => {
-        console.warn("⚠️  Face recognition models will use fallback mode:", err.message);
+        console.warn(
+          "⚠️  Face recognition models will use fallback mode:",
+          err.message
+        );
       });
     }
   } catch (error) {
-    console.warn("⚠️  Face recognition module not available. Server will continue without it.");
+    console.warn(
+      "⚠️  Face recognition module not available. Server will continue without it."
+    );
     console.warn("   Face recognition features will be disabled.");
   }
 }, 1000);
@@ -68,8 +75,15 @@ const faceRecognitionRoutes = require("./routes/faceRecognition");
 const fingerprintRecognitionRoutes = require("./routes/fingerprintRecognition");
 const biometricsRoutes = require("./routes/biometrics");
 const reportsRoutes = require("./routes/reports");
+const registrationsRoutes = require("./routes/registrations");
+
+// Initialize SMS service (Twilio)
+require("./utils/sms");
 
 // --- API Endpoints ---
+// IMPORTANT: Mount registrations routes BEFORE faculty routes to avoid route conflicts
+// registrations.js has routes like /faculty/courses/:courseId/registrations
+app.use("/api", registrationsRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/faculty", facultyRoutes);
 app.use("/api/attendance", attendanceRoutes);
@@ -99,7 +113,7 @@ const server = http.createServer(app);
 
 // Initialize Socket.io with the HTTP server
 const io = socketInit.init(server, {
-  origin: process.env.FRONTEND_URL || "*"
+  origin: process.env.FRONTEND_URL || "*",
 });
 
 // Make io available to routes if needed

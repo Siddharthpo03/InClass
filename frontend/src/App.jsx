@@ -29,10 +29,12 @@ import SocialMedia from "./pages/SocialMedia";
 import Accessibility from "./pages/Accessibility";
 import CommunityGuidelines from "./pages/CommunityGuidelines";
 import CookieConsent from "./components/CookieConsent";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <div className="app-main-content">
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/login" element={<InClassLogin />} />

@@ -46,7 +46,10 @@ const InClassLogin = () => {
     // Validate email format first
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setIsAdmin(false);
-      setRole("");
+      // Only clear role if it was auto-set to "Admin", not if user manually selected Student/Faculty
+      if (role === "Admin") {
+        setRole("");
+      }
       setCheckingEmail(false);
       return;
     }
@@ -109,14 +112,16 @@ const InClassLogin = () => {
         } else {
           // Not an admin - clear admin state
           setIsAdmin(false);
+          // Only clear role if it was auto-set to "Admin", not if user manually selected Student/Faculty
           if (role === "Admin") {
-            setRole(""); // Clear admin role if email doesn't match
+            setRole("");
           }
         }
       } catch (error) {
         console.error("Error checking email:", error);
         console.error("Error details:", error.response?.data || error.message);
         setIsAdmin(false);
+        // Only clear role if it was auto-set to "Admin", not if user manually selected Student/Faculty
         if (role === "Admin") {
           setRole("");
         }
@@ -149,15 +154,21 @@ const InClassLogin = () => {
         if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
           checkEmailForAdmin(emailValue);
         } else {
-          // Invalid email format - clear admin status
+          // Invalid email format - clear admin status only (don't clear manually selected role)
           setIsAdmin(false);
-          setRole("");
+          // Only clear role if it was auto-set to "Admin", not if user manually selected Student/Faculty
+          if (role === "Admin") {
+            setRole("");
+          }
           setCheckingEmail(false);
         }
       } else {
-        // Email field is empty - clear admin status
+        // Email field is empty - clear admin status only (don't clear manually selected role)
         setIsAdmin(false);
-        setRole("");
+        // Only clear role if it was auto-set to "Admin", not if user manually selected Student/Faculty
+        if (role === "Admin") {
+          setRole("");
+        }
         setCheckingEmail(false);
       }
     }

@@ -532,6 +532,12 @@ router.post("/face/enroll", async (req, res) => {
         [targetUserId, encryptedEmbedding]
       );
 
+      // Set face_enrolled flag in users table
+      await pool.query(
+        "UPDATE users SET face_enrolled = TRUE WHERE id = $1",
+        [targetUserId]
+      );
+
       return res.status(201).json({
         success: true,
         message: "Face enrolled successfully.",

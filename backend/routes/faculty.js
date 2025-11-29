@@ -36,7 +36,40 @@ router.get("/me", auth(["faculty"]), async (req, res) => {
 });
 
 // ------------------------
-// Register a new course
+// Create a new course (new courses table)
+// ------------------------
+router.post("/courses", auth(["faculty"]), async (req, res) => {
+  const { courseCode, courseName, description, credits, semester, academicYear, departmentId, collegeId } = req.body;
+  const faculty_id = req.user.id;
+
+  try {
+    if (!courseCode || !courseName) {
+      return res.status(400).json({ message: "Course code and name are required." });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO courses (faculty_id, course_code, course_name, description, credits, semester, academic_year, department_id, college_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING id, course_code, course_name, description, credits, semester, academic_year`,
+      [faculty_id, courseCode, courseName, description || null, credits || null, semester || null, academicYear || null, departmentId || null, collegeId || null]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Course created successfully",
+      course: result.rows[0],
+    });
+  } catch (err) {
+    if (err.code === "23505") {
+      return res.status(400).json({ message: "You have already created a course with this code." });
+    }
+    console.error(err);
+    res.status(500).json({ error: "Server error while creating course" });
+  }
+});
+
+// ------------------------
+// Register a new course (legacy - for backward compatibility)
 // ------------------------
 router.post("/register-course", auth(["faculty"]), async (req, res) => {
   const { course_code, title, total_classes } = req.body;
@@ -72,7 +105,50 @@ router.post("/register-course", auth(["faculty"]), async (req, res) => {
 });
 
 // ------------------------
-// List all courses by faculty
+// List all courses by faculty (new courses table)
+// ------------------------
+router.get("/:facultyId/courses", auth(["faculty", "student"]), async (req, res) => {
+  const { facultyId } = req.params;
+  const requestingUserId = req.user.id;
+  const requestingUserRole = req.user.role;
+
+  try {
+    // Verify faculty exists and requesting user has permission
+    if (requestingUserRole === "faculty" && parseInt(facultyId) !== requestingUserId) {
+      return res.status(403).json({ message: "You can only view your own courses." });
+    }
+
+    const result = await pool.query(
+      `SELECT id, course_code, course_name, description, credits, semester, academic_year, department_id, college_id, is_active, created_at
+       FROM courses 
+       WHERE faculty_id = $1 AND is_active = TRUE
+       ORDER BY created_at DESC`,
+      [facultyId]
+    );
+
+    res.json({
+      courses: result.rows.map((row) => ({
+        id: row.id,
+        courseCode: row.course_code,
+        courseName: row.course_name,
+        description: row.description,
+        credits: row.credits,
+        semester: row.semester,
+        academicYear: row.academic_year,
+        departmentId: row.department_id,
+        collegeId: row.college_id,
+        isActive: row.is_active,
+        createdAt: row.created_at,
+      })),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error while fetching courses" });
+  }
+});
+
+// ------------------------
+// List all courses by faculty (legacy - for backward compatibility)
 // ------------------------
 router.get("/my-courses", auth(["faculty"]), async (req, res) => {
   const faculty_id = req.user.id;
@@ -85,6 +161,53 @@ router.get("/my-courses", auth(["faculty"]), async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error while fetching courses" });
+  }
+});
+
+// ------------------------
+// List faculty by college and department
+// ------------------------
+router.get("/list", auth(["student"]), async (req, res) => {
+  const { collegeId, departmentId } = req.query;
+
+  try {
+    let query = `
+      SELECT u.id, u.name, u.email, u.roll_no, 
+             d.name as department_name, c.name as college_name
+      FROM users u
+      LEFT JOIN departments d ON u.department_id = d.id
+      LEFT JOIN colleges c ON u.college_id = c.id
+      WHERE u.role = 'faculty'
+    `;
+    const params = [];
+    
+    if (collegeId) {
+      params.push(collegeId);
+      query += ` AND u.college_id = $${params.length}`;
+    }
+    
+    if (departmentId) {
+      params.push(departmentId);
+      query += ` AND u.department_id = $${params.length}`;
+    }
+    
+    query += " ORDER BY u.name";
+
+    const result = await pool.query(query, params);
+
+    res.json({
+      faculty: result.rows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        rollNo: row.roll_no,
+        departmentName: row.department_name,
+        collegeName: row.college_name,
+      })),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error while fetching faculty" });
   }
 });
 

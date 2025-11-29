@@ -39,6 +39,8 @@ const InClassRegister = () => {
     roll_no: "",
     college: "",
     department: "",
+    college_id: null,
+    department_id: null,
   });
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
@@ -73,14 +75,22 @@ const InClassRegister = () => {
   };
 
   const handleCollegeSelect = (college) => {
-    setFormData({ ...formData, college: college.name });
+    setFormData({ 
+      ...formData, 
+      college: college.name,
+      college_id: college.id 
+    });
     setCollegeSearch("");
     setCollegeDropdownOpen(false);
     setValidationErrors((prev) => ({ ...prev, college: "" }));
   };
 
   const handleDepartmentSelect = (department) => {
-    setFormData({ ...formData, department: department.name });
+    setFormData({ 
+      ...formData, 
+      department: department.name,
+      department_id: department.id 
+    });
     setDepartmentSearch("");
     setDepartmentDropdownOpen(false);
     setValidationErrors((prev) => ({ ...prev, department: "" }));
@@ -152,17 +162,25 @@ const InClassRegister = () => {
       setDepartmentsLoading(true);
       try {
         console.log(
-          "Fetching departments with search:",
+          "[Frontend] Fetching departments with search:",
           departmentSearch || ""
         );
         const response = await apiClient.get("/auth/departments", {
           params: { search: departmentSearch || "" },
         });
-        console.log("Departments response:", response.data);
-        setDepartmentsList(response.data.departments || []);
+        console.log("[Frontend] Departments response:", response.data);
+        const departments = response.data?.departments || [];
+        console.log("[Frontend] Parsed departments count:", departments.length);
+        setDepartmentsList(departments);
+        
+        if (departments.length === 0 && departmentSearch.length === 0) {
+          console.warn("[Frontend] No departments found in database. Make sure schema.sql has been run.");
+        }
       } catch (error) {
-        console.error("Error fetching departments:", error);
-        console.error("Error details:", error.response?.data || error.message);
+        console.error("[Frontend] Error fetching departments:", error);
+        console.error("[Frontend] Error response:", error.response?.data);
+        console.error("[Frontend] Error status:", error.response?.status);
+        console.error("[Frontend] Error message:", error.message);
         setDepartmentsList([]);
       } finally {
         setDepartmentsLoading(false);
@@ -179,6 +197,28 @@ const InClassRegister = () => {
       return () => clearTimeout(timeoutId);
     }
   }, [departmentSearch]);
+
+  // Fetch departments when dropdown opens for the first time (if list is empty)
+  useEffect(() => {
+    if (departmentDropdownOpen && departmentsList.length === 0 && !departmentsLoading) {
+      const fetchDepartments = async () => {
+        setDepartmentsLoading(true);
+        try {
+          const response = await apiClient.get("/auth/departments", {
+            params: { search: "" },
+          });
+          setDepartmentsList(response.data.departments || []);
+        } catch (error) {
+          console.error("Error fetching departments:", error);
+          setDepartmentsList([]);
+        } finally {
+          setDepartmentsLoading(false);
+        }
+      };
+      fetchDepartments();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [departmentDropdownOpen]);
 
   useEffect(() => {
     const requiredFields = [
@@ -258,13 +298,17 @@ const InClassRegister = () => {
       isValid = false;
     }
 
-    if (!formData.college.trim()) {
-      errors.college = "College/University is required";
+    if (!formData.college.trim() || !formData.college_id) {
+      errors.college = formData.college.trim() 
+        ? "Please select a college from the dropdown list" 
+        : "College/University is required";
       isValid = false;
     }
 
-    if (!formData.department.trim()) {
-      errors.department = "Department is required";
+    if (!formData.department.trim() || !formData.department_id) {
+      errors.department = formData.department.trim() 
+        ? "Please select a department from the dropdown list" 
+        : "Department is required";
       isValid = false;
     }
 
@@ -293,6 +337,8 @@ const InClassRegister = () => {
       roll_no: formData.roll_no,
       college: formData.college,
       department: formData.department,
+      college_id: formData.college_id,
+      department_id: formData.department_id,
     };
 
     try {
@@ -638,11 +684,9 @@ const InClassRegister = () => {
                     validationErrors.department ? styles.inputError : ""
                   } ${departmentDropdownOpen ? styles.dropdownOpen : ""}`}
                   onClick={() => {
-                    setDepartmentDropdownOpen((prev) => !prev);
-                    if (
-                      !departmentDropdownOpen &&
-                      departmentsList.length === 0
-                    ) {
+                    const willOpen = !departmentDropdownOpen;
+                    setDepartmentDropdownOpen(willOpen);
+                    if (willOpen && departmentsList.length === 0 && !departmentsLoading) {
                       // Fetch departments when opening for the first time
                       setDepartmentSearch("");
                     }

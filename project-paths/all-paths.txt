@@ -1,0 +1,382 @@
+# InClass Project - Complete File Paths Structure
+# Generated: Complete project structure with all file paths
+
+==========================================
+ROOT DIRECTORY
+==========================================
+InClass/
+├── .gitignore
+├── README.md
+├── render.yaml
+├── inclass.db
+├── assets/
+└── project-paths/
+    └── all-paths.txt
+
+==========================================
+BACKEND DIRECTORY
+==========================================
+InClass/backend/
+├── .gitignore
+├── package.json
+├── package-lock.json
+├── README.md
+├── db.js
+├── index.js
+├── schema.sql
+├── socket.js
+
+├── middleware/
+│   ├── auth.js
+│   ├── biometricAuth.js
+│   └── upload.js
+
+├── routes/
+│   ├── attendance.js
+│   ├── auth.js
+│   ├── biometrics.js
+│   ├── faceRecognition.js
+│   ├── faculty.js
+│   ├── fingerprintRecognition.js
+│   └── reports.js
+
+├── utils/
+│   ├── crypto.js
+│   ├── errorHandler.js
+│   ├── faceRecognition.js
+│   ├── fingerprintRecognition.js
+│   ├── geo.js
+│   └── mailer.js
+
+├── scripts/
+│   ├── createAdmin.js
+│   ├── deleteAdmin.js
+│   └── listAdmins.js
+
+├── migrations/
+│   └── add_mobile_and_photo.sql
+
+└── uploads/
+    └── (uploaded files directory)
+
+==========================================
+FRONTEND DIRECTORY
+==========================================
+InClass/frontend/
+├── package.json
+├── package-lock.json
+├── index.html
+├── vite.config.js
+├── eslint.config.js
+├── ENV.example
+
+├── public/
+│   ├── favicon.jpg
+│   ├── htaccess.sample
+│   └── models/
+│       ├── face_landmark_68_model-shard1
+│       ├── face_landmark_68_model-weights_manifest.json
+│       ├── face_recognition_model-shard1
+│       ├── face_recognition_model-shard2
+│       ├── face_recognition_model-weights_manifest.json
+│       ├── README.md
+│       ├── ssd_mobilenetv1_model-shard1
+│       ├── ssd_mobilenetv1_model-shard2
+│       └── ssd_mobilenetv1_model-weights_manifest.json
+
+├── scripts/
+│   ├── download-models.js
+│   └── download-models.ps1
+
+├── src/
+│   ├── main.jsx
+│   ├── App.jsx
+│   
+│   ├── assets/
+│   │   ├── darK_logo.png
+│   │   ├── favicon.jpg
+│   │   └── Logo1.jpg
+│   
+│   ├── components/
+│   │   ├── CookieConsent.jsx
+│   │   ├── CookieConsent.module.css
+│   │   ├── CountryCodeSelector.jsx
+│   │   ├── CountryCodeSelector.module.css
+│   │   ├── FaceCapture.jsx
+│   │   ├── FaceCapture.module.css
+│   │   ├── FaceEnrollmentModal.jsx
+│   │   ├── FaceEnrollmentModal.module.css
+│   │   ├── FingerprintCapture.jsx
+│   │   ├── FingerprintCapture.module.css
+│   │   ├── Footer.jsx
+│   │   ├── Footer.module.css
+│   │   ├── InClassLogo.jsx
+│   │   ├── InClassLogo.module.css
+│   │   ├── Navigation.jsx
+│   │   ├── Navigation.module.css
+│   │   ├── PhotoUpload.jsx
+│   │   └── PhotoUpload.module.css
+│   
+│   ├── pages/
+│   │   ├── About.jsx
+│   │   ├── About.module.css
+│   │   ├── Accessibility.jsx
+│   │   ├── Accessibility.module.css
+│   │   ├── Blog.jsx
+│   │   ├── Blog.module.css
+│   │   ├── Careers.jsx
+│   │   ├── Careers.module.css
+│   │   ├── CommunityGuidelines.jsx
+│   │   ├── CommunityGuidelines.module.css
+│   │   ├── Contact.jsx
+│   │   ├── Contact.css
+│   │   ├── CookieDeclaration.jsx
+│   │   ├── CookieDeclaration.module.css
+│   │   ├── Developers.jsx
+│   │   ├── Developers.module.css
+│   │   ├── Documentation.jsx
+│   │   ├── Documentation.module.css
+│   │   ├── Features.jsx
+│   │   ├── Features.css
+│   │   ├── HelpCenter.jsx
+│   │   ├── HelpCenter.module.css
+│   │   ├── Homepage.jsx
+│   │   ├── Homepage.module.css
+│   │   ├── JobApplication.jsx
+│   │   ├── JobApplication.module.css
+│   │   ├── Newsletter.jsx
+│   │   ├── Newsletter.module.css
+│   │   ├── PrivacyPolicy.jsx
+│   │   ├── PrivacyPolicy.module.css
+│   │   ├── Report.jsx
+│   │   ├── Report.css
+│   │   ├── SocialMedia.jsx
+│   │   ├── SocialMedia.module.css
+│   │   ├── Support.jsx
+│   │   ├── Support.module.css
+│   │   ├── TermsOfUse.jsx
+│   │   ├── TermsOfUse.module.css
+│   │   
+│   │   ├── Admin/
+│   │   │   ├── InClassAdmin.jsx
+│   │   │   └── InClassAdmin.module.css
+│   │   
+│   │   ├── Faculty/
+│   │   │   ├── InClassFaculty.jsx
+│   │   │   └── InClassFaculty.module.css
+│   │   
+│   │   ├── Student/
+│   │   │   ├── InClassStudent.jsx
+│   │   │   └── InClassStudent.module.css
+│   │   
+│   │   ├── Login/
+│   │   │   ├── InClassLogin.jsx
+│   │   │   └── InClassLogin.module.css
+│   │   
+│   │   ├── Register/
+│   │   │   ├── InClassRegister.jsx
+│   │   │   └── InClassRegister.module.css
+│   │   
+│   │   ├── ForgotPass/
+│   │   │   ├── InClassForgotPass.jsx
+│   │   │   └── InClassForgotPass.module.css
+│   │   
+│   │   ├── JoinCourse/
+│   │   │   ├── JoinCourse.jsx
+│   │   │   └── JoinCourse.module.css
+│   │   
+│   │   ├── Onboard/
+│   │   │   ├── OnboardBiometrics.jsx
+│   │   │   └── OnboardBiometrics.module.css
+│   │   
+│   │   ├── OnboardBiometrics/
+│   │   │   ├── OnboardBiometrics.jsx
+│   │   │   └── OnboardBiometrics.module.css
+│   │   
+│   │   └── Onboarding/
+│   │       └── (empty directory)
+│   
+│   ├── hooks/
+│   │   └── useDeviceChecks.js
+│   
+│   ├── contexts/
+│   │   └── (empty directory)
+│   
+│   ├── styles/
+│   │   └── global.css
+│   
+│   └── utils/
+│       ├── apiClient.js
+│       ├── cookieUtils.js
+│       └── faceModels.js
+
+└── dist/
+    ├── index.html
+    ├── favicon.jpg
+    ├── htaccess.sample
+    ├── assets/
+    │   ├── darK_logo-Dxmgm9eh.png
+    │   ├── favicon-BeiF4yca.jpg
+    │   ├── index-D_Ju57uE.js
+    │   ├── index-txAUhxAM.css
+    │   └── Logo1-CMHgD0tv.jpg
+    └── models/
+        ├── face_landmark_68_model-shard1
+        ├── face_landmark_68_model-weights_manifest.json
+        ├── face_recognition_model-shard1
+        ├── face_recognition_model-shard2
+        ├── face_recognition_model-weights_manifest.json
+        ├── README.md
+        ├── ssd_mobilenetv1_model-shard1
+        ├── ssd_mobilenetv1_model-shard2
+        └── ssd_mobilenetv1_model-weights_manifest.json
+
+==========================================
+ABSOLUTE PATHS (Windows)
+==========================================
+Root: C:\Users\DELL\OneDrive\Desktop\InClass\InClass\
+
+Backend Root: C:\Users\DELL\OneDrive\Desktop\InClass\InClass\backend\
+Frontend Root: C:\Users\DELL\OneDrive\Desktop\InClass\InClass\frontend\
+
+==========================================
+KEY FILES BY CATEGORY
+==========================================
+
+CONFIGURATION FILES:
+- InClass/.gitignore
+- InClass/render.yaml
+- InClass/backend/package.json
+- InClass/backend/.gitignore
+- InClass/frontend/package.json
+- InClass/frontend/vite.config.js
+- InClass/frontend/eslint.config.js
+- InClass/frontend/ENV.example
+
+DATABASE:
+- InClass/inclass.db
+- InClass/backend/schema.sql
+- InClass/backend/migrations/add_mobile_and_photo.sql
+
+BACKEND ENTRY POINTS:
+- InClass/backend/index.js
+- InClass/backend/db.js
+- InClass/backend/socket.js
+
+FRONTEND ENTRY POINTS:
+- InClass/frontend/index.html
+- InClass/frontend/src/main.jsx
+- InClass/frontend/src/App.jsx
+
+AUTHENTICATION & MIDDLEWARE:
+- InClass/backend/middleware/auth.js
+- InClass/backend/middleware/biometricAuth.js
+- InClass/backend/middleware/upload.js
+- InClass/backend/routes/auth.js
+
+API ROUTES:
+- InClass/backend/routes/attendance.js
+- InClass/backend/routes/auth.js
+- InClass/backend/routes/biometrics.js
+- InClass/backend/routes/faceRecognition.js
+- InClass/backend/routes/faculty.js
+- InClass/backend/routes/fingerprintRecognition.js
+- InClass/backend/routes/reports.js
+
+UTILITIES:
+- InClass/backend/utils/crypto.js
+- InClass/backend/utils/errorHandler.js
+- InClass/backend/utils/faceRecognition.js
+- InClass/backend/utils/fingerprintRecognition.js
+- InClass/backend/utils/geo.js
+- InClass/backend/utils/mailer.js
+- InClass/frontend/src/utils/apiClient.js
+- InClass/frontend/src/utils/cookieUtils.js
+- InClass/frontend/src/utils/faceModels.js
+
+ADMIN SCRIPTS:
+- InClass/backend/scripts/createAdmin.js
+- InClass/backend/scripts/deleteAdmin.js
+- InClass/backend/scripts/listAdmins.js
+
+MODEL SCRIPTS:
+- InClass/frontend/scripts/download-models.js
+- InClass/frontend/scripts/download-models.ps1
+
+MAIN PAGES:
+- InClass/frontend/src/pages/Homepage.jsx
+- InClass/frontend/src/pages/About.jsx
+- InClass/frontend/src/pages/Contact.jsx
+- InClass/frontend/src/pages/Features.jsx
+- InClass/frontend/src/pages/Report.jsx
+
+AUTH PAGES:
+- InClass/frontend/src/pages/Login/InClassLogin.jsx
+- InClass/frontend/src/pages/Register/InClassRegister.jsx
+- InClass/frontend/src/pages/ForgotPass/InClassForgotPass.jsx
+
+ROLE-SPECIFIC PAGES:
+- InClass/frontend/src/pages/Admin/InClassAdmin.jsx
+- InClass/frontend/src/pages/Faculty/InClassFaculty.jsx
+- InClass/frontend/src/pages/Student/InClassStudent.jsx
+
+BIOMETRIC PAGES:
+- InClass/frontend/src/pages/Onboard/OnboardBiometrics.jsx
+- InClass/frontend/src/pages/OnboardBiometrics/OnboardBiometrics.jsx
+
+OTHER PAGES:
+- InClass/frontend/src/pages/JoinCourse/JoinCourse.jsx
+- InClass/frontend/src/pages/Blog.jsx
+- InClass/frontend/src/pages/Careers.jsx
+- InClass/frontend/src/pages/JobApplication.jsx
+- InClass/frontend/src/pages/Developers.jsx
+- InClass/frontend/src/pages/Documentation.jsx
+- InClass/frontend/src/pages/HelpCenter.jsx
+- InClass/frontend/src/pages/Support.jsx
+- InClass/frontend/src/pages/Newsletter.jsx
+- InClass/frontend/src/pages/SocialMedia.jsx
+- InClass/frontend/src/pages/PrivacyPolicy.jsx
+- InClass/frontend/src/pages/TermsOfUse.jsx
+- InClass/frontend/src/pages/CookieDeclaration.jsx
+- InClass/frontend/src/pages/CommunityGuidelines.jsx
+- InClass/frontend/src/pages/Accessibility.jsx
+
+COMPONENTS:
+- InClass/frontend/src/components/Navigation.jsx
+- InClass/frontend/src/components/Footer.jsx
+- InClass/frontend/src/components/InClassLogo.jsx
+- InClass/frontend/src/components/CookieConsent.jsx
+- InClass/frontend/src/components/CountryCodeSelector.jsx
+- InClass/frontend/src/components/FaceCapture.jsx
+- InClass/frontend/src/components/FaceEnrollmentModal.jsx
+- InClass/frontend/src/components/FingerprintCapture.jsx
+- InClass/frontend/src/components/PhotoUpload.jsx
+
+HOOKS:
+- InClass/frontend/src/hooks/useDeviceChecks.js
+
+STYLES:
+- InClass/frontend/src/styles/global.css
+
+ASSETS:
+- InClass/frontend/src/assets/darK_logo.png
+- InClass/frontend/src/assets/favicon.jpg
+- InClass/frontend/src/assets/Logo1.jpg
+
+FACE RECOGNITION MODELS:
+- InClass/frontend/public/models/face_landmark_68_model-shard1
+- InClass/frontend/public/models/face_landmark_68_model-weights_manifest.json
+- InClass/frontend/public/models/face_recognition_model-shard1
+- InClass/frontend/public/models/face_recognition_model-shard2
+- InClass/frontend/public/models/face_recognition_model-weights_manifest.json
+- InClass/frontend/public/models/ssd_mobilenetv1_model-shard1
+- InClass/frontend/public/models/ssd_mobilenetv1_model-shard2
+- InClass/frontend/public/models/ssd_mobilenetv1_model-weights_manifest.json
+
+UPLOADS:
+- InClass/backend/uploads/ (directory for uploaded files)
+
+==========================================
+END OF FILE STRUCTURE
+==========================================
+
