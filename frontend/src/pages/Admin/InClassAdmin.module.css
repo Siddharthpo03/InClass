@@ -1,0 +1,390 @@
+/* Professional Admin Dashboard Styles */
+
+:global(body) {
+  background: var(--bg-page);
+  background-attachment: fixed;
+  transition: background 0.3s ease;
+}
+
+.dashboardWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.dashboardContainer {
+  flex: 1;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 100px 24px 40px;
+}
+
+/* Loading State */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 20px;
+}
+
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #dc2626;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dashboard Header */
+.dashboardHeader {
+  margin-bottom: 32px;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  padding: 32px 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(220, 38, 38, 0.3);
+  color: white;
+}
+
+:global(body.darkMode) .headerContent {
+  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+}
+
+.welcomeSection {
+  flex: 1;
+}
+
+.welcomeTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: white;
+}
+
+.welcomeSubtitle {
+  font-size: 1rem;
+  margin: 0 0 4px 0;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.welcomeDetails {
+  font-size: 0.9rem;
+  margin: 0;
+  opacity: 0.8;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.statusBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.badgeCircle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.badgeLabel {
+  font-size: 0.875rem;
+  margin: 0;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logoutButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.logoutButton i {
+  font-size: 1.25rem;
+}
+
+/* Admin Tabs */
+.adminTabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.tabBtn {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  margin-bottom: -2px;
+}
+
+.tabBtn:hover {
+  color: #dc2626;
+}
+
+:global(body.darkMode) .tabBtn:hover {
+  color: #fca5a5;
+}
+
+.tabBtn.activeTab {
+  color: #dc2626;
+  border-bottom-color: #dc2626;
+}
+
+:global(body.darkMode) .tabBtn.activeTab {
+  color: #fca5a5;
+  border-bottom-color: #fca5a5;
+}
+
+.tabBtn i {
+  font-size: 1.25rem;
+}
+
+/* Content Area */
+.contentArea {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: var(--shadow-card);
+}
+
+/* Metrics Grid */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.metricCard {
+  background: var(--bg-surface);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.metricIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.metricContent {
+  flex: 1;
+}
+
+.metricValue {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: var(--text-heading);
+}
+
+.metricLabel {
+  font-size: 0.875rem;
+  margin: 0;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* User Management */
+.userManagement {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.userManagement h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-heading);
+}
+
+.userCount {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.userListCard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.userSearch {
+  display: flex;
+  gap: 12px;
+}
+
+.userSearch input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid var(--border-input);
+  border-radius: 10px;
+  font-size: 1rem;
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.userSearch input:focus {
+  outline: none;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+}
+
+.searchBtn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.searchBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9ca3af;
+}
+
+.emptyState i {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboardContainer {
+    padding: 100px 16px 32px;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .headerActions {
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .adminTabs {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tabBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .contentArea {
+    padding: 20px;
+  }
+
+  .userSearch {
+    flex-direction: column;
+  }
+
+  .logoutButton {
+    width: 100%;
+    justify-content: center;
+  }
+}

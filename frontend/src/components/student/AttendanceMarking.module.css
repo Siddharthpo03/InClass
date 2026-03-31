@@ -1,0 +1,246 @@
+.attendanceMarking {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+}
+
+.header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary, #111827);
+  margin: 0 0 1rem 0;
+}
+
+.sessionInfo {
+  margin-top: 1rem;
+}
+
+.courseName {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+  margin: 0.25rem 0;
+}
+
+.facultyName {
+  font-size: 0.9375rem;
+  color: var(--text-secondary, #6b7280);
+  margin: 0.25rem 0;
+}
+
+.errorMessage {
+  background-color: var(--bg-danger, #fee2e2);
+  border: 1px solid var(--border-danger, #fecaca);
+  color: var(--text-danger, #dc2626);
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputGroup label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+}
+
+.codeInput {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: "Courier New", monospace;
+  text-align: center;
+  letter-spacing: 0.5rem;
+  border: 2px solid var(--border-color, #e5e7eb);
+  border-radius: 0.5rem;
+  background-color: var(--bg-card, #ffffff);
+  color: var(--text-primary, #111827);
+  transition: all 0.2s ease;
+}
+
+.codeInput:focus {
+  outline: none;
+  border-color: var(--primary-color, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.infoBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--bg-secondary, #f9fafb);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 0.5rem;
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.875rem;
+}
+
+.infoBanner i {
+  font-size: 1.125rem;
+  color: var(--primary-color, #3b82f6);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.cancelButton,
+.submitButton {
+  padding: 0.875rem 1.5rem;
+  min-height: 44px;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton {
+  background-color: transparent;
+  color: var(--text-secondary, #6b7280);
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.cancelButton:hover:not(:disabled) {
+  background-color: var(--bg-hover, #f3f4f6);
+}
+
+.submitButton {
+  background-color: var(--primary-color, #3b82f6);
+  color: white;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: var(--primary-color-hover, #2563eb);
+}
+
+.submitButton:disabled,
+.cancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.verificationStep,
+.submittingStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.verificationStep p,
+.submittingStep p {
+  font-size: 1rem;
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+}
+
+.faceCaptureStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.faceCaptureStep p {
+  font-size: 1rem;
+  color: var(--text-primary, #111827);
+  font-weight: 600;
+  margin: 0;
+}
+
+.videoContainer {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 4 / 3;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: var(--bg-secondary, #f9fafb);
+}
+
+.videoPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.canvas {
+  display: none;
+}
+
+.capturingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+}
+
+.capturingOverlay p {
+  color: white;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .attendanceMarking {
+    padding: 1.5rem;
+  }
+
+  .header h2 {
+    font-size: 1.25rem;
+  }
+
+  .codeInput {
+    font-size: 1.25rem;
+    letter-spacing: 0.25rem;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cancelButton,
+  .submitButton {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+

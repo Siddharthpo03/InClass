@@ -1,0 +1,229 @@
+.panel {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: var(--radius-lg, 8px);
+  padding: 1.5rem;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.panelTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary, #111827);
+  margin: 0;
+}
+
+.refreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-primary, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md, 6px);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition-base, 0.2s);
+}
+
+.refreshBtn:hover:not(:disabled) {
+  background: var(--color-primary-dark, #2563eb);
+}
+
+.refreshBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: var(--radius-md, 6px);
+  font-size: 0.9rem;
+}
+
+.filterSelect {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: var(--radius-md, 6px);
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: var(--bg-primary, #f5f7fa);
+}
+
+.table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  padding: 1rem;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+  font-size: 0.9rem;
+}
+
+.table tbody tr:hover {
+  background: var(--bg-hover, #f9fafb);
+}
+
+.roleBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.roleAdmin {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.roleFaculty {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.roleStudent {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.biometricStatus {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.biometricBadge {
+  font-size: 1.25rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.biometricBadge i {
+  color: #10b981;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionBtn {
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: var(--radius-md, 6px);
+  color: var(--text-secondary, #6b7280);
+  cursor: pointer;
+  transition: all var(--transition-base, 0.2s);
+  font-size: 1rem;
+}
+
+.actionBtn:hover {
+  background: var(--color-primary, #3b82f6);
+  color: white;
+  border-color: var(--color-primary, #3b82f6);
+}
+
+.detailsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detailRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detailRow strong {
+  color: var(--text-primary, #111827);
+  font-weight: 600;
+}
+
+/* Dark mode */
+.darkMode .panel {
+  background: var(--dark-card-bg, #2a2a2a);
+  border-color: var(--dark-border-color, #404040);
+}
+
+.darkMode .table thead {
+  background: var(--dark-bg-primary, #1a1a1a);
+}
+
+.darkMode .table td {
+  border-color: var(--dark-border-color, #404040);
+}
+
+.darkMode .table tbody tr:hover {
+  background: var(--dark-bg-hover, #333);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+  }
+
+  .tableWrapper {
+    font-size: 0.85rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+
+
+
+
+
+
+
+

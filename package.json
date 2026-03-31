@@ -1,0 +1,19 @@
+{
+  "name": "inclass",
+  "private": true,
+  "description": "InClass biometric attendance system",
+  "scripts": {
+    "lint": "npm run lint --prefix frontend && npm run lint --prefix backend",
+    "prepare": "husky",
+    "audit:excel": "node scripts/generate-audit-excel.js"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3",
+    "xlsx": "^0.18.5"
+  },
+  "lint-staged": {
+    "frontend/src/**/*.{js,jsx}": "node -e \"require('child_process').execSync('npm run lint --prefix frontend', {stdio:'inherit'})\"",
+    "backend/**/*.js": "node -e \"require('child_process').execSync('npm run lint --prefix backend', {stdio:'inherit'})\""
+  }
+}

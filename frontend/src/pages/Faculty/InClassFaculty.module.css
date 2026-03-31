@@ -1,0 +1,1297 @@
+/* Premium Faculty Dashboard Styles - Matching Login/Register Theme */
+
+:global(body) {
+  background: var(--bg-page);
+  background-attachment: fixed;
+  transition: background 0.3s ease;
+}
+
+.dashboardWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: 4rem; /* TopNav height */
+  position: relative;
+  overflow-x: hidden;
+}
+
+.dashboardContainer {
+  flex: 1;
+  max-width: 1400px;
+  width: calc(100% - 16rem);
+  margin: 0;
+  margin-left: 16rem; /* Sidebar width on desktop */
+  padding: 2rem 24px 40px;
+  box-sizing: border-box;
+  transition: none; /* Remove transition to prevent movement */
+}
+
+/* Mobile menu button */
+.mobileMenuButton {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+.mobileMenuButton:hover {
+  background: var(--bg-hover);
+}
+
+@media (max-width: 768px) {
+  .dashboardContainer {
+    width: 100%;
+    margin-left: 0;
+    padding: 4rem 1rem 2rem;
+  }
+
+  .mobileMenuButton {
+    display: block;
+  }
+}
+
+/* Loading State */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 20px;
+}
+
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #f59e0b;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Welcome Section */
+.welcomeSection {
+  margin-bottom: 2rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.welcomeTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.welcomeSubtitle {
+  font-size: 1rem;
+  margin: 0;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.coursesBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.logoutButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+.logoutButton i {
+  font-size: 1.25rem;
+}
+
+.badgeCircle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+}
+
+.badgeValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+}
+
+.badgeLabel {
+  font-size: 0.875rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Message Box */
+.messageBox {
+  padding: 16px 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.messageSuccess {
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
+}
+
+.messageError {
+  background: var(--error-bg);
+  color: var(--error-text);
+  border: 1px solid var(--error-border);
+}
+
+/* Stats Section */
+.statsSection {
+  margin-bottom: 2rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Assist Section */
+.assistSection {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* StatCard styles are now handled by the shared StatCard component */
+/* These styles are kept for backward compatibility if needed */
+
+/* Main Content */
+.mainContent {
+  margin-bottom: 40px;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 1024px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* Card Styles - Generic card class */
+.card {
+  background: var(--bg-card);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 32px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-page);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardTitle i {
+  font-size: 1.75rem;
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
+.cardTitle span {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.activeBadge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.rosterCount {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.cardBody {
+  padding: 32px;
+}
+
+/* Session Controls */
+.sessionControls {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.formLabel {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.courseSelect {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid var(--border-input);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.courseSelect:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+}
+
+.courseSelect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.startButton {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.3s;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.startButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+}
+
+.startButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.startButton i {
+  font-size: 1.5rem;
+}
+
+/* Active Session */
+.activeSession {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.sessionInfo {
+  text-align: center;
+}
+
+.sessionCourseName {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  color: var(--text-primary);
+}
+
+.codeDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  padding: 28px;
+  border-radius: 16px;
+  border: 2px solid #fbbf24;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
+}
+
+:global(body.darkMode) .codeDisplay {
+  background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+  border-color: #fbbf24;
+}
+
+.codeLabel {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+:global(body.darkMode) .codeLabel {
+  color: #fde68a;
+}
+
+.codeValue {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 12px;
+  color: #d97706;
+  font-family: "Courier New", monospace;
+}
+
+:global(body.darkMode) .codeValue {
+  color: #fbbf24;
+}
+
+.sessionStats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 24px;
+  background: var(--bg-page);
+  border-radius: 16px;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.statItemValue {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.statItemLabel {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statDivider {
+  width: 1px;
+  height: 50px;
+  background: var(--border-color);
+}
+
+.timerDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: #fee2e2;
+  border: 2px solid #fca5a5;
+  border-radius: 16px;
+  padding: 20px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #dc2626;
+}
+
+:global(body.darkMode) .timerDisplay {
+  background: #7f1d1d;
+  border-color: #dc2626;
+  color: #fca5a5;
+}
+
+.timerDisplay i {
+  font-size: 1.75rem;
+}
+
+.endButton {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.3s;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+}
+
+.endButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(239, 68, 68, 0.4);
+}
+
+.endButton i {
+  font-size: 1.5rem;
+}
+
+.sessionActions {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+}
+
+.duplicateButton {
+  flex: 1;
+  padding: 18px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.3s;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+}
+
+.duplicateButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(245, 158, 11, 0.4);
+}
+
+.duplicateButton i {
+  font-size: 1.5rem;
+}
+
+/* Roster List */
+.rosterList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 550px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.rosterList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.rosterList::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 10px;
+}
+
+.rosterList::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+}
+
+.rosterItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px;
+  background: var(--bg-page);
+  border-radius: 14px;
+  border-left: 4px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.rosterItem:hover {
+  background: var(--bg-card);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.rosterPresent {
+  border-left-color: #10b981;
+}
+
+.rosterAbsent {
+  border-left-color: #ef4444;
+}
+
+.rosterOverridden {
+  background: #fef3c7;
+}
+
+:global(body.darkMode) .rosterOverridden {
+  background: #78350f;
+}
+
+.studentInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.studentName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.studentRoll {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.studentStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badgePresent {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.badgeAbsent {
+  background: var(--error-bg);
+  color: var(--error-text);
+}
+
+.statusTime {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.overrideButton {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 1.25rem;
+}
+
+.overridePresent {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.overridePresent:hover {
+  background: #10b981;
+  color: white;
+  transform: scale(1.1);
+}
+
+.overrideAbsent {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.overrideAbsent:hover {
+  background: #ef4444;
+  color: white;
+  transform: scale(1.1);
+}
+
+.viewReportButton {
+  width: 100%;
+  padding: 14px;
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-body);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s;
+  margin-top: 20px;
+}
+
+.viewReportButton:hover {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  transform: translateY(-2px);
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 80px 20px;
+  color: #9ca3af;
+}
+
+.emptyState i {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.4;
+  color: #d1d5db;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 1rem;
+  color: #9ca3af;
+}
+
+/* Registration Section */
+.registrationSection {
+  margin-top: 2rem;
+}
+
+/* registrationCard is now just .card */
+.registrationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-page);
+}
+
+.toggleButton {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.toggleButton span {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.toggleButton i {
+  flex-shrink: 0;
+}
+
+.toggleButton:hover {
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.registrationForm {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.registrationError {
+  padding: 14px 18px;
+  background: var(--error-bg);
+  color: var(--error-text);
+  border: 1px solid var(--error-border);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.formInput {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid var(--border-input);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+}
+
+.formInput::placeholder {
+  color: #9ca3af;
+}
+
+.submitButton {
+  padding: 18px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.3s;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.submitButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submitButton i {
+  font-size: 1.5rem;
+}
+
+/* Biometric Prompt */
+.biometricPrompt {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  margin-bottom: 32px;
+  overflow: hidden;
+  border: 2px solid #f59e0b;
+  animation: slideDown 0.3s ease-out;
+}
+
+:global(body.darkMode) .biometricPrompt {
+  background: #1e293b;
+  border-color: #fbbf24;
+}
+
+.promptHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 32px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+:global(body.darkMode) .promptHeader {
+  background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+}
+
+.promptIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.promptContent {
+  flex: 1;
+}
+
+.promptContent h3 {
+  margin: 0 0 6px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+}
+
+.promptContent p {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.95;
+  color: white;
+}
+
+.promptClose {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.promptClose:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.promptBody {
+  padding: 32px;
+}
+
+/* Pending Students Section */
+.pendingSection {
+  margin-bottom: 2rem;
+}
+
+.pendingList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pendingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--bg-page);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+}
+
+.studentInfo {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+}
+
+.studentPhoto {
+  width: 80px;
+  height: 80px;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  border: 2px solid var(--border-color);
+}
+
+.studentDetails h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.studentDetails p {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.requestDate {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #9ca3af);
+  margin-top: 0.5rem;
+}
+
+.pendingActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.approveButton,
+.rejectButton {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.approveButton {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.approveButton:hover {
+  background: #10b981;
+  color: white;
+}
+
+.rejectButton {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.rejectButton:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  background: var(--primary-color, #3b82f6);
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-left: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboardContainer {
+    width: 100%;
+    margin-left: 0;
+    padding: 4rem 1rem 1.5rem;
+  }
+
+  .mobileMenuButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 101;
+  }
+
+  .welcomeSection {
+    padding: 1rem;
+  }
+
+  .welcomeTitle {
+    font-size: 1.5rem;
+  }
+
+  .pendingItem {
+    flex-direction: column;
+  }
+
+  .pendingActions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .approveButton,
+  .rejectButton {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .cardHeader {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .cardTitle {
+    font-size: 1.25rem;
+    width: 100%;
+  }
+
+  .toggleButton {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 20px;
+    font-size: 0.875rem;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  .toggleButton i {
+    flex-shrink: 0;
+  }
+
+  .registrationForm {
+    padding: 1.5rem 1rem;
+    gap: 1.5rem;
+  }
+
+  .registrationSection {
+    margin-top: 1.5rem;
+  }
+
+  .codeValue {
+    font-size: 2.25rem;
+    letter-spacing: 8px;
+  }
+
+  .sessionStats {
+    gap: 20px;
+  }
+
+  .rosterItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .studentStatus {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .biometricPrompt {
+    margin-bottom: 24px;
+  }
+
+  .promptHeader {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+    gap: 12px;
+  }
+
+  .promptContent h3 {
+    font-size: 1.25rem;
+  }
+
+  .promptContent p {
+    font-size: 0.875rem;
+  }
+
+  .promptBody {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcomeTitle {
+    font-size: 1.75rem;
+  }
+
+  .badgeCircle {
+    width: 80px;
+    height: 80px;
+  }
+
+  .badgeValue {
+    font-size: 1.5rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statValue {
+    font-size: 1.75rem;
+  }
+
+  .codeValue {
+    font-size: 1.75rem;
+    letter-spacing: 4px;
+  }
+
+  .promptHeader {
+    padding: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .promptIcon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.75rem;
+  }
+
+  .promptContent h3 {
+    font-size: 1.1rem;
+  }
+
+  .promptContent p {
+    font-size: 0.8rem;
+  }
+
+  .promptBody {
+    padding: 20px;
+  }
+
+  .cardHeader {
+    padding: 0.75rem;
+  }
+
+  .cardTitle {
+    font-size: 1.125rem;
+  }
+
+  .toggleButton {
+    padding: 12px 16px;
+    font-size: 0.8125rem;
+  }
+
+  .registrationForm {
+    padding: 1rem 0.75rem;
+    gap: 1rem;
+  }
+
+  .formInput {
+    padding: 12px 14px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  .submitButton {
+    padding: 14px;
+    font-size: 1rem;
+  }
+}
