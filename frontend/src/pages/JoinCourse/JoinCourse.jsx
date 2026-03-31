@@ -28,6 +28,7 @@ const JoinCourse = () => {
   useEffect(() => {
     fetchUserInfo();
     fetchMyRegistrations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional run on mount only
   }, []);
 
   const fetchUserInfo = async () => {

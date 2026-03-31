@@ -1,61 +1,58 @@
 -- ============================================
--- InClass Database Schema - Complete Setup
+-- InClass Database Schema - Single Consolidated Schema
 -- ============================================
--- 
--- This is the COMPLETE database schema file for InClass Attendance Management System.
--- All tables, columns, indexes, and migrations are included in this single file.
 --
--- IMPORTANT: This script can be run multiple times safely (uses IF NOT EXISTS)
--- It will automatically add missing columns if the database already exists.
+-- Complete database schema for InClass Attendance Management System.
+-- All tables, indexes, constraints, and seed data in one file.
+-- Safe to run multiple times (uses IF NOT EXISTS and conditional ALTERs).
 --
--- TO USE IN PGADMIN:
--- 1. Open pgAdmin
--- 2. Connect to your PostgreSQL database
--- 3. Right-click on your database -> Query Tool
--- 4. Copy and paste this ENTIRE file
--- 5. Execute (F5 or click Execute button)
+-- Usage (pgAdmin or psql):
+--   1. Connect to your PostgreSQL database
+--   2. Execute this entire file
 --
 -- ============================================
 
--- IMPORTANT: Create colleges and departments tables FIRST before users table
--- because users table has foreign key references to these tables
+-- ---------------------------------------------------------------------------
+-- 0. EXTENSIONS
+-- ---------------------------------------------------------------------------
+CREATE EXTENSION IF NOT EXISTS vector;
 
--- 0. COLLEGES Table (Real-world colleges and universities) - MUST BE CREATED FIRST
+-- ---------------------------------------------------------------------------
+-- 1. COLLEGES
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS colleges (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,
     country VARCHAR(100) DEFAULT 'United States',
     state VARCHAR(100),
     city VARCHAR(100),
-    type VARCHAR(50) DEFAULT 'University', -- University, College, Institute, etc.
+    type VARCHAR(50) DEFAULT 'University',
     is_active BOOLEAN DEFAULT TRUE NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
--- 0. DEPARTMENTS Table (Academic departments) - MUST BE CREATED BEFORE USERS
-CREATE TABLE IF NOT EXISTS departments (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    code VARCHAR(20), -- Department code (e.g., CS, MATH, ENG)
-    description TEXT,
-    is_active BOOLEAN DEFAULT TRUE NOT NULL,
-    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (name)
-);
-
--- Colleges table indexes (created early for performance)
 CREATE INDEX IF NOT EXISTS idx_colleges_name ON colleges(name);
 CREATE INDEX IF NOT EXISTS idx_colleges_country ON colleges(country);
 CREATE INDEX IF NOT EXISTS idx_colleges_is_active ON colleges(is_active);
 
--- Departments table indexes (created early for performance)
+-- ---------------------------------------------------------------------------
+-- 2. DEPARTMENTS
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS departments (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    code VARCHAR(20),
+    description TEXT,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
 CREATE INDEX IF NOT EXISTS idx_departments_name ON departments(name);
 CREATE INDEX IF NOT EXISTS idx_departments_code ON departments(code);
 CREATE INDEX IF NOT EXISTS idx_departments_is_active ON departments(is_active);
 
--- Insert real-world colleges and universities (early insertion)
+-- ---------------------------------------------------------------------------
+-- 3. SEED: Colleges and Departments
+-- ---------------------------------------------------------------------------
 INSERT INTO colleges (name, country, state, city, type) VALUES
--- United States Universities
 ('Massachusetts Institute of Technology', 'United States', 'Massachusetts', 'Cambridge', 'University'),
 ('Harvard University', 'United States', 'Massachusetts', 'Cambridge', 'University'),
 ('Stanford University', 'United States', 'California', 'Stanford', 'University'),
@@ -87,7 +84,6 @@ INSERT INTO colleges (name, country, state, city, type) VALUES
 ('Pennsylvania State University', 'United States', 'Pennsylvania', 'University Park', 'University'),
 ('Ohio State University', 'United States', 'Ohio', 'Columbus', 'University'),
 ('Purdue University', 'United States', 'Indiana', 'West Lafayette', 'University'),
--- Indian Universities
 ('Indian Institute of Technology, Delhi', 'India', 'Delhi', 'New Delhi', 'Institute'),
 ('Indian Institute of Technology, Bombay', 'India', 'Maharashtra', 'Mumbai', 'Institute'),
 ('Indian Institute of Technology, Madras', 'India', 'Tamil Nadu', 'Chennai', 'Institute'),
@@ -105,7 +101,6 @@ INSERT INTO colleges (name, country, state, city, type) VALUES
 ('Manipal Institute of Technology', 'India', 'Karnataka', 'Manipal', 'Institute')
 ON CONFLICT (name) DO NOTHING;
 
--- Insert real-world academic departments (early insertion)
 INSERT INTO departments (name, code, description) VALUES
 ('Computer Science', 'CS', 'Computer Science and Engineering'),
 ('Electrical Engineering', 'EE', 'Electrical and Electronics Engineering'),
@@ -139,102 +134,127 @@ INSERT INTO departments (name, code, description) VALUES
 ('Materials Science', 'MS', 'Materials Science and Engineering')
 ON CONFLICT (name) DO NOTHING;
 
--- 1. USERS Table (Handles Admin, Faculty, and Student roles)
+-- ---------------------------------------------------------------------------
+-- 4. USERS (Admin, Faculty, Student)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL CHECK (role IN ('admin', 'faculty', 'student')),
-    roll_no VARCHAR(50) UNIQUE,
-    mobile_number VARCHAR(20), -- Country code + mobile number
-    country_code VARCHAR(5) DEFAULT '+1', -- Country code (e.g., +1, +91, +44)
-    passport_photo_url TEXT, -- URL/path to passport-sized photo
-    college VARCHAR(255), -- College/University name
-    department VARCHAR(255), -- Department name (for faculty)
+    roll_no VARCHAR(50),
+    mobile_number VARCHAR(20),
+    country_code VARCHAR(5) DEFAULT '+1',
+    passport_photo_url TEXT,
+    college VARCHAR(255),
+    department VARCHAR(255),
+    college_id INTEGER REFERENCES colleges(id),
+    department_id INTEGER REFERENCES departments(id),
+    face_enrolled BOOLEAN DEFAULT FALSE,
+    fingerprint_enrolled BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Add new columns if they don't exist (for existing databases)
-DO $$ 
+-- Add any columns that may be missing on existing databases
+DO $$
 BEGIN
-    -- Add mobile_number column if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'users' AND column_name = 'mobile_number') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'mobile_number') THEN
         ALTER TABLE users ADD COLUMN mobile_number VARCHAR(20);
     END IF;
-
-    -- Add country_code column if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'users' AND column_name = 'country_code') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'country_code') THEN
         ALTER TABLE users ADD COLUMN country_code VARCHAR(5) DEFAULT '+1';
     END IF;
-
-    -- Add passport_photo_url column if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'users' AND column_name = 'passport_photo_url') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'passport_photo_url') THEN
         ALTER TABLE users ADD COLUMN passport_photo_url TEXT;
     END IF;
-
-    -- Add college column if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'users' AND column_name = 'college') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'college') THEN
         ALTER TABLE users ADD COLUMN college VARCHAR(255);
     END IF;
-
-    -- Add department column if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'users' AND column_name = 'department') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'department') THEN
         ALTER TABLE users ADD COLUMN department VARCHAR(255);
     END IF;
-
-    -- Add college_id column if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'users' AND column_name = 'college_id') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'college_id') THEN
         ALTER TABLE users ADD COLUMN college_id INTEGER REFERENCES colleges(id);
     END IF;
-
-    -- Add department_id column if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'users' AND column_name = 'department_id') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'department_id') THEN
         ALTER TABLE users ADD COLUMN department_id INTEGER REFERENCES departments(id);
     END IF;
-
-    -- Add face_enrolled column if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'users' AND column_name = 'face_enrolled') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'face_enrolled') THEN
         ALTER TABLE users ADD COLUMN face_enrolled BOOLEAN DEFAULT FALSE;
     END IF;
-
-    -- Add fingerprint_enrolled column if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'users' AND column_name = 'fingerprint_enrolled') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'fingerprint_enrolled') THEN
         ALTER TABLE users ADD COLUMN fingerprint_enrolled BOOLEAN DEFAULT FALSE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'embedding') THEN
+        ALTER TABLE users ADD COLUMN embedding vector(512);
     END IF;
 END $$;
 
--- 2. CLASSES Table (Managed by Faculty)
+-- Roll_no: composite unique (college_id, roll_no) so same roll_no can exist in different colleges
+DO $$
+DECLARE
+    cname TEXT;
+    rn_attnum INTEGER;
+BEGIN
+    SELECT attnum INTO rn_attnum FROM pg_attribute WHERE attrelid = 'users'::regclass AND attname = 'roll_no';
+    IF rn_attnum IS NOT NULL THEN
+        SELECT conname INTO cname FROM pg_constraint
+        WHERE conrelid = 'users'::regclass AND contype = 'u' AND array_length(conkey, 1) = 1 AND conkey[1] = rn_attnum;
+        IF cname IS NOT NULL THEN
+            EXECUTE 'ALTER TABLE users DROP CONSTRAINT IF EXISTS ' || quote_ident(cname);
+        END IF;
+        SELECT indexname INTO cname FROM pg_indexes
+        WHERE tablename = 'users' AND indexdef LIKE '%UNIQUE%' AND (indexdef LIKE '%roll_no%' OR indexdef LIKE '%(roll_no)%');
+        IF cname IS NOT NULL THEN
+            EXECUTE 'DROP INDEX IF EXISTS ' || quote_ident(cname);
+        END IF;
+    END IF;
+END $$;
+DROP INDEX IF EXISTS idx_users_roll_no;
+CREATE UNIQUE INDEX IF NOT EXISTS users_college_roll_no_unique ON users (college_id, roll_no) WHERE roll_no IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_users_roll_no ON users(roll_no);
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_users_mobile_number ON users(mobile_number);
+CREATE INDEX IF NOT EXISTS idx_users_college_id ON users(college_id);
+CREATE INDEX IF NOT EXISTS idx_users_department_id ON users(department_id);
+
+-- ---------------------------------------------------------------------------
+-- 5. CLASSES (Faculty course instances)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS classes (
     id SERIAL PRIMARY KEY,
     faculty_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     course_code VARCHAR(10) NOT NULL,
     title VARCHAR(255) NOT NULL,
-    total_classes INTEGER DEFAULT 0 NOT NULL, 
+    total_classes INTEGER DEFAULT 0 NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (faculty_id, course_code)
 );
+CREATE INDEX IF NOT EXISTS idx_classes_faculty_id ON classes(faculty_id);
+CREATE INDEX IF NOT EXISTS idx_classes_course_code ON classes(course_code);
 
--- 3. SESSIONS Table (Attendance Code Management)
+-- ---------------------------------------------------------------------------
+-- 6. SESSIONS (Attendance codes)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS sessions (
     id SERIAL PRIMARY KEY,
     class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE NOT NULL,
     code VARCHAR(10) UNIQUE NOT NULL,
     expires_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE NOT NULL, 
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX IF NOT EXISTS idx_sessions_class_id ON sessions(class_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_code ON sessions(code);
+CREATE INDEX IF NOT EXISTS idx_sessions_is_active ON sessions(is_active);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
 
--- 4. ENROLLMENTS Table (Links Students to Classes)
+-- ---------------------------------------------------------------------------
+-- 7. ENROLLMENTS (Students in classes)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS enrollments (
     id SERIAL PRIMARY KEY,
     student_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
@@ -242,65 +262,91 @@ CREATE TABLE IF NOT EXISTS enrollments (
     enrolled_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (student_id, class_id)
 );
+CREATE INDEX IF NOT EXISTS idx_enrollments_student_id ON enrollments(student_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_class_id ON enrollments(class_id);
 
--- 5. FACE_ENCODINGS Table (Biometric face data)
+-- ---------------------------------------------------------------------------
+-- 8. FACE_ENCODINGS (Legacy face descriptor storage)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS face_encodings (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL UNIQUE,
-    face_descriptor JSONB NOT NULL, -- Stores face descriptor array
-    enrollment_image_url TEXT, -- Optional: store reference to enrollment image
+    face_descriptor JSONB NOT NULL,
+    enrollment_image_url TEXT,
     enrolled_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_face_encodings_user_id ON face_encodings(user_id);
+CREATE INDEX IF NOT EXISTS idx_face_encodings_is_active ON face_encodings(is_active);
 
--- 5.5. FINGERPRINT_DATA Table (WebAuthn credential data - Legacy)
+-- ---------------------------------------------------------------------------
+-- 9. FINGERPRINT_DATA (Legacy WebAuthn – kept for backward compatibility)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS fingerprint_data (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    credential_id TEXT NOT NULL UNIQUE, -- WebAuthn credential ID (base64url encoded)
-    public_key TEXT NOT NULL, -- Public key (base64url encoded)
-    counter BIGINT DEFAULT 0, -- Signature counter for replay attack prevention
-    device_name VARCHAR(255), -- Optional: device/browser name
+    credential_id TEXT NOT NULL UNIQUE,
+    public_key TEXT NOT NULL,
+    counter BIGINT DEFAULT 0,
+    device_name VARCHAR(255),
     enrolled_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     last_used_at TIMESTAMP WITHOUT TIME ZONE,
     is_active BOOLEAN DEFAULT TRUE NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_fingerprint_data_user_id ON fingerprint_data(user_id);
+CREATE INDEX IF NOT EXISTS idx_fingerprint_data_credential_id ON fingerprint_data(credential_id);
+CREATE INDEX IF NOT EXISTS idx_fingerprint_data_is_active ON fingerprint_data(is_active);
 
--- 5.6. WEBAUTHN_CREDENTIALS Table (WebAuthn/FIDO2 credential data for device biometrics)
+-- ---------------------------------------------------------------------------
+-- 10. WEBAUTHN_CREDENTIALS (Device biometrics)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS webauthn_credentials (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    credential_id TEXT NOT NULL UNIQUE, -- WebAuthn credential ID (base64url encoded)
-    public_key TEXT NOT NULL, -- Public key (base64url encoded)
-    counter BIGINT DEFAULT 0, -- Signature counter for replay attack prevention
-    device_name VARCHAR(255), -- Optional: device/browser name
+    credential_id TEXT NOT NULL UNIQUE,
+    public_key TEXT NOT NULL,
+    counter BIGINT DEFAULT 0,
+    device_name VARCHAR(255),
     enrolled_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     last_used_at TIMESTAMP WITHOUT TIME ZONE,
     is_active BOOLEAN DEFAULT TRUE NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_webauthn_credentials_user_id ON webauthn_credentials(user_id);
+CREATE INDEX IF NOT EXISTS idx_webauthn_credentials_credential_id ON webauthn_credentials(credential_id);
+CREATE INDEX IF NOT EXISTS idx_webauthn_credentials_is_active ON webauthn_credentials(is_active);
 
--- 5.7. BIOMETRIC_FACE Table (Encrypted face embeddings for face recognition)
+-- ---------------------------------------------------------------------------
+-- 11. BIOMETRIC_FACE (Encrypted face embeddings – primary face storage)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS biometric_face (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL UNIQUE,
-    encrypted_embedding TEXT NOT NULL, -- AES-256 encrypted face embedding (JSON array)
+    encrypted_embedding TEXT NOT NULL,
     enrolled_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_biometric_face_user_id ON biometric_face(user_id);
+CREATE INDEX IF NOT EXISTS idx_biometric_face_is_active ON biometric_face(is_active);
 
--- 5.8. BIOMETRIC_CONSENT Table (Records user consent for biometric data collection)
+-- ---------------------------------------------------------------------------
+-- 12. BIOMETRIC_CONSENT
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS biometric_consent (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL UNIQUE,
-    method VARCHAR(50) DEFAULT 'both', -- 'webauthn', 'face', or 'both'
+    method VARCHAR(50) DEFAULT 'both',
     ip_address VARCHAR(50),
     user_agent TEXT,
     consented_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     revoked_at TIMESTAMP WITHOUT TIME ZONE,
     is_active BOOLEAN DEFAULT TRUE NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_biometric_consent_user_id ON biometric_consent(user_id);
+CREATE INDEX IF NOT EXISTS idx_biometric_consent_is_active ON biometric_consent(is_active);
 
--- 6. ATTENDANCE Table (Student records)
+-- ---------------------------------------------------------------------------
+-- 13. ATTENDANCE
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS attendance (
     id SERIAL PRIMARY KEY,
     student_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
@@ -308,87 +354,47 @@ CREATE TABLE IF NOT EXISTS attendance (
     status VARCHAR(50) DEFAULT 'Present' NOT NULL CHECK (status IN ('Present', 'Absent', 'Manual')),
     ip_address VARCHAR(50),
     location TEXT,
-    face_verified BOOLEAN DEFAULT FALSE, -- Whether face recognition was used
-    face_match_score DECIMAL(5,4), -- Similarity score (0.0 to 1.0)
-    fingerprint_verified BOOLEAN DEFAULT FALSE, -- Whether fingerprint verification was used
-    fingerprint_credential_id TEXT, -- WebAuthn credential ID used for verification
+    face_verified BOOLEAN DEFAULT FALSE,
+    face_match_score DECIMAL(5,4),
+    fingerprint_verified BOOLEAN DEFAULT FALSE,
+    fingerprint_credential_id TEXT,
     is_overridden BOOLEAN DEFAULT FALSE NOT NULL,
     override_reason TEXT,
-    is_duplicate BOOLEAN DEFAULT FALSE NOT NULL, -- Flag for duplicate detection
+    is_duplicate BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (student_id, session_id)
 );
+CREATE INDEX IF NOT EXISTS idx_attendance_student_id ON attendance(student_id);
+CREATE INDEX IF NOT EXISTS idx_attendance_session_id ON attendance(session_id);
+CREATE INDEX IF NOT EXISTS idx_attendance_created_at ON attendance(created_at);
+CREATE INDEX IF NOT EXISTS idx_attendance_face_verified ON attendance(face_verified);
 
--- 7. EXPIRED_CODE_REPORTS Table (Use Case 04: Real-Time Reporting In Expired Codes)
+-- ---------------------------------------------------------------------------
+-- 14. EXPIRED_CODE_REPORTS (session_id nullable)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS expired_code_reports (
     id SERIAL PRIMARY KEY,
     student_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    session_id INTEGER REFERENCES sessions(id) ON DELETE CASCADE NOT NULL,
+    session_id INTEGER REFERENCES sessions(id) ON DELETE CASCADE,
     report_reason TEXT NOT NULL,
     status VARCHAR(50) DEFAULT 'Pending' CHECK (status IN ('Pending', 'Approved', 'Rejected')),
     faculty_response TEXT,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     resolved_at TIMESTAMP WITHOUT TIME ZONE
 );
-
--- ============================================
--- INDEXES for Performance Optimization
--- ============================================
-
--- Users table indexes
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
-CREATE INDEX IF NOT EXISTS idx_users_roll_no ON users(roll_no);
-CREATE INDEX IF NOT EXISTS idx_users_mobile_number ON users(mobile_number);
-
--- Classes table indexes
-CREATE INDEX IF NOT EXISTS idx_classes_faculty_id ON classes(faculty_id);
-CREATE INDEX IF NOT EXISTS idx_classes_course_code ON classes(course_code);
-
--- Sessions table indexes
-CREATE INDEX IF NOT EXISTS idx_sessions_class_id ON sessions(class_id);
-CREATE INDEX IF NOT EXISTS idx_sessions_code ON sessions(code);
-CREATE INDEX IF NOT EXISTS idx_sessions_is_active ON sessions(is_active);
-CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
-
--- Enrollments table indexes
-CREATE INDEX IF NOT EXISTS idx_enrollments_student_id ON enrollments(student_id);
-CREATE INDEX IF NOT EXISTS idx_enrollments_class_id ON enrollments(class_id);
-
--- Face encodings table indexes
-CREATE INDEX IF NOT EXISTS idx_face_encodings_user_id ON face_encodings(user_id);
-CREATE INDEX IF NOT EXISTS idx_face_encodings_is_active ON face_encodings(is_active);
-
--- Fingerprint data table indexes
-CREATE INDEX IF NOT EXISTS idx_fingerprint_data_user_id ON fingerprint_data(user_id);
-CREATE INDEX IF NOT EXISTS idx_fingerprint_data_credential_id ON fingerprint_data(credential_id);
-CREATE INDEX IF NOT EXISTS idx_fingerprint_data_is_active ON fingerprint_data(is_active);
-
--- WebAuthn credentials table indexes
-CREATE INDEX IF NOT EXISTS idx_webauthn_credentials_user_id ON webauthn_credentials(user_id);
-CREATE INDEX IF NOT EXISTS idx_webauthn_credentials_credential_id ON webauthn_credentials(credential_id);
-CREATE INDEX IF NOT EXISTS idx_webauthn_credentials_is_active ON webauthn_credentials(is_active);
-
--- Biometric face table indexes
-CREATE INDEX IF NOT EXISTS idx_biometric_face_user_id ON biometric_face(user_id);
-CREATE INDEX IF NOT EXISTS idx_biometric_face_is_active ON biometric_face(is_active);
-
--- Biometric consent table indexes
-CREATE INDEX IF NOT EXISTS idx_biometric_consent_user_id ON biometric_consent(user_id);
-CREATE INDEX IF NOT EXISTS idx_biometric_consent_is_active ON biometric_consent(is_active);
-
--- Attendance table indexes
-CREATE INDEX IF NOT EXISTS idx_attendance_student_id ON attendance(student_id);
-CREATE INDEX IF NOT EXISTS idx_attendance_session_id ON attendance(session_id);
-CREATE INDEX IF NOT EXISTS idx_attendance_created_at ON attendance(created_at);
-CREATE INDEX IF NOT EXISTS idx_attendance_face_verified ON attendance(face_verified);
-
--- Expired Code Reports table indexes
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'expired_code_reports' AND column_name = 'session_id' AND is_nullable = 'NO') THEN
+        ALTER TABLE expired_code_reports ALTER COLUMN session_id DROP NOT NULL;
+    END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS idx_expired_code_reports_student_id ON expired_code_reports(student_id);
 CREATE INDEX IF NOT EXISTS idx_expired_code_reports_session_id ON expired_code_reports(session_id);
 CREATE INDEX IF NOT EXISTS idx_expired_code_reports_status ON expired_code_reports(status);
 
--- 8. PENDING_STUDENTS Table (Students waiting for faculty approval when no fingerprint)
+-- ---------------------------------------------------------------------------
+-- 15. PENDING_STUDENTS
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS pending_students (
     id SERIAL PRIMARY KEY,
     student_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
@@ -399,32 +405,28 @@ CREATE TABLE IF NOT EXISTS pending_students (
     resolved_at TIMESTAMP WITHOUT TIME ZONE,
     UNIQUE (student_id, faculty_id)
 );
-
--- Pending Students table indexes
 CREATE INDEX IF NOT EXISTS idx_pending_students_student_id ON pending_students(student_id);
 CREATE INDEX IF NOT EXISTS idx_pending_students_faculty_id ON pending_students(faculty_id);
 CREATE INDEX IF NOT EXISTS idx_pending_students_status ON pending_students(status);
 
--- NOTE: COLLEGES and DEPARTMENTS tables, their indexes, and initial data
--- are now created at the beginning of this file (before the USERS table)
--- to avoid foreign key dependency issues
-
--- 11. OTPS Table (One-Time Passwords for biometric onboarding)
+-- ---------------------------------------------------------------------------
+-- 16. OTPS
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS otps (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    otp_hash VARCHAR(255) NOT NULL, -- Hashed OTP
+    otp_hash VARCHAR(255) NOT NULL,
     expires_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     is_used BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
--- OTPs table indexes
 CREATE INDEX IF NOT EXISTS idx_otps_user_id ON otps(user_id);
 CREATE INDEX IF NOT EXISTS idx_otps_expires_at ON otps(expires_at);
 CREATE INDEX IF NOT EXISTS idx_otps_is_used ON otps(is_used);
 
--- 12. COURSES Table (Course catalog - separate from classes which are faculty-specific instances)
+-- ---------------------------------------------------------------------------
+-- 17. COURSES (Course catalog)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS courses (
     id SERIAL PRIMARY KEY,
     faculty_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
@@ -440,48 +442,50 @@ CREATE TABLE IF NOT EXISTS courses (
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (faculty_id, course_code)
 );
-
--- Courses table indexes
 CREATE INDEX IF NOT EXISTS idx_courses_faculty_id ON courses(faculty_id);
 CREATE INDEX IF NOT EXISTS idx_courses_course_code ON courses(course_code);
 CREATE INDEX IF NOT EXISTS idx_courses_department_id ON courses(department_id);
 CREATE INDEX IF NOT EXISTS idx_courses_college_id ON courses(college_id);
 CREATE INDEX IF NOT EXISTS idx_courses_is_active ON courses(is_active);
 
--- 13. STUDENT_REGISTRATIONS Table (Student course registration requests)
+-- ---------------------------------------------------------------------------
+-- 18. STUDENT_REGISTRATIONS (course_id references courses.id – no FK for flexibility)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS student_registrations (
     id SERIAL PRIMARY KEY,
     student_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE NOT NULL,
+    course_id INTEGER NOT NULL,
     faculty_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+    status VARCHAR(50) DEFAULT 'pending' NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
     rejection_reason TEXT,
     requested_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     reviewed_at TIMESTAMP WITHOUT TIME ZONE,
     UNIQUE (student_id, course_id)
 );
-
--- Student registrations table indexes
 CREATE INDEX IF NOT EXISTS idx_student_registrations_student_id ON student_registrations(student_id);
 CREATE INDEX IF NOT EXISTS idx_student_registrations_course_id ON student_registrations(course_id);
 CREATE INDEX IF NOT EXISTS idx_student_registrations_faculty_id ON student_registrations(faculty_id);
 CREATE INDEX IF NOT EXISTS idx_student_registrations_status ON student_registrations(status);
 
--- 14. FINGERPRINT_TEMPLATES Table (Vendor-specific fingerprint templates - skeleton for future integration)
+-- ---------------------------------------------------------------------------
+-- 19. FINGERPRINT_TEMPLATES (Legacy – kept for backward compatibility)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS fingerprint_templates (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    registration_id VARCHAR(255), -- Vendor-specific registration ID
-    student_id INTEGER REFERENCES users(id) ON DELETE CASCADE, -- Student whose fingerprint is registered
-    encrypted_template TEXT NOT NULL, -- AES-256 encrypted fingerprint template
-    vendor VARCHAR(50), -- Vendor name (e.g., 'suprema', 'zkteco', 'custom')
-    enrolled_by INTEGER REFERENCES users(id) ON DELETE SET NULL, -- Faculty who enrolled it
+    registration_id VARCHAR(255),
+    student_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    encrypted_template TEXT NOT NULL,
+    vendor VARCHAR(50),
+    enrolled_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
     enrolled_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE NOT NULL
 );
-
--- Fingerprint templates table indexes
 CREATE INDEX IF NOT EXISTS idx_fingerprint_templates_user_id ON fingerprint_templates(user_id);
 CREATE INDEX IF NOT EXISTS idx_fingerprint_templates_student_id ON fingerprint_templates(student_id);
 CREATE INDEX IF NOT EXISTS idx_fingerprint_templates_vendor ON fingerprint_templates(vendor);
 CREATE INDEX IF NOT EXISTS idx_fingerprint_templates_is_active ON fingerprint_templates(is_active);
+
+-- ============================================
+-- End of schema
+-- ============================================

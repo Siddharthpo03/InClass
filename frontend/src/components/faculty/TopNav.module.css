@@ -1,0 +1,175 @@
+.topNav {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 1.5rem;
+  height: 4rem;
+  min-height: 4rem;
+  max-height: 4rem;
+  display: flex;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+  will-change: auto;
+}
+
+.navContent {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logoSection {
+  display: flex;
+  align-items: center;
+}
+
+.logoButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  color: var(--text-primary);
+  transition: all 0.2s;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.logoButton:hover {
+  background-color: var(--bg-surface);
+}
+
+.logoButton:focus {
+  outline: 2px solid var(--primary-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+.logoImage {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  max-width: 2rem;
+  max-height: 2rem;
+  object-fit: contain;
+  border-radius: 0.375rem;
+  display: block;
+  flex-shrink: 0;
+}
+
+.logoButton i {
+  font-size: 1.5rem;
+  color: var(--primary-color, #3b82f6);
+  display: none; /* Hide icon, use image instead */
+}
+
+.logoText {
+  font-weight: 700;
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profileSection {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--bg-surface);
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.profileName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.profileRole {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-danger, #fee2e2);
+  color: var(--text-danger, #991b1b);
+  border: 1px solid var(--border-danger, #fecaca);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.darkMode .logoutButton {
+  background: rgba(153, 27, 27, 0.2);
+  color: #fca5a5;
+  border-color: rgba(153, 27, 27, 0.3);
+}
+
+.logoutButton:hover {
+  background: var(--bg-danger-hover, #fecaca);
+}
+
+.darkMode .logoutButton:hover {
+  background: rgba(153, 27, 27, 0.3);
+}
+
+.logoutButton:focus {
+  outline: 2px solid var(--primary-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+.logoutButton i {
+  font-size: 1.125rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .topNav {
+    padding: 0 1rem;
+    height: 3.5rem;
+  }
+
+  .logoText {
+    display: none;
+  }
+
+  .profileSection {
+    display: none;
+  }
+
+  .logoutButton span {
+    display: none;
+  }
+
+  .logoutButton {
+    padding: 0.5rem;
+    min-width: 2.5rem;
+    justify-content: center;
+  }
+}
+

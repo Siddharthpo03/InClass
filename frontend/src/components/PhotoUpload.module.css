@@ -7,7 +7,7 @@
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--text-primary);
   margin-bottom: 8px;
   font-size: 14px;
 }
@@ -21,9 +21,9 @@
   position: relative;
   width: 100%;
   min-height: 200px;
-  border: 2px dashed var(--input-border, #d1d5db);
+  border: 2px dashed var(--border-input);
   border-radius: 12px;
-  background: var(--input-bg, #f9fafb);
+  background: var(--bg-input);
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -68,11 +68,11 @@
 
 .uploadPlaceholder i {
   font-size: 48px;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
 }
 
 .uploadText {
-  color: var(--text-primary, #1f2937);
+  color: var(--text-primary);
   font-size: 14px;
   margin: 0;
 }
@@ -83,7 +83,7 @@
 }
 
 .uploadHint {
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
   font-size: 12px;
   margin: 0;
 }
@@ -148,16 +148,7 @@
   font-size: 16px;
 }
 
-/* Dark mode support */
-:global(.darkMode) .label {
-  color: #f9fafb;
-}
-
-:global(.darkMode) .uploadArea {
-  background: #1f2937;
-  border-color: #374151;
-}
-
+/* Dark mode support - accent hover/drag interactions */
 :global(.darkMode) .uploadArea:hover {
   background: #374151;
   border-color: #6366f1;
@@ -165,18 +156,6 @@
 
 :global(.darkMode) .uploadArea.dragging {
   background: rgba(99, 102, 241, 0.1);
-}
-
-:global(.darkMode) .uploadText {
-  color: #f9fafb;
-}
-
-:global(.darkMode) .uploadHint {
-  color: #9ca3af;
-}
-
-:global(.darkMode) .uploadPlaceholder i {
-  color: #9ca3af;
 }
 
 /* Mobile Responsive Styles */

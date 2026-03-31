@@ -10,7 +10,7 @@ const InClassAdmin = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [adminProfile, setAdminProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
+  const [stats] = useState({
     totalUsers: 0,
     activeSessions: 0,
     newRegistersToday: 0,
@@ -83,18 +83,6 @@ const InClassAdmin = () => {
     localStorage.removeItem("user_role");
     navigate("/login");
   };
-
-  const handleUserAction = (action, user) => {
-    alert(`${action} user: ${user.name} (Role: ${user.role})`);
-  };
-
-  const classNames = (...classes) =>
-    classes
-      .flat()
-      .filter(Boolean)
-      .map((cls) => styles[cls] || cls)
-      .join(" ")
-      .trim();
 
   if (loading) {
     return (

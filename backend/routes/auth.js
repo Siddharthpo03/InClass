@@ -16,11 +16,18 @@ const {
   validateEmail,
   validateRole,
 } = require("../utils/errorHandler");
+const {
+  authLimiter,
+  loginLimiter,
+  otpSendLimiter,
+  otpVerifyLimiter,
+} = require("../middleware/rateLimiter");
 
 // Utility to generate JWT (requires JWT_SECRET in .env)
+// Token expires in 7 days for better user experience
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
-    expiresIn: "3d",
+    expiresIn: "7d", // Extended from 3d to 7d for better session persistence
   });
 };
 
@@ -37,6 +44,7 @@ router.get(
       return res.json({ exists: false, role: null });
     }
 
+    // SECURE: Parameterized query prevents SQL injection
     const result = await pool.query("SELECT role FROM users WHERE email = $1", [
       email,
     ]);
@@ -61,6 +69,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const userId = req.user.id;
 
+    // SECURE: Parameterized query prevents SQL injection
     const result = await pool.query(
       "SELECT name, email, role, roll_no, college, department, college_id, department_id FROM users WHERE id = $1",
       [userId]
@@ -72,21 +81,12 @@ router.get(
 
     const user = result.rows[0];
 
-    // Check if user has enrolled fingerprint
-    const fingerprintCheck = await pool.query(
-      "SELECT id FROM fingerprint_data WHERE user_id = $1 AND is_active = true LIMIT 1",
-      [userId]
-    );
-
-    const hasFingerprint = fingerprintCheck.rowCount > 0;
-
     // Map data to the structure the frontend expects
     res.json({
       name: user.name,
       role: user.role,
       id: user.roll_no,
-      userId: userId, // Add userId for fingerprint enrollment
-      hasFingerprint: hasFingerprint,
+      userId: userId,
       email: user.email,
       department:
         user.department ||
@@ -104,6 +104,7 @@ const upload = require("../middleware/upload");
 
 router.post(
   "/register",
+  authLimiter,
   upload.fields([
     { name: "passportPhoto", maxCount: 1 },
     { name: "faceImage", maxCount: 1 },
@@ -221,6 +222,21 @@ router.post(
       console.log("👤 Face image saved:", faceImagePath);
     }
 
+  
+    // Validate roll_no uniqueness within college (if roll_no and college_id provided)
+    if (roll_no && college_id) {
+      const existingRollNo = await pool.query(
+        `SELECT id FROM users WHERE roll_no = $1 AND college_id = $2`,
+        [roll_no, college_id]
+      );
+
+      if (existingRollNo.rowCount > 0) {
+        throw new ConflictError(
+          `Roll number ${roll_no} already exists in this college. Please use a different roll number.`
+        );
+      }
+    }
+
     // Insert user (PostgreSQL will handle unique constraint violations)
     console.log("💾 Inserting user into database...");
     console.log("💾 Values:", {
@@ -283,6 +299,7 @@ router.post(
 // @desc    Authenticate User
 router.post(
   "/login",
+  loginLimiter,
   asyncHandler(async (req, res) => {
     const { email, password, role } = req.body; // Frontend sends email as 'username'
 
@@ -291,7 +308,15 @@ router.post(
     validateEmail(email);
     validateRole(role);
 
-    // Find user
+    // BLOCK ADMIN LOGIN FROM REGULAR ENDPOINT
+    // Admins must use the separate /inclass/admin/login endpoint
+    if (role === "admin") {
+      throw new AuthenticationError(
+        "Admin accounts must use the admin login page at /inclass/admin/login"
+      );
+    }
+
+    // SECURE: Parameterized query prevents SQL injection (login)
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [
       email,
     ]);
@@ -301,6 +326,13 @@ router.post(
     }
 
     const user = result.rows[0];
+
+    // Also block if user is admin (even if they didn't select admin role)
+    if (user.role === "admin") {
+      throw new AuthenticationError(
+        "Admin accounts must use the admin login page at /inclass/admin/login"
+      );
+    }
 
     // Check role match
     if (user.role !== role) {
@@ -316,6 +348,159 @@ router.post(
       throw new AuthenticationError("Invalid email or password.");
     }
 
+    // ============================================
+    // STUDENT FIRST-LOGIN FACE ENROLLMENT CHECK
+    // ============================================
+    // If student role and face not enrolled, block JWT issuance
+    if (user.role === "student") {
+      // Check if student has enrolled face
+      const faceCheck = await pool.query(
+        `SELECT id FROM biometric_face WHERE user_id = $1 AND is_active = TRUE LIMIT 1`,
+        [user.id]
+      );
+
+      const hasFace = faceCheck.rowCount > 0;
+
+      // If no face enrollment, block login
+      if (!hasFace) {
+        console.log(
+          `[Login] ❌ Student ${user.id} has no face enrollment - blocking login`
+        );
+
+        return res.status(403).json({
+          success: false,
+          error: {
+            message:
+              "Face enrollment required. Please enroll your face to continue.",
+            code: "FACE_ENROLLMENT_REQUIRED",
+          },
+          requiresFaceEnrollment: true,
+          userId: user.id,
+        });
+      }
+
+      console.log(
+        `[Login] ✅ Student ${user.id} face enrollment check passed`
+      );
+    }
+
+    // Face verification for students and faculty (only if face is enrolled)
+    if (user.role === "student" || user.role === "faculty") {
+      const faceCheck = await pool.query(
+        "SELECT id FROM biometric_face WHERE user_id = $1 AND is_active = TRUE LIMIT 1",
+        [user.id]
+      );
+
+      console.log(`[Login] ========================================`);
+      console.log(
+        `[Login] User ${user.id} (${user.role}): Face enrolled = ${
+          faceCheck.rowCount > 0
+        }`
+      );
+      console.log(
+        `[Login] Face check query result: ${faceCheck.rowCount} rows`
+      );
+
+      if (faceCheck.rowCount > 0) {
+        console.log(`[Login] Face record found for user ${user.id}`);
+      } else {
+        console.log(
+          `[Login] No face record found for user ${user.id} - skipping face verification`
+        );
+        console.log(`[Login] ========================================`);
+      }
+
+      // If face is enrolled, require face verification
+      if (faceCheck.rowCount > 0) {
+        const { embedding } = req.body;
+
+        console.log(`[Login] Face enrolled, checking embedding...`);
+        console.log(
+          `[Login] Embedding provided = ${
+            !!embedding && Array.isArray(embedding) && embedding.length > 0
+          }`
+        );
+        console.log(
+          `[Login] Embedding type: ${typeof embedding}, isArray: ${Array.isArray(
+            embedding
+          )}, length: ${embedding?.length || 0}`
+        );
+
+        if (!embedding || !Array.isArray(embedding) || embedding.length === 0) {
+          console.log(
+            `[Login] ❌ Face verification required for user ${user.id} - returning 400 error`
+          );
+          // Return specific error that frontend can catch
+          const errorResponse = {
+            success: false,
+            error: {
+              message: "Face verification required. Please capture your face.",
+              code: "FACE_VERIFICATION_REQUIRED",
+            },
+            requiresFaceVerification: true,
+          };
+          console.log(
+            `[Login] Sending error response:`,
+            JSON.stringify(errorResponse, null, 2)
+          );
+          console.log(`[Login] ========================================`);
+          // Use res.status().json() and ensure it's returned
+          res.status(400).json(errorResponse);
+          return; // Explicitly return to prevent further execution
+        }
+
+        // Call face verification endpoint logic
+        const { decrypt } = require("../utils/crypto");
+        const storedResult = await pool.query(
+          "SELECT encrypted_embedding FROM biometric_face WHERE user_id = $1 AND is_active = TRUE",
+          [user.id]
+        );
+
+        if (storedResult.rowCount > 0) {
+          // Decrypt stored embedding
+          const decryptedEmbedding = JSON.parse(
+            decrypt(storedResult.rows[0].encrypted_embedding)
+          );
+
+          // Calculate cosine similarity
+          function cosineSimilarity(vecA, vecB) {
+            if (vecA.length !== vecB.length) {
+              return 0;
+            }
+            let dotProduct = 0;
+            let normA = 0;
+            let normB = 0;
+            for (let i = 0; i < vecA.length; i++) {
+              dotProduct += vecA[i] * vecB[i];
+              normA += vecA[i] * vecA[i];
+              normB += vecB[i] * vecB[i];
+            }
+            const denominator = Math.sqrt(normA) * Math.sqrt(normB);
+            if (denominator === 0) {
+              return 0;
+            }
+            return dotProduct / denominator;
+          }
+
+          const similarity = cosineSimilarity(embedding, decryptedEmbedding);
+          const threshold = parseFloat(
+            process.env.FACE_SIMILARITY_THRESHOLD || "0.62"
+          );
+          const match = similarity >= threshold;
+
+          if (!match) {
+            throw new AuthenticationError(
+              "Face mismatch – identity could not be verified."
+            );
+          }
+        }
+      }
+    }
+
+    console.log(
+      `[Login] ✅ Login successful for user ${user.id} (${user.role})`
+    );
+    console.log(`[Login] ========================================`);
     res.json({
       success: true,
       message: "Login successful.",
@@ -355,7 +540,7 @@ router.get(
 );
 
 // @route   POST /api/auth/submit-pending-student
-// @desc    Submit student registration for faculty approval (when no fingerprint)
+// @desc    Submit student registration for faculty approval
 // @access  Public (student submits before login)
 router.post(
   "/submit-pending-student",
@@ -428,6 +613,7 @@ router.get(
 
     query += " ORDER BY name ASC";
 
+    // SECURE: Parameterized query (search in params) prevents SQL injection
     const result = await pool.query(query, params);
 
     res.json({
@@ -462,6 +648,7 @@ router.get(
 
     query += " ORDER BY name ASC";
 
+    // SECURE: Parameterized query (search in params) prevents SQL injection
     console.log("[Departments API] Query:", query, "Params:", params);
     const result = await pool.query(query, params);
     console.log("[Departments API] Found", result.rowCount, "departments");
@@ -482,6 +669,7 @@ router.get(
 // @access  Public (during onboarding) or Private
 router.post(
   "/send-otp",
+  otpSendLimiter,
   asyncHandler(async (req, res) => {
     const { userId } = req.body;
     const authUser = req.user; // From auth middleware if present
@@ -560,6 +748,7 @@ router.post(
 // @access  Public (during onboarding) or Private
 router.post(
   "/verify-otp",
+  otpVerifyLimiter,
   asyncHandler(async (req, res) => {
     const { userId, otp } = req.body;
     const authUser = req.user;

@@ -7,7 +7,7 @@
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--text-primary);
   margin-bottom: 8px;
   font-size: 14px;
 }
@@ -32,9 +32,9 @@
 
 .captureArea {
   width: 100%;
-  border: 2px solid var(--input-border, #d1d5db);
+  border: 2px solid var(--border-input);
   border-radius: 12px;
-  background: var(--input-bg, #f9fafb);
+  background: var(--bg-input);
   overflow: hidden;
 }
 
@@ -55,12 +55,12 @@
   gap: 16px;
   padding: 40px;
   text-align: center;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
 }
 
 .placeholder i {
   font-size: 64px;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
 }
 
 .placeholder p {
@@ -73,6 +73,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
+  min-height: 44px;
   background: var(--primary-color, #6366f1);
   color: white;
   border: none;
@@ -124,6 +125,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
+  min-height: 44px;
   border: none;
   border-radius: 8px;
   font-weight: 600;
@@ -161,9 +163,9 @@
 .previewContainer {
   position: relative;
   width: 100%;
-  border: 2px solid var(--input-border, #d1d5db);
+  border: 2px solid var(--border-input);
   border-radius: 12px;
-  background: var(--input-bg, #f9fafb);
+  background: var(--bg-input);
   overflow: hidden;
   min-height: 300px;
   display: flex;
@@ -188,6 +190,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
+  min-height: 44px;
   background: rgba(99, 102, 241, 0.9);
   color: white;
   border: none;
@@ -233,24 +236,7 @@
   }
 }
 
-/* Dark mode support */
-:global(.darkMode) .label {
-  color: #f9fafb;
-}
-
-:global(.darkMode) .captureArea {
-  background: #1f2937;
-  border-color: #374151;
-}
-
-:global(.darkMode) .placeholder {
-  color: #9ca3af;
-}
-
-:global(.darkMode) .placeholder i {
-  color: #9ca3af;
-}
-
+/* Dark mode support - cancelButton overlay needs specific styling */
 :global(.darkMode) .cancelButton {
   background: rgba(31, 41, 55, 0.9);
   color: #f9fafb;
@@ -258,11 +244,6 @@
 
 :global(.darkMode) .cancelButton:hover {
   background: #374151;
-}
-
-:global(.darkMode) .previewContainer {
-  background: #1f2937;
-  border-color: #374151;
 }
 
 .readyIndicator {

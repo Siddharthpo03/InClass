@@ -24,14 +24,22 @@ async function createDatabase() {
     if (process.env.DATABASE_URL) {
       // Parse DATABASE_URL: postgresql://user:pass@host:port/dbname
       const url = new URL(process.env.DATABASE_URL);
-      dbName = url.pathname.slice(1); // Remove leading /
+      dbName = url.pathname.slice(1).replace(/\/$/, ""); // Remove leading / and trailing slash
     } else {
       dbName = process.env.DB_NAME || "inclass";
     }
 
+    // SEC-007: Sanitize database name (CREATE DATABASE does not support $1; allow only safe chars)
+    const sanitizedDbName = dbName.replace(/[^a-zA-Z0-9_]/g, "");
+    if (!sanitizedDbName || sanitizedDbName !== dbName) {
+      console.error("❌ Invalid database name: only letters, numbers, and underscores allowed.");
+      process.exit(1);
+    }
+    dbName = sanitizedDbName;
+
     console.log(`🔍 Checking if database "${dbName}" exists...`);
 
-    // Check if database exists
+    // SECURE: Parameterized query prevents SQL injection
     const result = await adminClient.query(
       "SELECT 1 FROM pg_database WHERE datname = $1",
       [dbName]
@@ -39,7 +47,8 @@ async function createDatabase() {
 
     if (result.rowCount === 0) {
       console.log(`📦 Creating database "${dbName}"...`);
-      await adminClient.query(`CREATE DATABASE ${dbName}`);
+      // SEC-007: dbName is sanitized (alphanumeric + underscore only); identifier quoted to be safe
+      await adminClient.query("CREATE DATABASE \"" + dbName.replace(/"/g, '""') + "\"");
       console.log(`✅ Database "${dbName}" created successfully!`);
     } else {
       console.log(`✅ Database "${dbName}" already exists`);

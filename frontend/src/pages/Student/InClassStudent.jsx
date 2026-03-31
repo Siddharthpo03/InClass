@@ -1,25 +1,41 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import apiClient from "../../utils/apiClient";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
+import ActiveSessionsList from "../../components/student/ActiveSessionsList";
+import AttendanceMarking from "../../components/student/AttendanceMarking";
+import Modal from "../../components/shared/Modal";
+import ToastContainer from "../../components/shared/ToastContainer";
+import useStudentSocket from "../../hooks/useStudentSocket";
 import styles from "./InClassStudent.module.css";
 
-const InClassStudent = () => {
+const MOCK_STUDENT_PROFILE = {
+  userId: 0,
+  id: 0,
+  name: "Preview Student",
+  email: "preview@test.com",
+  role: "student",
+  college_id: 1,
+  department_id: 1,
+};
+
+const InClassStudent = ({ previewMode = false }) => {
   const navigate = useNavigate();
   const portalRef = useRef(null);
   const intervalRef = useRef(null);
   const autoLogoutRef = useRef(null);
 
   // User data state
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState(previewMode ? MOCK_STUDENT_PROFILE : null);
+  const [loading, setLoading] = useState(!previewMode);
   const [biometricStatus, setBiometricStatus] = useState({
     webauthn: false,
     face: false,
     isLoading: true,
   });
   const [showBiometricModal, setShowBiometricModal] = useState(false);
+  const [faceEnrolled, setFaceEnrolled] = useState(false);
   const [attendanceStats, setAttendanceStats] = useState({
     percentage: 0,
     totalClasses: 0,
@@ -36,6 +52,12 @@ const InClassStudent = () => {
   const [currentSession, setCurrentSession] = useState(null);
   const [attendanceHistory, setAttendanceHistory] = useState([]);
   
+  // New state for real-time sessions
+  const [activeSessions, setActiveSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [toasts, setToasts] = useState([]);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
+  
   // Auto-logout timer (5 minutes for students during attendance session)
   const STUDENT_AUTO_LOGOUT_TIME = 5 * 60 * 1000; // 5 minutes in milliseconds
 
@@ -51,8 +73,14 @@ const InClassStudent = () => {
     }
   }, []);
 
-  // Fetch user profile
+  // Fetch user profile (skip when preview mode)
   useEffect(() => {
+    if (previewMode) {
+      setUserData(MOCK_STUDENT_PROFILE);
+      setBiometricStatus((prev) => ({ ...prev, isLoading: false }));
+      setLoading(false);
+      return;
+    }
     const fetchUserProfile = async () => {
       try {
         const response = await apiClient.get("/auth/profile");
@@ -62,13 +90,14 @@ const InClassStudent = () => {
         // Fetch biometric status
         if (response.data?.userId) {
           try {
-            const bioResponse = await apiClient.get(`/api/biometrics/status?userId=${response.data.userId}`);
+            const bioResponse = await apiClient.get(`/biometrics/status?userId=${response.data.userId}`);
             if (bioResponse.data) {
               setBiometricStatus({
                 webauthn: bioResponse.data.webauthn || false,
                 face: bioResponse.data.face || false,
                 isLoading: false,
               });
+              setFaceEnrolled(!!bioResponse.data.face);
             } else {
               setBiometricStatus((prev) => ({ ...prev, isLoading: false }));
             }
@@ -79,10 +108,22 @@ const InClassStudent = () => {
           }
         }
         
+        // Fetch enrolled courses for Socket.io
+        try {
+          const enrollmentsResponse = await apiClient.get("/registrations/my-registrations");
+          const registrations = enrollmentsResponse.data?.registrations || [];
+          const approvedCourseIds = registrations
+            .filter((reg) => reg.status === "approved")
+            .map((reg) => reg.course?.id);
+          setEnrolledCourseIds(approvedCourseIds);
+        } catch (enrollError) {
+          console.log("Failed to fetch enrollments:", enrollError);
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch profile:", error);
-        if (error.response?.status === 401 || error.response?.status === 403) {
+        if (!previewMode && (error.response?.status === 401 || error.response?.status === 403)) {
           localStorage.removeItem("inclass_token");
           localStorage.removeItem("user_role");
           navigate("/login");
@@ -91,12 +132,10 @@ const InClassStudent = () => {
       }
     };
     fetchUserProfile();
-  }, [navigate]);
+  }, [navigate, previewMode]);
 
-  // Fetch attendance statistics (mock for now - can be enhanced with real API)
+  // Derive attendance statistics from history
   useEffect(() => {
-    // TODO: Replace with real API call when endpoint is available
-    // For now, calculate from attendance history
     const calculateStats = () => {
       const total = attendanceHistory.length;
       const present = attendanceHistory.filter((item) => item.status === "Present").length;
@@ -111,9 +150,8 @@ const InClassStudent = () => {
     calculateStats();
   }, [attendanceHistory]);
 
-  // Mock attendance history (replace with real API call)
+  // NOTE: Attendance history uses placeholder data. See GitHub issue for real API integration.
   useEffect(() => {
-    // TODO: Replace with real API endpoint
     setAttendanceHistory([
       { date: "2025-01-20", course: "CS401", status: "Present", time: "10:00 AM" },
       { date: "2025-01-18", course: "MA205", status: "Present", time: "02:00 PM" },
@@ -131,13 +169,60 @@ const InClassStudent = () => {
     });
   }, []);
 
-  const classNames = (...classes) =>
-    classes
-      .flat()
-      .filter(Boolean)
-      .map((cls) => styles[cls] || cls)
-      .join(" ")
-      .trim();
+  // Toast management
+  const showToast = useCallback((message, type = "info") => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, message, type, show: true }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 5000);
+  }, []);
+
+  const removeToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  // Socket.io integration for real-time sessions
+  const { isConnected } = useStudentSocket(
+    enrolledCourseIds,
+    (sessionData) => {
+      // Handle session started
+      setActiveSessions((prev) => {
+        const exists = prev.find((s) => s.id === sessionData.sessionId);
+        if (exists) return prev;
+        return [
+          ...prev,
+          {
+            id: sessionData.sessionId,
+            courseId: sessionData.courseId,
+            courseName: sessionData.courseName || "Unknown Course",
+            facultyName: sessionData.facultyName || sessionData.facultyId || "Unknown Professor",
+            code: sessionData.code,
+            expiresAt: sessionData.expiresAt,
+            isActive: true,
+            studentId: userData?.userId,
+          },
+        ];
+      });
+      
+      // Show toast notification
+      showToast(
+        `Professor ${sessionData.facultyName || "Unknown"} started attendance for ${sessionData.courseName || "course"} — tap to mark.`,
+        "info"
+      );
+    },
+    (sessionData) => {
+      // Handle session ended
+      setActiveSessions((prev) =>
+        prev.filter((s) => s.id !== sessionData.sessionId)
+      );
+    },
+    (attendanceData) => {
+      // Handle attendance updates (optional)
+      console.log("Attendance updated:", attendanceData);
+    },
+    true // enabled
+  );
 
   // Enforce attendance rules
   const enforceAbsentAndExit = useCallback(
@@ -224,6 +309,7 @@ const InClassStudent = () => {
         autoLogoutRef.current = null;
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- STUDENT_AUTO_LOGOUT_TIME and handleLogout are stable
   }, [isSessionActive, isAttendanceMarked]);
 
   // Check biometric enrollment before starting session
@@ -238,8 +324,8 @@ const InClassStudent = () => {
     return true;
   };
 
-  // Start attendance session
-  const handleStartSession = (e) => {
+  // Start attendance session (reserved for fullscreen flow)
+  const _handleStartSession = (e) => {
     e.preventDefault();
     if (!currentSession) return;
 
@@ -321,8 +407,20 @@ const InClassStudent = () => {
         document.exitFullscreen().catch(() => {});
       }
 
-      // Refresh attendance history
-      // TODO: Fetch updated history from API
+      // Append the just-marked record so the UI reflects it immediately
+      const session = selectedSession || currentSession;
+      if (session) {
+        const now = new Date();
+        setAttendanceHistory((prev) => [
+          {
+            date: now.toISOString().split("T")[0],
+            course: session.course_code || session.courseId || "N/A",
+            status: "Present",
+            time: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          },
+          ...prev,
+        ]);
+      }
     } catch (error) {
       const errorData = error.response?.data;
       const errorMessage = errorData?.error?.message || errorData?.message || "Attendance submission failed.";
@@ -333,7 +431,7 @@ const InClassStudent = () => {
         setShowExpiredReportModal(true);
         setSessionMessage("⚠️ Code has expired. Please report the issue.");
       } else {
-        setSessionMessage(`❌ ${errorMessage}`);
+      setSessionMessage(`❌ ${errorMessage}`);
       }
       console.error("Attendance Submission Error:", error.response || error);
       if (submitButton) submitButton.disabled = false;
@@ -348,7 +446,7 @@ const InClassStudent = () => {
     }
 
     try {
-      const response = await apiClient.post("/reports/expired-code", {
+      await apiClient.post("/reports/expired-code", {
         session_id: expiredSessionId,
         reason: reportReason,
       });
@@ -368,26 +466,34 @@ const InClassStudent = () => {
   };
 
   if (loading) {
-    return (
+      return (
       <div className={styles.loadingContainer}>
         <div className={styles.loader}></div>
         <p>Loading your dashboard...</p>
-      </div>
-    );
-  }
+        </div>
+      );
+    }
 
   if (!userData) {
-    return (
+      return (
       <div className={styles.errorContainer}>
         <p>Failed to load profile. Please try again.</p>
         <button onClick={() => navigate("/login")}>Go to Login</button>
-      </div>
-    );
-  }
+        </div>
+      );
+    }
+
+  const formatDisplayName = (name) => {
+    if (!name || typeof name !== "string") return name || "Student";
+    return name.replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  const displayDepartment = userData.department_name ?? userData.department ?? "N/A";
+  const displayCollege = userData.college_name ?? userData.college ?? "Tech University";
 
   // If session is active, show only the attendance form in fullscreen mode
-  if (isSessionActive) {
-    return (
+    if (isSessionActive) {
+      return (
       <div className={styles.fullscreenSession} ref={portalRef}>
         <form onSubmit={handleCodeSubmit} className={styles.fullscreenForm}>
           <div className={styles.fullscreenHeader}>
@@ -403,16 +509,16 @@ const InClassStudent = () => {
           </div>
 
           <div className={styles.fullscreenInputWrapper}>
-            <input
-              type="text"
-              value={sessionCode}
-              onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
+          <input
+            type="text"
+            value={sessionCode}
+            onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
               placeholder="Enter 6-digit code"
               className={styles.fullscreenInput}
-              maxLength="6"
-              required
+            maxLength="6"
+            required
               autoFocus
-            />
+          />
           </div>
 
           {sessionMessage && (
@@ -445,6 +551,11 @@ const InClassStudent = () => {
 
   return (
     <div className={styles.dashboardWrapper} ref={portalRef}>
+      {previewMode && (
+        <div style={{ background: "#f59e0b", color: "#000", padding: "8px 16px", textAlign: "center", fontSize: "14px", fontWeight: 600 }}>
+          Preview mode — no login (testing only)
+        </div>
+      )}
       <Navigation />
       
       <div className={styles.dashboardContainer}>
@@ -452,17 +563,29 @@ const InClassStudent = () => {
         <header className={styles.dashboardHeader}>
           <div className={styles.headerContent}>
             <div className={styles.welcomeSection}>
-              <h1 className={styles.welcomeTitle}>Welcome back, {userData.name}!</h1>
+              <h1 className={styles.welcomeTitle}>Welcome back, {formatDisplayName(userData.name)}!</h1>
               <p className={styles.welcomeSubtitle}>
                 {userData.role} • {userData.id || "N/A"}
               </p>
               <p className={styles.welcomeDetails}>
-                {userData.department || "N/A"} • {userData.college || "Tech University"}
+                {displayDepartment} • {displayCollege}
               </p>
             </div>
             <div className={styles.headerActions}>
+              <Link
+                to="/student/register-courses"
+                className={styles.registerLink}
+                title="Register for courses"
+              >
+                <i className="bx bx-book-add"></i>
+                <span>Register Courses</span>
+              </Link>
               <div className={styles.attendanceBadge}>
-                <div className={styles.badgeCircle}>
+                <div
+                  className={styles.badgeCircle}
+                  style={{ ["--pct"]: attendanceStats.percentage }}
+                  aria-label={`Attendance: ${attendanceStats.percentage}%`}
+                >
                   <span className={styles.badgePercentage}>{attendanceStats.percentage}%</span>
                 </div>
                 <p className={styles.badgeLabel}>Attendance</p>
@@ -470,10 +593,10 @@ const InClassStudent = () => {
               <button className={styles.logoutButton} onClick={handleLogout} title="Logout">
                 <i className="bx bx-log-out"></i>
                 <span>Logout</span>
-              </button>
+          </button>
             </div>
-          </div>
-        </header>
+        </div>
+      </header>
 
 
         {/* Stats Cards Section */}
@@ -512,60 +635,27 @@ const InClassStudent = () => {
         {/* Main Content Grid */}
         <section className={styles.mainContent}>
           <div className={styles.contentGrid}>
-            {/* Attendance Session Card */}
+            {/* Active Sessions List */}
             <div className={styles.sessionCard}>
               <div className={styles.cardHeader}>
                 <h2 className={styles.cardTitle}>
                   <i className="bx bx-calendar-check"></i>
-                  Attendance Session
+                  Active Sessions
                 </h2>
-                {currentSession?.isActive && !isAttendanceMarked && (
-                  <span className={styles.activeBadge}>Active</span>
+                {isConnected && (
+                  <span className={styles.connectionBadge} title="Real-time updates active">
+                    <i className="bx bx-wifi"></i>
+                    Connected
+                  </span>
                 )}
               </div>
 
               <div className={styles.cardBody}>
-                {!currentSession?.isActive && !isAttendanceMarked ? (
-                  <div className={styles.emptyState}>
-                    <i className="bx bx-time"></i>
-                    <h3>No Active Session</h3>
-                    <p>Check back at your scheduled class time</p>
-                  </div>
-                ) : isAttendanceMarked ? (
-                  <div className={styles.successState}>
-                    <div className={styles.successIcon}>
-                      <i className="bx bx-check-circle"></i>
-                    </div>
-                    <h3>Attendance Marked!</h3>
-                    <p className={styles.courseName}>{currentSession?.courseName}</p>
-                    <p className={styles.successMessage}>You are recorded as PRESENT</p>
-                    {sessionMessage && (
-                      <div className={styles.messageBox}>{sessionMessage}</div>
-                    )}
-                  </div>
-                ) : (
-                  <div className={styles.sessionReady}>
-                    <div className={styles.sessionInfo}>
-                      <h3>Active Session Available</h3>
-                      <p className={styles.courseName}>{currentSession?.courseName}</p>
-                      <p className={styles.instructorName}>
-                        <i className="bx bx-user"></i>
-                        {currentSession?.instructor}
-                      </p>
-                    </div>
-                    <div className={styles.securityNotice}>
-                      <i className="bx bx-shield"></i>
-                      <p>
-                        Your screen will be locked to ensure attendance integrity. Exiting or
-                        switching tabs will result in an ABSENT mark.
-                      </p>
-                    </div>
-                    <button className={styles.startButton} onClick={handleStartSession}>
-                      <i className="bx bx-play-circle"></i>
-                      Start Attendance Session
-                    </button>
-                  </div>
-                )}
+                <ActiveSessionsList
+                  sessions={activeSessions}
+                  onSessionClick={(session) => setSelectedSession(session)}
+                  currentTime={Date.now()}
+                />
               </div>
             </div>
 
@@ -600,7 +690,7 @@ const InClassStudent = () => {
                               month: "short",
                               day: "numeric",
                             })}
-                          </span>
+              </span>
                           <span className={styles.timeText}>{item.time}</span>
                         </div>
                         <div className={styles.historyCourse}>{item.course}</div>
@@ -626,7 +716,34 @@ const InClassStudent = () => {
             </div>
           </div>
         </section>
-      </div>
+        </div>
+
+      {/* Toast Container */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+
+      {/* Attendance Marking Modal */}
+      {selectedSession && (
+        <Modal
+          isOpen={!!selectedSession}
+          onClose={() => setSelectedSession(null)}
+          title="Mark Attendance"
+          size="large"
+        >
+          <AttendanceMarking
+            session={selectedSession}
+            onSuccess={() => {
+              setSelectedSession(null);
+              showToast("Attendance recorded.", "success");
+              // Remove from active sessions
+              setActiveSessions((prev) =>
+                prev.filter((s) => s.id !== selectedSession.id)
+              );
+            }}
+            onCancel={() => setSelectedSession(null)}
+            hasFaceEnrolled={faceEnrolled}
+          />
+        </Modal>
+      )}
 
       {/* Biometric Enrollment Modal */}
       {showBiometricModal && (
@@ -648,9 +765,9 @@ const InClassStudent = () => {
             </div>
             <div className={styles.modalBody}>
               <div className={styles.biometricModalContent}>
-                <i className="bx bx-fingerprint" style={{ fontSize: "3rem", color: "#10b981", marginBottom: "16px" }}></i>
+                <i className="bx bx-face" style={{ fontSize: "3rem", color: "#10b981", marginBottom: "16px" }}></i>
                 <p className={styles.modalDescription}>
-                  You need to enroll biometrics to mark attendance. This ensures secure and accurate attendance tracking.
+                  You need to enroll your face to mark attendance. This ensures secure and accurate attendance tracking.
                 </p>
                 {localStorage.getItem("biometricSkipped") === "true" ? (
                   <p className={styles.modalNote}>

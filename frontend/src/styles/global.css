@@ -1,5 +1,163 @@
 /* Global Mobile-Friendly Styles for InClass */
 
+/* ===== Unified Design System Variables ===== */
+:root {
+  /* Primary Colors */
+  --color-primary: #2563eb;
+  --color-secondary: #1e293b;
+  --color-success: #16a34a;
+  --color-error: #dc2626;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+
+  /* Backgrounds */
+  --bg-page: #ffffff;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-hover: #f3f4f6;
+  --bg-active: #eff6ff;
+  --bg-card: #ffffff;
+  --bg-nav: #f9f9f9;
+  --bg-input: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f3f4f6;
+  --bg-icon: #f3f4f6;
+  --bg-overlay: rgba(0, 0, 0, 0.5);
+  --bg-danger: #fee2e2;
+  --bg-danger-hover: #fecaca;
+
+  /* Text */
+  --text-primary: #111827;
+  --text-heading: #111827;
+  --text-body: #374151;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-placeholder: #9ca3af;
+  --text-danger: #991b1b;
+  --text-link: #667eea;
+  --text-link-hover: #764ba2;
+
+  /* Borders */
+  --border-color: #e2e8f0;
+  --border-input: #e5e7eb;
+  --border-subtle: #f3f4f6;
+  --border-danger: #fecaca;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.1);
+  --shadow-card-hover: 0 25px 70px rgba(0, 0, 0, 0.15);
+  --shadow-nav: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --shadow-dropdown: 0 10px 30px rgba(0, 0, 0, 0.15);
+
+  /* Status */
+  --success-bg: #d1fae5;
+  --success-text: #065f46;
+  --success-border: #10b981;
+  --error-bg: #fee2e2;
+  --error-text: #991b1b;
+  --error-border: #ef4444;
+  --warning-bg: #fffbeb;
+  --warning-text: #92400e;
+  --warning-border: #f59e0b;
+
+  /* Scrollbar */
+  --scrollbar-track: #f3f4f6;
+  --scrollbar-thumb: #cbd5e1;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+
+  /* Typography */
+  --font-family:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+/* ===== Dark Mode ===== */
+body.darkMode,
+.darkMode {
+  /* Page + surfaces */
+  --bg-page: #020617; /* almost black */
+  --bg-primary: #020617;
+  --bg-secondary: #020617;
+  --bg-card: #0b1220;
+  --bg-nav: rgba(15, 23, 42, 0.95);
+  --bg-input: #020617;
+  --bg-surface: #0b1220;
+  --bg-surface-hover: #020617;
+
+  /* Hovers / active */
+  --bg-hover: #1e293b;
+  --bg-active: rgba(59, 130, 246, 0.25);
+  --bg-icon: #1e293b;
+
+  /* Text */
+  --text-primary: #e5e7eb;
+  --text-heading: #f9fafb;
+  --text-body: #cbd5e1;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-placeholder: #64748b;
+  --text-danger: #fca5a5;
+  --text-link: #60a5fa;
+  --text-link-hover: #93c5fd;
+
+  /* Borders */
+  --border-color: #1f2937;
+  --border-input: #1f2937;
+  --border-subtle: rgba(148, 163, 184, 0.25);
+  --border-danger: rgba(220, 38, 38, 0.4);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --shadow-card-hover: 0 25px 70px rgba(0, 0, 0, 0.75);
+  --shadow-nav: 0 2px 8px rgba(0, 0, 0, 0.6);
+  --shadow-dropdown: 0 10px 30px rgba(0, 0, 0, 0.6);
+
+  /* Status */
+  --success-bg: #064e3b;
+  --success-text: #6ee7b7;
+  --success-border: #10b981;
+  --error-bg: #7f1d1d;
+  --error-text: #fca5a5;
+  --error-border: #ef4444;
+  --warning-bg: #78350f;
+  --warning-text: #fde68a;
+  --warning-border: #fbbf24;
+
+  /* Scrollbar */
+  --scrollbar-track: #020617;
+  --scrollbar-thumb: #475569;
+}
+
 /* ===== Base Reset & Mobile Optimizations ===== */
 * {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -23,11 +181,7 @@ html {
 /* Mobile background override */
 @media (max-width: 480px) {
   html {
-    background: #ffffff !important;
-  }
-
-  html.darkMode {
-    background: #1e293b !important;
+    background: var(--bg-page) !important;
   }
 }
 
@@ -43,11 +197,7 @@ body {
 /* Mobile background override */
 @media (max-width: 480px) {
   body {
-    background: #ffffff !important;
-  }
-
-  body.darkMode {
-    background: #1e293b !important;
+    background: var(--bg-page) !important;
   }
 }
 
@@ -58,15 +208,32 @@ body,
   overflow-x: hidden;
 }
 
+/* ===== Prevent Layout Shifts ===== */
+* {
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  /* Prevent image loading from causing layout shifts */
+  aspect-ratio: attr(width) / attr(height);
+}
+
+/* Prevent content jumping during load */
+[class*="loading"],
+[class*="spinner"] {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @media (max-width: 480px) {
   #root,
   .app-main-content {
-    background: #ffffff !important;
-  }
-
-  .darkMode #root,
-  .darkMode .app-main-content {
-    background: #1e293b !important;
+    background: var(--bg-page) !important;
   }
 }
 
@@ -246,7 +413,9 @@ a:focus-visible {
   z-index: 999;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
 }
 
 .mobile-overlay.active {

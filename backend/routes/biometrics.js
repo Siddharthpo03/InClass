@@ -1,41 +1,128 @@
+// @ts-check
 // inclass-backend/routes/biometrics.js
 // Complete biometric onboarding and verification routes
 
 const express = require("express");
 const router = express.Router();
-const pool = require("../db");
+const { pool } = require("../config/database");
 const auth = require("../middleware/auth");
+const sendMail = require("../utils/mailer");
 const {
   generateRegistrationOptions,
   verifyRegistrationResponse,
   generateAuthenticationOptions,
   verifyAuthenticationResponse,
 } = require("@simplewebauthn/server");
-const { isoBase64URL, isoUint8Array } = require("@simplewebauthn/server/helpers");
-const { encrypt, decrypt } = require("../utils/crypto");
+const {
+  isoBase64URL,
+  isoUint8Array,
+} = require("@simplewebauthn/server/helpers");
+const { encrypt, decrypt, secureLog } = require("../utils/crypto");
 const {
   setAuthenticationChallenge,
   getAuthenticationChallenge,
   clearAuthenticationChallenge,
 } = require("../middleware/biometricAuth");
+const { extractEmbedding } = require("../services/facenet");
+const { saveUserEmbedding, findBestMatch } = require("../services/faceMatcher");
 
-// WebAuthn configuration
-const RP_ID = process.env.WEBAUTHN_RP_ID || "localhost";
+// WebAuthn configuration - supports separate student/faculty domains
+// RP_ID must be explicitly configured for production; in development/tests we
+// safely default to "localhost" for convenience.
+const NODE_ENV = process.env.NODE_ENV || "development";
+
+let RP_ID;
+
+if (!process.env.WEBAUTHN_RP_ID) {
+  if (NODE_ENV === "production") {
+    throw new Error(
+      "CRITICAL SECURITY ERROR: WEBAUTHN_RP_ID must be set in production."
+    );
+  } else {
+    RP_ID = "localhost";
+  }
+} else {
+  RP_ID = process.env.WEBAUTHN_RP_ID;
+}
 const RP_NAME = process.env.WEBAUTHN_RP_NAME || "InClass Attendance System";
-const ORIGIN = process.env.WEBAUTHN_ORIGIN || (process.env.FRONTEND_URL || "http://localhost:5173");
+
+// Additional hardening: never allow localhost RP_ID in production
+if (NODE_ENV === "production" && RP_ID === "localhost") {
+  throw new Error(
+    "CRITICAL SECURITY ERROR: WEBAUTHN_RP_ID cannot be 'localhost' in production."
+  );
+}
+
+console.log(`WebAuthn configured for RP_ID: ${RP_ID}`);
+
+// ORIGIN is determined dynamically from request origin
+// This allows WebAuthn to work with both student.* and faculty.* subdomains
+function getWebAuthnOrigin(req) {
+  // Get origin from request headers
+  const origin = req.headers.origin || req.headers.referer;
+
+  if (origin) {
+    try {
+      const originUrl = new URL(origin);
+      return origin;
+    } catch {
+      // Fallback to env vars
+    }
+  }
+
+  // Fallback to environment variables
+  return (
+    process.env.WEBAUTHN_ORIGIN ||
+    process.env.STUDENT_FRONTEND_URL ||
+    process.env.FACULTY_FRONTEND_URL ||
+    process.env.FRONTEND_URL ||
+    "http://localhost:5173"
+  );
+}
+
+// In production, strictly enforce that the request Origin header matches the RP_ID.
+// Example: RP_ID = "inclass.example.com" => origin must be "https://inclass.example.com".
+function validateWebAuthnOrigin(req, res) {
+  if (process.env.NODE_ENV !== "production") {
+    return true;
+  }
+
+  const originHeader = req.headers.origin;
+  const expectedOrigin = `https://${RP_ID}`;
+
+  if (!originHeader || originHeader !== expectedOrigin) {
+    console.warn(
+      "[WebAuthn] Forbidden WebAuthn origin:",
+      "received=",
+      originHeader || "none",
+      "expected=",
+      expectedOrigin
+    );
+
+    res.status(403).json({
+      success: false,
+      message: "Forbidden WebAuthn origin.",
+    });
+    return false;
+  }
+
+  return true;
+}
 
 // Store registration challenges temporarily (in production, use Redis)
 const registrationChallenges = new Map();
 
-// Clean up old challenges every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, value] of registrationChallenges.entries()) {
-    if (now - value.timestamp > 300000) {
-      registrationChallenges.delete(key);
+// Clean up old challenges every 5 minutes (skip in tests to avoid open handles)
+if (process.env.NODE_ENV !== "test") {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, value] of registrationChallenges.entries()) {
+      if (now - value.timestamp > 300000) {
+        registrationChallenges.delete(key);
+      }
     }
-  }
-}, 300000);
+  }, 300000);
+}
 
 // ============================================
 // WEBAUTHN ROUTES
@@ -52,15 +139,19 @@ router.post("/webauthn/register/options", async (req, res) => {
     // Get userId from body or auth token
     const targetUserId = userId || (authUser ? authUser.id : null);
     if (!targetUserId) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: "User ID is required. Please provide userId in request body or authenticate with a valid token." 
+        message:
+          "User ID is required. Please provide userId in request body or authenticate with a valid token.",
       });
     }
 
-    console.log(`[WebAuthn] Generating registration options for userId: ${targetUserId}`);
+    console.log(
+      `[WebAuthn] Generating registration options for userId: ${targetUserId}`
+    );
 
     // Get user info
+    // SECURE: Parameterized query prevents SQL injection (biometric/webauthn)
     let userResult;
     try {
       userResult = await pool.query(
@@ -69,16 +160,16 @@ router.post("/webauthn/register/options", async (req, res) => {
       );
     } catch (dbError) {
       console.error("[WebAuthn] Database error fetching user:", dbError);
-      return res.status(500).json({ 
+      return res.status(500).json({
         success: false,
-        message: `Database error: ${dbError.message}. Check if users table exists.` 
+        message: `Database error: ${dbError.message}. Check if users table exists.`,
       });
     }
 
     if (userResult.rowCount === 0) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: `User not found with ID: ${targetUserId}` 
+        message: `User not found with ID: ${targetUserId}`,
       });
     }
 
@@ -94,7 +185,10 @@ router.post("/webauthn/register/options", async (req, res) => {
       existingCredentials = credResult;
     } catch (dbError) {
       // Table might not exist - log but continue (will create on first enrollment)
-      console.warn("[WebAuthn] Could not fetch existing credentials (table may not exist):", dbError.message);
+      console.warn(
+        "[WebAuthn] Could not fetch existing credentials (table may not exist):",
+        dbError.message
+      );
       existingCredentials = { rows: [] };
     }
 
@@ -122,19 +216,23 @@ router.post("/webauthn/register/options", async (req, res) => {
         supportedAlgorithmIDs: [-7, -257],
       });
     } catch (genError) {
-      console.error("[WebAuthn] Error generating registration options:", genError);
-      console.error("[WebAuthn] Stack trace:", genError.stack);
-      return res.status(500).json({ 
+      console.error(
+        "[WebAuthn] Error generating registration options:",
+        genError.message
+      );
+      return res.status(500).json({
         success: false,
-        message: `Failed to generate registration options: ${genError.message}. Check RP_ID (${RP_ID}) and ORIGIN (${ORIGIN}) configuration.` 
+        message:
+          "Failed to generate registration options. Please contact support if this persists.",
       });
     }
 
     // Store challenge temporarily (in-memory cache)
-    const challengeString = typeof options.challenge === 'string' 
-      ? options.challenge 
-      : isoBase64URL.fromBuffer(options.challenge);
-    
+    const challengeString =
+      typeof options.challenge === "string"
+        ? options.challenge
+        : isoBase64URL.fromBuffer(options.challenge);
+
     registrationChallenges.set(targetUserId.toString(), {
       challenge: challengeString,
       timestamp: Date.now(),
@@ -154,7 +252,9 @@ router.post("/webauthn/register/options", async (req, res) => {
         name: options.user.name,
         displayName: options.user.displayName,
       },
-      pubKeyCredParams: options.pubKeyCredParams || [{ alg: -7, type: "public-key" }],
+      pubKeyCredParams: options.pubKeyCredParams || [
+        { alg: -7, type: "public-key" },
+      ],
       authenticatorSelection: options.authenticatorSelection || {
         authenticatorAttachment: "platform",
         userVerification: "required",
@@ -164,25 +264,23 @@ router.post("/webauthn/register/options", async (req, res) => {
     };
 
     if (options.excludeCredentials && options.excludeCredentials.length > 0) {
-      serializedOptions.excludeCredentials = options.excludeCredentials.map((cred) => ({
-        id: isoBase64URL.fromBuffer(cred.id),
-        type: cred.type,
-        transports: cred.transports || ["internal"],
-      }));
+      serializedOptions.excludeCredentials = options.excludeCredentials.map(
+        (cred) => ({
+          id: isoBase64URL.fromBuffer(cred.id),
+          type: cred.type,
+          transports: cred.transports || ["internal"],
+        })
+      );
     }
 
-    console.log(`[WebAuthn] Returning registration options for userId: ${targetUserId}`);
+    console.log(
+      `[WebAuthn] Returning registration options for userId: ${targetUserId}`
+    );
     res.json(serializedOptions);
   } catch (err) {
-    console.error("[WebAuthn] Registration options error - Full stack trace:");
-    console.error(err);
-    console.error("Error stack:", err.stack);
-    res.status(500).json({ 
-      success: false,
-      error: "Server error generating registration options.",
-      message: err.message || "Unknown error occurred",
-      details: process.env.NODE_ENV === 'development' ? err.stack : undefined
-    });
+    console.error("[WebAuthn] Registration options error:", err.message);
+    // Delegate to centralized error handler
+    next(err);
   }
 });
 
@@ -196,20 +294,27 @@ router.post("/webauthn/register/complete", async (req, res) => {
 
     const targetUserId = userId || (authUser ? authUser.id : null);
     if (!targetUserId) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: "User ID is required." 
+        message: "User ID is required.",
       });
     }
 
     if (!registrationResponse) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: "Registration response is required." 
+        message: "Registration response is required.",
       });
     }
 
-    console.log(`[WebAuthn] Completing registration for userId: ${targetUserId}`);
+    // Enforce strict origin/RP_ID binding in production
+    if (!validateWebAuthnOrigin(req, res)) {
+      return;
+    }
+
+    console.log(
+      `[WebAuthn] Completing registration for userId: ${targetUserId}`
+    );
 
     // Get stored challenge
     const storedChallenge = registrationChallenges.get(targetUserId.toString());
@@ -224,21 +329,34 @@ router.post("/webauthn/register/complete", async (req, res) => {
     // Client sends: { id, rawId (base64url), response: { clientDataJSON (base64url), attestationObject (base64url) } }
     const response = {
       id: registrationResponse.id,
-      rawId: typeof registrationResponse.rawId === 'string' 
-        ? isoBase64URL.toBuffer(registrationResponse.rawId)
-        : registrationResponse.rawId,
+      rawId:
+        typeof registrationResponse.rawId === "string"
+          ? isoBase64URL.toBuffer(registrationResponse.rawId)
+          : registrationResponse.rawId,
       response: {
-        clientDataJSON: typeof registrationResponse.response?.clientDataJSON === 'string'
-          ? isoBase64URL.toBuffer(registrationResponse.response.clientDataJSON)
-          : registrationResponse.response?.clientDataJSON,
-        attestationObject: typeof registrationResponse.response?.attestationObject === 'string'
-          ? isoBase64URL.toBuffer(registrationResponse.response.attestationObject)
-          : registrationResponse.response?.attestationObject,
+        clientDataJSON:
+          typeof registrationResponse.response?.clientDataJSON === "string"
+            ? isoBase64URL.toBuffer(
+                registrationResponse.response.clientDataJSON
+              )
+            : registrationResponse.response?.clientDataJSON,
+        attestationObject:
+          typeof registrationResponse.response?.attestationObject === "string"
+            ? isoBase64URL.toBuffer(
+                registrationResponse.response.attestationObject
+              )
+            : registrationResponse.response?.attestationObject,
       },
       type: registrationResponse.type || "public-key",
     };
 
     console.log(`[WebAuthn] Verifying registration response...`);
+
+    // Get origin for WebAuthn verification
+    const dynamicOrigin = getWebAuthnOrigin(req);
+    const expectedOrigin = `https://${RP_ID}`;
+    const verificationOrigin =
+      process.env.NODE_ENV === "production" ? expectedOrigin : dynamicOrigin;
 
     // Verify registration response
     let verification;
@@ -246,39 +364,44 @@ router.post("/webauthn/register/complete", async (req, res) => {
       verification = await verifyRegistrationResponse({
         response: response,
         expectedChallenge: storedChallenge.challenge,
-        expectedOrigin: ORIGIN,
+        expectedOrigin: verificationOrigin,
         expectedRPID: RP_ID,
         requireUserVerification: true,
       });
     } catch (verifyError) {
-      console.error("[WebAuthn] Verification error:", verifyError);
-      console.error("[WebAuthn] Verification error stack:", verifyError.stack);
+      console.error("[WebAuthn] Verification error:", verifyError.message);
       return res.status(400).json({
         success: false,
-        message: `Verification failed: ${verifyError.message}. Check ORIGIN (${ORIGIN}) and RP_ID (${RP_ID}) configuration.`,
+        message:
+          "Verification failed. Please ensure your device time and origin are correct, then try again.",
       });
     }
 
     if (!verification.verified || !verification.registrationInfo) {
-      console.error("[WebAuthn] Verification failed - not verified or missing registration info");
+      console.error(
+        "[WebAuthn] Verification failed - not verified or missing registration info"
+      );
       return res.status(400).json({
         success: false,
         message: "Registration verification failed. Please try again.",
       });
     }
 
-    const { credentialID, credentialPublicKey, counter } = verification.registrationInfo;
+    const { credentialID, credentialPublicKey, counter } =
+      verification.registrationInfo;
 
     console.log(`[WebAuthn] Verification successful, storing credential...`);
 
+
     // Store credential in database
+    const credentialIdString = isoBase64URL.fromBuffer(credentialID);
     try {
       await pool.query(
         `INSERT INTO webauthn_credentials (user_id, credential_id, public_key, device_name, counter, is_active)
          VALUES ($1, $2, $3, $4, $5, TRUE)`,
         [
           targetUserId,
-          isoBase64URL.fromBuffer(credentialID),
+          credentialIdString,
           isoBase64URL.fromBuffer(credentialPublicKey),
           deviceName || "Unknown Device",
           counter || 0,
@@ -287,41 +410,41 @@ router.post("/webauthn/register/complete", async (req, res) => {
     } catch (dbError) {
       console.error("[WebAuthn] Database error storing credential:", dbError);
       if (dbError.code === "23505") {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
-          message: "This biometric is already enrolled." 
+          message: "This biometric is already enrolled.",
         });
       }
       // Check if table doesn't exist
       if (dbError.code === "42P01") {
-        return res.status(500).json({ 
+        return res.status(500).json({
           success: false,
-          message: `Database table 'webauthn_credentials' does not exist. Please run the schema.sql migration.` 
+          message: `Database table 'webauthn_credentials' does not exist. Please run the schema.sql migration.`,
         });
       }
       throw dbError;
     }
 
+
     // Clean up challenge
     registrationChallenges.delete(targetUserId.toString());
 
-    console.log(`[WebAuthn] Registration completed successfully for userId: ${targetUserId}`);
+    console.log(
+      `[WebAuthn] Registration completed successfully for userId: ${targetUserId}`
+    );
 
-    res.status(201).json({
+    const responseData = {
       success: true,
       message: "Device biometric enrolled successfully.",
-      credentialId: isoBase64URL.fromBuffer(credentialID),
-    });
+      credentialId: credentialIdString,
+    };
+
+
+    res.status(201).json(responseData);
   } catch (err) {
-    console.error("[WebAuthn] Registration complete error - Full stack trace:");
-    console.error(err);
-    console.error("Error stack:", err.stack);
-    res.status(500).json({ 
-      success: false,
-      error: "Server error completing registration.",
-      message: err.message || "Unknown error occurred",
-      details: process.env.NODE_ENV === 'development' ? err.stack : undefined
-    });
+    console.error("[WebAuthn] Registration complete error:", err.message);
+    // Delegate to centralized error handler
+    next(err);
   }
 });
 
@@ -346,9 +469,15 @@ router.post("/webauthn/auth/options", async (req, res) => {
 
     if (credentials.rowCount === 0) {
       return res.status(404).json({
-        message: "No biometric enrollment found. Please enroll your biometric first.",
+        message:
+          "No biometric enrollment found. Please enroll your biometric first.",
         enrolled: false,
       });
+    }
+
+    // Enforce strict origin/RP_ID binding in production
+    if (!validateWebAuthnOrigin(req, res)) {
+      return;
     }
 
     // Generate authentication options
@@ -381,7 +510,9 @@ router.post("/webauthn/auth/options", async (req, res) => {
     res.json(serializedOptions);
   } catch (err) {
     console.error("WebAuthn authentication options error:", err);
-    res.status(500).json({ error: "Server error generating authentication options." });
+    res
+      .status(500)
+      .json({ error: "Server error generating authentication options." });
   }
 });
 
@@ -399,14 +530,17 @@ router.post("/webauthn/auth/complete", async (req, res) => {
     }
 
     if (!authenticationResponse) {
-      return res.status(400).json({ message: "Authentication response is required." });
+      return res
+        .status(400)
+        .json({ message: "Authentication response is required." });
     }
 
     // Get stored challenge
     const storedChallenge = getAuthenticationChallenge(targetUserId);
     if (!storedChallenge) {
       return res.status(400).json({
-        message: "Authentication session expired. Please start a new verification.",
+        message:
+          "Authentication session expired. Please start a new verification.",
       });
     }
 
@@ -428,9 +562,15 @@ router.post("/webauthn/auth/complete", async (req, res) => {
       id: authenticationResponse.id,
       rawId: isoBase64URL.toBuffer(authenticationResponse.id),
       response: {
-        clientDataJSON: isoBase64URL.toBuffer(authenticationResponse.response.clientDataJSON),
-        authenticatorData: isoBase64URL.toBuffer(authenticationResponse.response.authenticatorData),
-        signature: isoBase64URL.toBuffer(authenticationResponse.response.signature),
+        clientDataJSON: isoBase64URL.toBuffer(
+          authenticationResponse.response.clientDataJSON
+        ),
+        authenticatorData: isoBase64URL.toBuffer(
+          authenticationResponse.response.authenticatorData
+        ),
+        signature: isoBase64URL.toBuffer(
+          authenticationResponse.response.signature
+        ),
         userHandle: authenticationResponse.response.userHandle
           ? isoBase64URL.toBuffer(authenticationResponse.response.userHandle)
           : null,
@@ -438,11 +578,22 @@ router.post("/webauthn/auth/complete", async (req, res) => {
       type: authenticationResponse.type || "public-key",
     };
 
+    // Enforce strict origin/RP_ID binding in production
+    if (!validateWebAuthnOrigin(req, res)) {
+      return;
+    }
+
+    // Get origin for WebAuthn verification
+    const dynamicOrigin = getWebAuthnOrigin(req);
+    const expectedOrigin = `https://${RP_ID}`;
+    const verificationOrigin =
+      process.env.NODE_ENV === "production" ? expectedOrigin : dynamicOrigin;
+
     // Verify authentication response
     const verification = await verifyAuthenticationResponse({
       response: response,
       expectedChallenge: storedChallenge.challenge,
-      expectedOrigin: ORIGIN,
+      expectedOrigin: verificationOrigin,
       expectedRPID: RP_ID,
       credential: {
         id: isoBase64URL.toBuffer(credential.credential_id),
@@ -484,32 +635,99 @@ router.post("/webauthn/auth/complete", async (req, res) => {
 // ============================================
 
 // @route   POST /api/biometrics/face/enroll
-// @desc    Enroll user's face (accept embedding array)
+// @desc    Enroll user's face by accepting one or more base64 images or a precomputed embedding
 // @access  Public (during onboarding) or Private
 router.post("/face/enroll", async (req, res) => {
   try {
-    const { userId, embedding } = req.body;
+    const { userId, images, embedding } = req.body;
     const authUser = req.user;
 
     const targetUserId = userId || (authUser ? authUser.id : null);
     if (!targetUserId) {
-      return res.status(400).json({ message: "User ID is required." });
-    }
-
-    if (!embedding || !Array.isArray(embedding) || embedding.length === 0) {
-      return res.status(400).json({
-        message: "Face embedding array is required.",
+      return res.status(400).json({ 
+        success: false,
+        message: "User ID is required." 
       });
     }
 
-    // Encrypt embedding before storing
-    const encryptedEmbedding = encrypt(JSON.stringify(embedding));
+    let faceDescriptor = null;
+
+    // If images are provided, process them to extract FaceNet embeddings and average them
+    if (images && Array.isArray(images) && images.length > 0) {
+      try {
+        const descriptors = [];
+        for (const imageBase64 of images) {
+          const base64Data = imageBase64.replace(
+            /^data:image\/\w+;base64,/,
+            ""
+          );
+          const buf = Buffer.from(base64Data, "base64");
+          const descriptor = await extractEmbedding(buf);
+          if (descriptor) {
+            descriptors.push(descriptor);
+          }
+        }
+
+        if (descriptors.length === 0) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "No face detected in any of the provided images. Please ensure your face is clearly visible.",
+          });
+        }
+
+        if (descriptors.length > 1) {
+          const dim = descriptors[0].length;
+          const avg = new Array(dim).fill(0);
+          for (let i = 0; i < dim; i++) {
+            let sum = 0;
+            for (const desc of descriptors) {
+              sum += desc[i];
+            }
+            avg[i] = sum / descriptors.length;
+          }
+          faceDescriptor = avg;
+        } else {
+          faceDescriptor = descriptors[0];
+        }
+      } catch (faceError) {
+        secureLog("FaceNet extraction error", {
+          operationStatus: "error",
+          userId: targetUserId,
+        });
+        return res.status(400).json({
+          success: false,
+          message:
+            "Failed to process face images. Please try again with clearer images.",
+        });
+      }
+    } else if (embedding && Array.isArray(embedding) && embedding.length > 0) {
+      // Direct embedding provided (for advanced clients)
+      faceDescriptor = embedding;
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Either images array or embedding array is required.",
+      });
+    }
+
+    if (!Array.isArray(faceDescriptor) || faceDescriptor.length !== 512) {
+      return res.status(400).json({
+        success: false,
+        message: "Face embedding must be 512 dimensions.",
+      });
+    }
+
+    const encryptedEmbedding = encrypt(JSON.stringify(faceDescriptor));
 
     // Check if user already has a face enrolled
     const existingCheck = await pool.query(
       "SELECT id FROM biometric_face WHERE user_id = $1 AND is_active = TRUE",
       [targetUserId]
     );
+
+    // Persist embedding in users table for pgvector-based recognition
+    await saveUserEmbedding(targetUserId, faceDescriptor);
 
     if (existingCheck.rowCount > 0) {
       // Update existing enrollment
@@ -533,10 +751,9 @@ router.post("/face/enroll", async (req, res) => {
       );
 
       // Set face_enrolled flag in users table
-      await pool.query(
-        "UPDATE users SET face_enrolled = TRUE WHERE id = $1",
-        [targetUserId]
-      );
+      await pool.query("UPDATE users SET face_enrolled = TRUE WHERE id = $1", [
+        targetUserId,
+      ]);
 
       return res.status(201).json({
         success: true,
@@ -544,13 +761,20 @@ router.post("/face/enroll", async (req, res) => {
       });
     }
   } catch (err) {
-    console.error("Face enrollment error:", err);
-    res.status(500).json({ error: "Server error during face enrollment." });
+    secureLog("Face enrollment error", {
+      operationStatus: "error",
+      userId: targetUserId,
+    });
+    res.status(500).json({
+      success: false,
+      error: "Server error during face enrollment.",
+      message: "An error occurred. Please try again.",
+    });
   }
 });
 
 // @route   POST /api/biometrics/face/verify
-// @desc    Verify user's face against stored enrollment
+// @desc    Verify user's face against stored enrollment using FaceNet embeddings
 // @access  Public (during onboarding) or Private
 router.post("/face/verify", async (req, res) => {
   try {
@@ -563,67 +787,117 @@ router.post("/face/verify", async (req, res) => {
     }
 
     if (!embedding || !Array.isArray(embedding) || embedding.length === 0) {
-      return res.status(400).json({ message: "Face embedding array is required." });
+      return res
+        .status(400)
+        .json({ message: "Face embedding array is required." });
     }
 
-    // Get stored face embedding
-    const storedResult = await pool.query(
-      "SELECT encrypted_embedding FROM biometric_face WHERE user_id = $1 AND is_active = TRUE",
-      [targetUserId]
-    );
+    if (embedding.length !== 512) {
+      return res.status(400).json({
+        message: "Face embedding must be 512 dimensions.",
+      });
+    }
 
-    if (storedResult.rowCount === 0) {
+    // Use pgvector nearest-neighbor search and ensure best match is the target user
+    const bestMatch = await findBestMatch(embedding);
+
+    if (!bestMatch) {
       return res.status(404).json({
         message: "No face enrollment found. Please enroll your face first.",
         enrolled: false,
       });
     }
 
-    // Decrypt stored embedding
-    const decryptedEmbedding = JSON.parse(decrypt(storedResult.rows[0].encrypted_embedding));
-
-    // Calculate cosine similarity
-    const similarity = cosineSimilarity(embedding, decryptedEmbedding);
-    const threshold = parseFloat(process.env.FACE_SIMILARITY_THRESHOLD || "0.62");
-    const match = similarity >= threshold;
+    const match =
+      bestMatch.match && parseInt(bestMatch.userId, 10) === targetUserId;
+    const similarity = 1 - bestMatch.distance;
 
     res.json({
       verified: match,
       score: similarity,
-      threshold: threshold,
+      threshold: 1 - bestMatch.threshold,
       message: match
         ? "Face verified successfully."
         : "Face verification failed. Please try again with better lighting and a clear view of your face.",
     });
   } catch (err) {
-    console.error("Face verification error:", err);
+    secureLog("Face verification error", {
+      operationStatus: "error",
+      userId: targetUserId,
+    });
     res.status(500).json({ error: "Server error during face verification." });
   }
 });
 
-// Helper function to calculate cosine similarity
-function cosineSimilarity(vecA, vecB) {
-  if (vecA.length !== vecB.length) {
-    return 0;
+// @route   POST /api/biometrics/face/verify-at-login
+// @desc    Verify user's face during login (returns 401 on mismatch)
+// @access  Public (during login)
+router.post("/face/verify-at-login", async (req, res) => {
+  try {
+    const { userId, embedding } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required.",
+      });
+    }
+
+    if (!embedding || !Array.isArray(embedding) || embedding.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Face embedding array is required.",
+      });
+    }
+
+    if (embedding.length !== 512) {
+      return res.status(400).json({
+        success: false,
+        message: "Face embedding must be 512 dimensions.",
+      });
+    }
+
+    const bestMatch = await findBestMatch(embedding);
+
+    if (!bestMatch) {
+      return res.status(404).json({
+        success: false,
+        message: "No face enrollment found. Please enroll your face first.",
+        enrolled: false,
+      });
+    }
+
+    const match =
+      bestMatch.match && parseInt(bestMatch.userId, 10) === userId;
+    const similarity = 1 - bestMatch.distance;
+
+    if (!match) {
+      return res.status(401).json({
+        success: false,
+        verified: false,
+        score: similarity,
+        threshold: 1 - bestMatch.threshold,
+        message: "Face mismatch – identity could not be verified.",
+      });
+    }
+
+    // Success - face matches
+    res.json({
+      success: true,
+      verified: true,
+      score: similarity,
+      threshold: 1 - bestMatch.threshold,
+      message: "Face verified successfully.",
+    });
+  } catch (err) {
+    secureLog("Face verification at login error", { operationStatus: "error" });
+    res.status(500).json({
+      success: false,
+      error: "Server error during face verification.",
+    });
   }
+});
 
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
-
-  for (let i = 0; i < vecA.length; i++) {
-    dotProduct += vecA[i] * vecB[i];
-    normA += vecA[i] * vecA[i];
-    normB += vecB[i] * vecB[i];
-  }
-
-  const denominator = Math.sqrt(normA) * Math.sqrt(normB);
-  if (denominator === 0) {
-    return 0;
-  }
-
-  return dotProduct / denominator;
-}
 
 // ============================================
 // CONSENT ROUTES
@@ -654,14 +928,24 @@ router.post("/consent", async (req, res) => {
         `UPDATE biometric_consent 
          SET method = $1, ip_address = $2, user_agent = $3, consented_at = CURRENT_TIMESTAMP, is_active = TRUE
          WHERE user_id = $4`,
-        [method || "both", ip || req.ip, userAgent || req.get("user-agent"), targetUserId]
+        [
+          method || "both",
+          ip || req.ip,
+          userAgent || req.get("user-agent"),
+          targetUserId,
+        ]
       );
     } else {
       // Create new consent
       await pool.query(
         `INSERT INTO biometric_consent (user_id, method, ip_address, user_agent, is_active)
          VALUES ($1, $2, $3, $4, TRUE)`,
-        [targetUserId, method || "both", ip || req.ip, userAgent || req.get("user-agent")]
+        [
+          targetUserId,
+          method || "both",
+          ip || req.ip,
+          userAgent || req.get("user-agent"),
+        ]
       );
     }
 
@@ -670,7 +954,7 @@ router.post("/consent", async (req, res) => {
       message: "Biometric consent recorded successfully.",
     });
   } catch (err) {
-    console.error("Consent recording error:", err);
+    secureLog("Consent recording error", { operationStatus: "error", userId: targetUserId });
     res.status(500).json({ error: "Server error recording consent." });
   }
 });
@@ -714,14 +998,15 @@ router.get("/status", async (req, res) => {
       webauthn: webauthnCheck.rowCount > 0,
       face: faceCheck.rowCount > 0,
       consent: consentCheck.rowCount > 0,
-      consentMethod: consentCheck.rowCount > 0 ? consentCheck.rows[0].method : null,
-      consentedAt: consentCheck.rowCount > 0 ? consentCheck.rows[0].consented_at : null,
+      consentMethod:
+        consentCheck.rowCount > 0 ? consentCheck.rows[0].method : null,
+      consentedAt:
+        consentCheck.rowCount > 0 ? consentCheck.rows[0].consented_at : null,
     });
   } catch (err) {
-    console.error("Biometric status error:", err);
+    secureLog("Biometric status error", { operationStatus: "error", userId: targetUserId });
     res.status(500).json({ error: "Server error checking biometric status." });
   }
 });
 
 module.exports = router;
-

@@ -1,14 +1,9 @@
 /* Cookie Declaration Page - Modern Design */
 
 :global(body) {
-  background: linear-gradient(to top, #d4f5eb 0%, #ffffff 100%);
+  background: var(--bg-page);
   background-attachment: fixed;
   transition: background 0.3s ease;
-}
-
-:global(body.darkMode) {
-  background: linear-gradient(to top, #1a1a2e 0%, #16213e 100%);
-  background-attachment: fixed;
 }
 
 .cookiePageWrapper {
@@ -22,12 +17,8 @@
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "kern" 1, "liga" 1;
   text-rendering: optimizeLegibility;
-  color: #111827;
+  color: var(--text-body);
   transition: color 0.3s ease;
-}
-
-:global(body.darkMode) .cookiePageWrapper {
-  color: #e5e7eb;
 }
 
 .cookieContainer {
@@ -84,7 +75,7 @@
 
 .subtitle {
   font-size: 1.25rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   max-width: 750px;
   margin: 0 auto 20px;
   line-height: 1.7;
@@ -92,20 +83,12 @@
   animation: fadeInUp 1s ease;
 }
 
-:global(body.darkMode) .subtitle {
-  color: #9ca3af;
-}
-
 .lastUpdated {
   font-size: 0.9rem;
-  color: #9ca3af;
+  color: var(--text-muted);
   font-style: italic;
   margin-top: 15px;
   animation: fadeInUp 1.2s ease;
-}
-
-:global(body.darkMode) .lastUpdated {
-  color: #6b7280;
 }
 
 /* ===== Content Section ===== */
@@ -117,9 +100,9 @@
 
 .cookieSection {
   padding: 35px;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-card);
   border: 1px solid rgba(16, 185, 129, 0.1);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -150,13 +133,10 @@
 }
 
 :global(body.darkMode) .cookieSection {
-  background: rgba(31, 41, 55, 0.8);
   border-color: rgba(16, 185, 129, 0.2);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 :global(body.darkMode) .cookieSection:hover {
-  background: rgba(31, 41, 55, 0.95);
   box-shadow: 0 8px 30px rgba(16, 185, 129, 0.25);
 }
 
@@ -164,24 +144,16 @@
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 20px;
-  color: #111827;
+  color: var(--text-heading);
   letter-spacing: -0.01em;
-}
-
-:global(body.darkMode) .cookieSection h2 {
-  color: #f9fafb;
 }
 
 .cookieSection p {
   font-size: 1.05rem;
-  color: #4b5563;
+  color: var(--text-body);
   line-height: 1.8;
   margin-bottom: 15px;
   letter-spacing: 0.01em;
-}
-
-:global(body.darkMode) .cookieSection p {
-  color: #9ca3af;
 }
 
 .cookieSection ul {
@@ -192,7 +164,7 @@
 
 .cookieSection ul li {
   font-size: 1.05rem;
-  color: #4b5563;
+  color: var(--text-body);
   line-height: 1.8;
   padding-left: 30px;
   position: relative;
@@ -208,10 +180,6 @@
   font-weight: bold;
   font-size: 1.5rem;
   line-height: 1.2;
-}
-
-:global(body.darkMode) .cookieSection ul li {
-  color: #9ca3af;
 }
 
 :global(body.darkMode) .cookieSection ul li::before {
@@ -241,12 +209,8 @@
   font-size: 1.4rem;
   font-weight: 700;
   margin-bottom: 15px;
-  color: #111827;
+  color: var(--text-heading);
   letter-spacing: -0.01em;
-}
-
-:global(body.darkMode) .cookieType h3 {
-  color: #f9fafb;
 }
 
 .cookieType p {
@@ -262,11 +226,7 @@
 .cookieDetails p {
   font-size: 0.95rem;
   margin: 8px 0;
-  color: #4b5563;
-}
-
-:global(body.darkMode) .cookieDetails p {
-  color: #9ca3af;
+  color: var(--text-body);
 }
 
 .cookieDetails strong {
@@ -292,11 +252,7 @@
 
 .contactInfo p {
   margin: 8px 0;
-  color: #111827;
-}
-
-:global(body.darkMode) .contactInfo p {
-  color: #e5e7eb;
+  color: var(--text-primary);
 }
 
 .contactInfo strong {
@@ -326,12 +282,8 @@
   align-items: center;
   gap: 10px;
   font-size: 1.05rem;
-  color: #111827;
+  color: var(--text-primary);
   margin-bottom: 10px;
-}
-
-:global(body.darkMode) .statusBadge {
-  color: #e5e7eb;
 }
 
 .statusBadge i {
@@ -354,34 +306,22 @@
 
 .consentDate {
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
   font-style: italic;
-}
-
-:global(body.darkMode) .consentDate {
-  color: #9ca3af;
 }
 
 .preferenceActions {
   margin-top: 30px;
   padding-top: 30px;
-  border-top: 2px solid #e5e7eb;
-}
-
-:global(body.darkMode) .preferenceActions {
-  border-top-color: #374151;
+  border-top: 2px solid var(--border-color);
 }
 
 .preferenceActions h3 {
   font-size: 1.3rem;
   font-weight: 700;
   margin-bottom: 20px;
-  color: #111827;
-}
-
-:global(body.darkMode) .preferenceActions h3 {
-  color: #f9fafb;
+  color: var(--text-heading);
 }
 
 .preferenceButtons {
@@ -395,8 +335,8 @@
   align-items: center;
   gap: 15px;
   padding: 20px;
-  background: #ffffff;
-  border: 2px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -409,11 +349,6 @@
   background: rgba(16, 185, 129, 0.05);
   transform: translateX(5px);
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
-}
-
-:global(body.darkMode) .prefButton {
-  background: rgba(31, 41, 55, 0.8);
-  border-color: #374151;
 }
 
 :global(body.darkMode) .prefButton:hover {
@@ -439,23 +374,15 @@
   display: block;
   font-size: 1.05rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-heading);
   margin-bottom: 5px;
-}
-
-:global(body.darkMode) .prefButton strong {
-  color: #f9fafb;
 }
 
 .prefButton span {
   display: block;
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   line-height: 1.5;
-}
-
-:global(body.darkMode) .prefButton span {
-  color: #9ca3af;
 }
 
 /* ===== Active Cookies Section ===== */
@@ -476,14 +403,10 @@
   font-size: 1.2rem;
   font-weight: 700;
   margin: 0 0 20px 0;
-  color: #111827;
+  color: var(--text-heading);
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-:global(body.darkMode) .activeCookiesSection h3 {
-  color: #f9fafb;
 }
 
 .activeCookiesSection h3 i {
@@ -505,14 +428,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
-}
-
-:global(body.darkMode) .activeCookieItem {
-  background: rgba(31, 41, 55, 0.8);
-  border-color: #374151;
+  border: 1px solid var(--border-color);
 }
 
 .cookieName {
@@ -533,12 +451,8 @@
 
 .cookieName strong {
   font-size: 0.95rem;
-  color: #111827;
+  color: var(--text-primary);
   font-weight: 600;
-}
-
-:global(body.darkMode) .cookieName strong {
-  color: #e5e7eb;
 }
 
 .cookieTypeBadge {
@@ -580,13 +494,9 @@
 }
 
 .noCookies {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-style: italic;
   margin: 0;
-}
-
-:global(body.darkMode) .noCookies {
-  color: #9ca3af;
 }
 
 /* ===== Granular Controls ===== */
@@ -599,15 +509,10 @@
 
 .cookieControl {
   padding: 20px;
-  background: #f9fafb;
+  background: var(--bg-surface);
   border-radius: 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   transition: all 0.3s ease;
-}
-
-:global(body.darkMode) .cookieControl {
-  background: rgba(31, 41, 55, 0.6);
-  border-color: #374151;
 }
 
 .cookieControl:hover {
@@ -650,34 +555,22 @@
   display: block;
   font-size: 1rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-heading);
   margin-bottom: 4px;
-}
-
-:global(body.darkMode) .controlInfo strong {
-  color: #f9fafb;
 }
 
 .controlInfo span {
   display: block;
   font-size: 0.85rem;
-  color: #6b7280;
-}
-
-:global(body.darkMode) .controlInfo span {
-  color: #9ca3af;
+  color: var(--text-secondary);
 }
 
 .controlDescription {
   font-size: 0.85rem;
-  color: #4b5563;
+  color: var(--text-body);
   margin: 0;
   line-height: 1.6;
   padding-left: 52px;
-}
-
-:global(body.darkMode) .controlDescription {
-  color: #9ca3af;
 }
 
 /* ===== Toggle Switch (same as CookieConsent) ===== */
@@ -746,25 +639,17 @@
 .quickActions {
   margin-top: 30px;
   padding-top: 30px;
-  border-top: 2px solid #e5e7eb;
-}
-
-:global(body.darkMode) .quickActions {
-  border-top-color: #374151;
+  border-top: 2px solid var(--border-color);
 }
 
 .quickActions h3 {
   font-size: 1.3rem;
   font-weight: 700;
   margin-bottom: 20px;
-  color: #111827;
+  color: var(--text-heading);
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-:global(body.darkMode) .quickActions h3 {
-  color: #f9fafb;
 }
 
 .quickActions h3 i {

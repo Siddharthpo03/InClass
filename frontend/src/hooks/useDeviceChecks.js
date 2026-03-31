@@ -25,7 +25,7 @@ export default function useDeviceChecks() {
       if (window.PublicKeyCredential) {
         results.webAuthnSupported = true;
 
-        // Check if platform authenticator (fingerprint/FaceID/Windows Hello) is actually available
+        // Check if platform authenticator (FaceID/Windows Hello/camera) is actually available
         try {
           const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
           results.platformAuthenticatorAvailable = available;

@@ -1,14 +1,9 @@
 /* Job Application Page - High-End Company Style (Amazon, Google, Facebook) */
 
 :global(body) {
-  background: linear-gradient(to top, #d4f5eb 0%, #ffffff 100%);
+  background: var(--bg-page);
   background-attachment: fixed;
   transition: background 0.3s ease;
-}
-
-:global(body.darkMode) {
-  background: linear-gradient(to top, #1a1a2e 0%, #16213e 100%);
-  background-attachment: fixed;
 }
 
 .applicationPageWrapper {
@@ -22,12 +17,8 @@
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "kern" 1, "liga" 1;
   text-rendering: optimizeLegibility;
-  color: #111827;
+  color: var(--text-body);
   transition: color 0.3s ease;
-}
-
-:global(body.darkMode) .applicationPageWrapper {
-  color: #e5e7eb;
 }
 
 .applicationContainer {
@@ -50,9 +41,9 @@
   gap: 8px;
   padding: 10px 20px;
   background: transparent;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
@@ -67,40 +58,29 @@
   transform: translateX(-3px);
 }
 
-:global(body.darkMode) .backButton {
-  border-color: #374151;
-  color: #9ca3af;
-}
-
 :global(body.darkMode) .backButton:hover {
   border-color: #34d399;
   color: #34d399;
 }
 
 .headerContent {
-  background: #ffffff;
+  background: var(--bg-card);
   padding: 30px;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-card);
   border: 1px solid rgba(16, 185, 129, 0.1);
 }
 
 :global(body.darkMode) .headerContent {
-  background: rgba(31, 41, 55, 0.8);
   border-color: rgba(16, 185, 129, 0.2);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .jobTitleSection h1 {
   font-size: 2.2rem;
   font-weight: 700;
   margin-bottom: 15px;
-  color: #111827;
+  color: var(--text-heading);
   letter-spacing: -0.01em;
-}
-
-:global(body.darkMode) .jobTitleSection h1 {
-  color: #f9fafb;
 }
 
 .jobMetaInfo {
@@ -146,17 +126,15 @@
 
 /* ===== Application Form ===== */
 .applicationForm {
-  background: #ffffff;
+  background: var(--bg-card);
   padding: 40px;
   border-radius: 20px;
-  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
   border: 1px solid rgba(16, 185, 129, 0.1);
 }
 
 :global(body.darkMode) .applicationForm {
-  background: rgba(31, 41, 55, 0.8);
   border-color: rgba(16, 185, 129, 0.2);
-  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
 }
 
 .submitMessage {
@@ -172,42 +150,26 @@
 }
 
 .submitMessage.success {
-  background: #d1fae5;
-  color: #065f46;
-  border: 2px solid #10b981;
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 2px solid var(--success-border);
 }
 
 .submitMessage.error {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 2px solid #ef4444;
-}
-
-:global(body.darkMode) .submitMessage.success {
-  background: rgba(16, 185, 129, 0.2);
-  color: #34d399;
-  border-color: #10b981;
-}
-
-:global(body.darkMode) .submitMessage.error {
-  background: rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
-  border-color: #ef4444;
+  background: var(--error-bg);
+  color: var(--error-text);
+  border: 2px solid var(--error-border);
 }
 
 /* ===== Form Sections ===== */
 .formSection {
   margin-bottom: 40px;
   padding-bottom: 40px;
-  border-bottom: 2px solid #f3f4f6;
+  border-bottom: 2px solid var(--border-color);
 }
 
 .formSection:last-of-type {
   border-bottom: none;
-}
-
-:global(body.darkMode) .formSection {
-  border-bottom-color: #374151;
 }
 
 .sectionHeader {
@@ -218,7 +180,7 @@
   font-size: 1.6rem;
   font-weight: 700;
   margin-bottom: 8px;
-  color: #111827;
+  color: var(--text-heading);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -230,23 +192,15 @@
   font-size: 1.4rem;
 }
 
-:global(body.darkMode) .sectionHeader h2 {
-  color: #f9fafb;
-}
-
 :global(body.darkMode) .sectionHeader h2 i {
   color: #34d399;
 }
 
 .sectionHeader p {
   font-size: 0.95rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
   letter-spacing: 0.01em;
-}
-
-:global(body.darkMode) .sectionHeader p {
-  color: #9ca3af;
 }
 
 /* ===== Form Rows and Groups ===== */
@@ -266,12 +220,8 @@
   font-size: 0.95rem;
   font-weight: 600;
   margin-bottom: 8px;
-  color: #111827;
+  color: var(--text-primary);
   letter-spacing: 0.01em;
-}
-
-:global(body.darkMode) .formGroup label {
-  color: #e5e7eb;
 }
 
 .required {
@@ -283,13 +233,13 @@
 .formGroup select,
 .formGroup textarea {
   padding: 14px 18px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-input);
   border-radius: 10px;
   font-size: 1rem;
   font-family: "Poppins", sans-serif;
   transition: all 0.3s ease;
-  background: #ffffff;
-  color: #111827;
+  background: var(--bg-input);
+  color: var(--text-primary);
   box-sizing: border-box;
   letter-spacing: 0.01em;
 }
@@ -301,14 +251,6 @@
   border-color: #10b981;
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
   transform: translateY(-2px);
-}
-
-:global(body.darkMode) .formGroup input,
-:global(body.darkMode) .formGroup select,
-:global(body.darkMode) .formGroup textarea {
-  background: rgba(17, 24, 39, 0.8);
-  border-color: #374151;
-  color: #e5e7eb;
 }
 
 :global(body.darkMode) .formGroup input:focus,
@@ -335,17 +277,13 @@
 .charCount {
   margin-top: 8px;
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   text-align: right;
 }
 
 .charWarning {
   color: #ef4444;
   margin-left: 8px;
-}
-
-:global(body.darkMode) .charCount {
-  color: #9ca3af;
 }
 
 .errorText {
@@ -371,9 +309,9 @@
 .fileUploadLabel {
   display: block;
   padding: 40px;
-  border: 3px dashed #d1d5db;
+  border: 3px dashed var(--border-color);
   border-radius: 12px;
-  background: #f9fafb;
+  background: var(--bg-surface);
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
@@ -383,11 +321,6 @@
   border-color: #10b981;
   background: rgba(16, 185, 129, 0.05);
   transform: translateY(-2px);
-}
-
-:global(body.darkMode) .fileUploadLabel {
-  background: rgba(17, 24, 39, 0.5);
-  border-color: #374151;
 }
 
 :global(body.darkMode) .fileUploadLabel:hover {
@@ -414,22 +347,14 @@
 .fileUploadText {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   display: block;
   margin-bottom: 5px;
 }
 
-:global(body.darkMode) .fileUploadText {
-  color: #e5e7eb;
-}
-
 .fileUploadHint {
   font-size: 0.9rem;
-  color: #6b7280;
-}
-
-:global(body.darkMode) .fileUploadHint {
-  color: #9ca3af;
+  color: var(--text-secondary);
 }
 
 /* ===== Form Actions ===== */
@@ -439,19 +364,15 @@
   gap: 20px;
   margin-top: 40px;
   padding-top: 30px;
-  border-top: 2px solid #f3f4f6;
-}
-
-:global(body.darkMode) .formActions {
-  border-top-color: #374151;
+  border-top: 2px solid var(--border-color);
 }
 
 .cancelButton {
   padding: 14px 32px;
   background: transparent;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 10px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -462,19 +383,8 @@
 
 .cancelButton:hover {
   border-color: #6b7280;
-  color: #111827;
-  background: #f9fafb;
-}
-
-:global(body.darkMode) .cancelButton {
-  border-color: #374151;
-  color: #9ca3af;
-}
-
-:global(body.darkMode) .cancelButton:hover {
-  border-color: #6b7280;
-  color: #e5e7eb;
-  background: rgba(31, 41, 55, 0.8);
+  color: var(--text-primary);
+  background: var(--bg-surface);
 }
 
 .submitButton {
@@ -517,25 +427,17 @@
   margin-top: 30px;
   padding-top: 20px;
   text-align: center;
-  border-top: 1px solid #f3f4f6;
-}
-
-:global(body.darkMode) .formFooter {
-  border-top-color: #374151;
+  border-top: 1px solid var(--border-color);
 }
 
 .formFooter p {
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   margin: 0;
-}
-
-:global(body.darkMode) .formFooter p {
-  color: #9ca3af;
 }
 
 .formFooter i {

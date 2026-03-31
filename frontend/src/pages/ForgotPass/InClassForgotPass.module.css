@@ -1,14 +1,9 @@
 /* Premium Forgot Password Page Styles */
 
 :global(body) {
-  background: linear-gradient(to top, #d4f5eb 0%, #ffffff 100%);
+  background: var(--bg-page);
   background-attachment: fixed;
   transition: background 0.3s ease;
-}
-
-:global(body.darkMode) {
-  background: linear-gradient(to top, #1a1a2e 0%, #16213e 100%);
-  background-attachment: fixed;
 }
 
 .forgotPasswordPageWrapper {
@@ -46,27 +41,18 @@
   position: relative;
   width: 100%;
   max-width: 520px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
   padding: 48px 40px;
   transition: all 0.3s ease;
   overflow: hidden;
   margin: 0 auto;
 }
 
-:global(body.darkMode) .forgotPasswordCard {
-  background: #1e293b;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-}
-
 .forgotPasswordCard:hover {
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-card-hover);
   transform: translateY(-1px);
-}
-
-:global(body.darkMode) .forgotPasswordCard:hover {
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
 }
 
 .cardDecoration {
@@ -158,13 +144,9 @@
 
 .subtitle {
   font-size: 1rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
   line-height: 1.6;
-}
-
-:global(body.darkMode) .subtitle {
-  color: #9ca3af;
 }
 
 .forgotPasswordForm {
@@ -185,27 +167,15 @@
 }
 
 .messageSuccess {
-  background: #d1fae5;
-  color: #065f46;
-  border: 1px solid #10b981;
-}
-
-:global(body.darkMode) .messageSuccess {
-  background: #064e3b;
-  color: #6ee7b7;
-  border-color: #10b981;
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
 }
 
 .messageError {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #ef4444;
-}
-
-:global(body.darkMode) .messageError {
-  background: #7f1d1d;
-  color: #fca5a5;
-  border-color: #ef4444;
+  background: var(--error-bg);
+  color: var(--error-text);
+  border: 1px solid var(--error-border);
 }
 
 .messageBox i {
@@ -236,14 +206,10 @@
 .formLabel {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-body);
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-:global(body.darkMode) .formLabel {
-  color: #e5e7eb;
 }
 
 .formLabel i {
@@ -262,32 +228,22 @@
   position: absolute;
   left: 18px;
   font-size: 1.25rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   z-index: 1;
   pointer-events: none;
-}
-
-:global(body.darkMode) .inputWrapper > i {
-  color: #9ca3af;
 }
 
 .inputWrapper input {
   width: 100%;
   padding: 16px 50px 16px 50px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-input);
   border-radius: 14px;
   font-size: 1rem;
-  background: white;
-  color: #1f2937;
+  background: var(--bg-input);
+  color: var(--text-primary);
   transition: all 0.3s ease;
   box-sizing: border-box;
   height: 52px;
-}
-
-:global(body.darkMode) .inputWrapper input {
-  background: #0f172a;
-  border-color: #334155;
-  color: #f9fafb;
 }
 
 .inputWrapper input:focus {
@@ -298,7 +254,7 @@
 }
 
 .inputWrapper input::placeholder {
-  color: #9ca3af;
+  color: var(--text-placeholder);
 }
 
 .inputError {
@@ -382,24 +338,15 @@
   align-items: center;
   text-align: center;
   margin: 24px 0;
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 0.875rem;
-}
-
-:global(body.darkMode) .divider {
-  color: #6b7280;
 }
 
 .divider::before,
 .divider::after {
   content: "";
   flex: 1;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-:global(body.darkMode) .divider::before,
-:global(body.darkMode) .divider::after {
-  border-bottom-color: #334155;
+  border-bottom: 1px solid var(--border-input);
 }
 
 .divider span {
@@ -414,11 +361,7 @@
 .backToLoginLink p {
   margin: 0;
   font-size: 0.95rem;
-  color: #6b7280;
-}
-
-:global(body.darkMode) .backToLoginLink p {
-  color: #9ca3af;
+  color: var(--text-secondary);
 }
 
 .backToLoginLink a {
@@ -461,23 +404,15 @@
 .successTitle {
   font-size: 2rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-heading);
   margin: 0 0 16px 0;
-}
-
-:global(body.darkMode) .successTitle {
-  color: #f9fafb;
 }
 
 .successText {
   font-size: 1.1rem;
-  color: #4b5563;
+  color: var(--text-secondary);
   margin: 0 0 12px 0;
   line-height: 1.6;
-}
-
-:global(body.darkMode) .successText {
-  color: #d1d5db;
 }
 
 .successText strong {
@@ -491,13 +426,9 @@
 
 .successHint {
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--text-muted);
   margin: 0 0 32px 0;
   line-height: 1.5;
-}
-
-:global(body.darkMode) .successHint {
-  color: #9ca3af;
 }
 
 .backButton {
@@ -530,21 +461,13 @@
 
 .resendSection {
   padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
-}
-
-:global(body.darkMode) .resendSection {
-  border-top-color: #334155;
+  border-top: 1px solid var(--border-input);
 }
 
 .resendSection p {
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--text-muted);
   margin: 0 0 12px 0;
-}
-
-:global(body.darkMode) .resendSection p {
-  color: #9ca3af;
 }
 
 .resendButton {
@@ -639,13 +562,9 @@
 
 .illustrationContent > p {
   font-size: 1.1rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin: 0 0 32px 0;
-}
-
-:global(body.darkMode) .illustrationContent > p {
-  color: #9ca3af;
 }
 
 .featureList {
@@ -687,11 +606,7 @@
 .featureItem span {
   font-size: 1rem;
   font-weight: 500;
-  color: #374151;
-}
-
-:global(body.darkMode) .featureItem span {
-  color: #e5e7eb;
+  color: var(--text-body);
 }
 
 /* Responsive Design */

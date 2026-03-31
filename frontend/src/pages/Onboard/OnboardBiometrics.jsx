@@ -4,12 +4,11 @@ import {
   startRegistration,
   startAuthentication,
 } from "@simplewebauthn/browser";
-import * as faceapi from "face-api.js";
 import apiClient from "../../utils/apiClient";
+import { enrollFace, recognizeFace } from "../../services/faceRecognitionApi";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import useDeviceChecks from "../../hooks/useDeviceChecks";
-import { loadFaceModels } from "../../utils/faceModels";
 import styles from "./OnboardBiometrics.module.css";
 
 const OnboardBiometrics = () => {
@@ -27,9 +26,6 @@ const OnboardBiometrics = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [isTesting, setIsTesting] = useState({ webauthn: false, face: false });
-  const [modelsLoaded, setModelsLoaded] = useState(false);
-  const [modelsLoading, setModelsLoading] = useState(false);
-  const [modelError, setModelError] = useState(null);
   const [showFaceCapture, setShowFaceCapture] = useState(false);
   const [enrollmentProgress, setEnrollmentProgress] = useState("");
   const [capturedImage, setCapturedImage] = useState(null);
@@ -75,39 +71,9 @@ const OnboardBiometrics = () => {
     }
   }, [searchParams]);
 
-  // Load face-api.js models on mount
-  useEffect(() => {
-    const loadModels = async () => {
-      setModelsLoading(true);
-      setModelError(null);
-      const result = await loadFaceModels();
-      setModelsLoading(false);
-      if (result.ok) {
-        setModelsLoaded(true);
-        setModelError(null);
-      } else {
-        setModelsLoaded(false);
-        setModelError(result.error);
-      }
-    };
-
-    loadModels();
-  }, []);
-
-  // Retry loading models
-  const handleRetryModels = async () => {
-    setModelsLoading(true);
-    setModelError(null);
-    const result = await loadFaceModels();
-    setModelsLoading(false);
-    if (result.ok) {
-      setModelsLoaded(true);
-      setModelError(null);
-    } else {
-      setModelsLoaded(false);
-      setModelError(result.error);
-    }
-  };
+  const [modelsLoaded] = useState(true);
+  const [modelsLoading] = useState(false);
+  const [modelError] = useState(null);
 
   // Check existing biometric status and get user role
   useEffect(() => {
@@ -130,6 +96,7 @@ const OnboardBiometrics = () => {
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- checkBiometricStatus is stable, run when userId/userRole change
   }, [userId, userRole]);
 
   const checkBiometricStatus = async () => {
@@ -381,11 +348,12 @@ const OnboardBiometrics = () => {
 
   // For students: only face is required. For faculty/admin: both are required.
   const isStudent = userRole === "student";
+  const isFaculty = userRole === "faculty";
 
-  // Auto-send OTP when consent is checked and user is a student
+  // Auto-send OTP when consent is checked (for both students and faculty)
   useEffect(() => {
     if (
-      isStudent &&
+      (isStudent || isFaculty) &&
       consentChecked &&
       !otpVerified &&
       !otpSent &&
@@ -396,6 +364,7 @@ const OnboardBiometrics = () => {
     }
   }, [
     isStudent,
+    isFaculty,
     consentChecked,
     otpVerified,
     otpSent,
@@ -443,8 +412,8 @@ const OnboardBiometrics = () => {
       return;
     }
 
-    // For students, require OTP verification first
-    if (userRole === "student" && !otpVerified) {
+    // For students and faculty, require OTP verification first
+    if ((isStudent || isFaculty) && !otpVerified) {
       setErrorMessage("Please verify OTP first to unlock face enrollment.");
       return;
     }
@@ -501,13 +470,6 @@ const OnboardBiometrics = () => {
       return;
     }
 
-    if (!modelsLoaded) {
-      setErrorMessage(
-        "Face recognition models are not loaded yet. Please wait for models to load."
-      );
-      return;
-    }
-
     setEnrollmentProgress("Capturing image...");
     setErrorMessage(null);
 
@@ -529,55 +491,8 @@ const OnboardBiometrics = () => {
 
       setEnrollmentProgress("Detecting face...");
 
-      // Use SSD MobileNet v1 - MUST match loaded models (ssdMobilenetv1)
-      // Ensure models are loaded before calling detection
-      if (!faceapi.nets.ssdMobilenetv1.isLoaded) {
-        throw new Error(
-          "SSD MobileNet v1 model not loaded. Please wait for models to load completely."
-        );
-      }
-
-      const detection = await faceapi
-        .detectSingleFace(canvas, new faceapi.SsdMobilenetv1Options())
-        .withFaceLandmarks()
-        .withFaceDescriptor();
-
-      if (!detection) {
-        setCapturedImage(null);
-        setCapturedDescriptor(null);
-        setEnrollmentProgress("");
-        throw new Error(
-          "No face detected. Please ensure your face is clearly visible, well-lit, and centered in the frame."
-        );
-      }
-
-      setEnrollmentProgress("Processing face data...");
-
-      // Get descriptor array
-      const descriptor = Array.from(detection.descriptor);
-
-      // Simple liveness check: detect if eyes are open (basic blink detection)
-      const landmarks = detection.landmarks;
-      const leftEye = landmarks.getLeftEye();
-      const rightEye = landmarks.getRightEye();
-
-      // Calculate eye aspect ratio (EAR) for both eyes
-      const leftEAR = calculateEAR(leftEye);
-      const rightEAR = calculateEAR(rightEye);
-      const avgEAR = (leftEAR + rightEAR) / 2;
-
-      // If eyes are too closed, might be a photo (basic check)
-      if (avgEAR < 0.2) {
-        setCapturedImage(null);
-        setCapturedDescriptor(null);
-        setEnrollmentProgress("");
-        throw new Error(
-          "Liveness check failed. Please ensure you are looking directly at the camera with eyes open."
-        );
-      }
-
-      // Store descriptor for enrollment
-      setCapturedDescriptor(descriptor);
+      // For FaceNet backend, we only need the captured image.
+      // Embedding and liveness checks are handled server-side.
       setEnrollmentProgress("");
 
       // Stop video stream to show captured image
@@ -590,8 +505,6 @@ const OnboardBiometrics = () => {
       console.error("[Face Capture] Error details:", {
         message: error.message,
         name: error.name,
-        modelsLoaded: modelsLoaded,
-        ssdMobilenetv1Loaded: faceapi.nets.ssdMobilenetv1?.isLoaded,
       });
 
       let errorMsg =
@@ -628,8 +541,8 @@ const OnboardBiometrics = () => {
 
   // Enroll with captured face
   const enrollCapturedFace = async () => {
-    if (!capturedDescriptor) {
-      setErrorMessage("No face data available. Please capture again.");
+    if (!capturedImage) {
+      setErrorMessage("No face image available. Please capture again.");
       return;
     }
 
@@ -639,54 +552,36 @@ const OnboardBiometrics = () => {
     setEnrollmentProgress("Sending to server...");
 
     try {
-      // Send embedding to backend
-      const response = await apiClient.post("/biometrics/face/enroll", {
-        userId: userId,
-        embedding: capturedDescriptor,
-      });
+      const response = await fetch(capturedImage);
+      const blob = await response.blob();
 
-      if (response.data?.success) {
-        setEnrollmentProgress("Finalizing...");
-        setSuccessMessage("✅ Face enrolled successfully!");
-        setEnrollmentStatus((prev) => ({ ...prev, face: true }));
-        setShowFaceCapture(false);
-        setCapturedImage(null);
-        setCapturedDescriptor(null);
-        stopCamera();
-        setEnrollmentProgress("");
-        await checkBiometricStatus();
-      } else {
-        throw new Error(response.data?.error || "Enrollment failed");
-      }
+      const result = await enrollFace({ userId, imageBlob: blob });
+
+      setEnrollmentProgress("Finalizing...");
+      setSuccessMessage("✅ Face enrolled successfully!");
+      setEnrollmentStatus((prev) => ({ ...prev, face: true }));
+      setShowFaceCapture(false);
+      setCapturedImage(null);
+      setCapturedDescriptor(null);
+      stopCamera();
+      setEnrollmentProgress("");
+
+      // Refresh biometric status to get latest enrollment state
+      await checkBiometricStatus();
     } catch (error) {
       console.error("Face enrollment error:", error);
-      setErrorMessage(
+      const message =
         error.response?.data?.message ||
-          error.message ||
-          "Failed to enroll face. Please try again."
-      );
+        error.message ||
+        "Failed to enroll face. Please try again.";
+      setErrorMessage(message);
       setEnrollmentProgress("");
     } finally {
       setIsEnrolling(false);
     }
   };
 
-  // Calculate Eye Aspect Ratio (EAR) for liveness detection
-  const calculateEAR = (eye) => {
-    // Vertical distances
-    const vertical1 = Math.sqrt(
-      Math.pow(eye[1].x - eye[5].x, 2) + Math.pow(eye[1].y - eye[5].y, 2)
-    );
-    const vertical2 = Math.sqrt(
-      Math.pow(eye[2].x - eye[4].x, 2) + Math.pow(eye[2].y - eye[4].y, 2)
-    );
-    // Horizontal distance
-    const horizontal = Math.sqrt(
-      Math.pow(eye[0].x - eye[3].x, 2) + Math.pow(eye[0].y - eye[3].y, 2)
-    );
-    // EAR formula
-    return (vertical1 + vertical2) / (2.0 * horizontal);
-  };
+  // EAR-based liveness logic removed; liveness can be handled server-side if needed.
 
   // Test WebAuthn
   const handleTestWebAuthn = async () => {
@@ -718,7 +613,7 @@ const OnboardBiometrics = () => {
       );
 
       if (completeResponse.data?.verified) {
-        setSuccessMessage("✅ Fingerprint test successful!");
+        setSuccessMessage("✅ Biometric test successful!");
       } else {
         throw new Error("Verification failed");
       }
@@ -727,7 +622,7 @@ const OnboardBiometrics = () => {
       setErrorMessage(
         error.response?.data?.message ||
           error.message ||
-          "Fingerprint test failed. Please try again."
+          "Biometric test failed. Please try again."
       );
     } finally {
       setIsTesting((prev) => ({ ...prev, webauthn: false }));
@@ -745,19 +640,6 @@ const OnboardBiometrics = () => {
         throw new Error("Camera not ready.");
       }
 
-      if (!modelsLoaded) {
-        throw new Error(
-          "Face recognition models are not loaded yet. Please wait for models to load."
-        );
-      }
-
-      // Ensure SSD MobileNet v1 is loaded
-      if (!faceapi.nets.ssdMobilenetv1.isLoaded) {
-        throw new Error(
-          "SSD MobileNet v1 model not loaded. Please wait for models to load completely."
-        );
-      }
-
       const video = videoRef.current;
       const canvas = canvasRef.current;
       const context = canvas.getContext("2d");
@@ -766,35 +648,19 @@ const OnboardBiometrics = () => {
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Use SSD MobileNet v1 to match loaded models
-      const detection = await faceapi
-        .detectSingleFace(canvas, new faceapi.SsdMobilenetv1Options())
-        .withFaceLandmarks()
-        .withFaceDescriptor();
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+      const resp = await fetch(dataUrl);
+      const blob = await resp.blob();
 
-      if (!detection) {
-        throw new Error("No face detected.");
-      }
+      const result = await recognizeFace({ imageBlob: blob });
 
-      const descriptor = Array.from(detection.descriptor);
-
-      const response = await apiClient.post("/biometrics/face/verify", {
-        userId: userId,
-        embedding: descriptor,
-      });
-
-      if (response.data?.verified) {
+      if (result.match) {
         setSuccessMessage(
-          `✅ Face test successful! (Score: ${(
-            response.data.score * 100
-          ).toFixed(1)}%)`
+          `✅ Face test successful! (Distance: ${result.distance.toFixed(3)})`
         );
       } else {
         throw new Error(
-          response.data?.message ||
-            `Verification failed (Score: ${(response.data.score * 100).toFixed(
-              1
-            )}%)`
+          `Verification failed (Best distance: ${result.distance.toFixed(3)})`
         );
       }
     } catch (error) {
@@ -837,12 +703,14 @@ const OnboardBiometrics = () => {
     }
   }, []);
 
-  // For students: only face is required. For faculty/admin: both are required.
-  const hasEnrolledBoth = isStudent
-    ? enrollmentStatus.face
-    : enrollmentStatus.webauthn && enrollmentStatus.face;
+  // For students and faculty: only face is required. For admin: both are required.
+  const hasEnrolledBoth =
+    isStudent || isFaculty
+      ? enrollmentStatus.face
+      : enrollmentStatus.webauthn && enrollmentStatus.face;
   const canEnrollDevice =
     !isStudent &&
+    !isFaculty &&
     consentChecked &&
     !isEnrolling &&
     deviceChecks.checksDone &&
@@ -853,7 +721,7 @@ const OnboardBiometrics = () => {
     deviceChecks.checksDone &&
     deviceChecks.cameraAvailable &&
     modelsLoaded &&
-    (isStudent ? otpVerified : true);
+    (isStudent || isFaculty ? otpVerified : true);
 
   // Determine status messages
   const deviceBiometricStatus = !deviceChecks.checksDone
@@ -888,7 +756,7 @@ const OnboardBiometrics = () => {
             <h1 className={styles.title}>Biometric Onboarding</h1>
             <p className={styles.subtitle}>
               Secure your account with biometric authentication. Both
-              fingerprint and face are required for attendance.
+              face enrollment is required for attendance.
             </p>
           </div>
 
@@ -938,7 +806,7 @@ const OnboardBiometrics = () => {
             <div className={styles.consentText}>
               <p>
                 I consent to the collection and use of my biometric data (face
-                and/or fingerprint) for identity verification and attendance
+                for identity verification and attendance
                 marking by InClass (Variance Technologies). I understand raw
                 biometric images will not be stored; only encrypted templates or
                 device-managed credentials will be used. I can revoke this
@@ -963,7 +831,7 @@ const OnboardBiometrics = () => {
 
           {/* Enrollment Status */}
           <div className={styles.statusSection}>
-            {!isStudent && (
+            {!isStudent && !isFaculty && (
               <div className={styles.statusItem}>
                 <i
                   className={`bx ${
@@ -1005,8 +873,8 @@ const OnboardBiometrics = () => {
             </div>
           </div>
 
-          {/* OTP Flow for Students */}
-          {isStudent && !otpVerified && (
+          {/* OTP Flow for Students and Faculty */}
+          {(isStudent || isFaculty) && !otpVerified && (
             <div className={styles.otpSection}>
               <h2 className={styles.sectionTitle}>OTP Verification</h2>
               <p className={styles.sectionDescription}>
@@ -1095,11 +963,11 @@ const OnboardBiometrics = () => {
           {/* Enrollment Options */}
           {!hasEnrolledBoth && (
             <div className={styles.enrollmentOptions}>
-              {/* Device Biometric Panel - Only for Faculty/Admin */}
-              {!isStudent && (
+              {/* Device Biometric Panel - Only for Admin (not for Faculty) */}
+              {!isStudent && !isFaculty && (
                 <div className={styles.enrollmentPanel}>
                   <div className={styles.panelHeader}>
-                    <i className="bx bx-fingerprint"></i>
+                    <i className="bx bx-face"></i>
                     <h3>Device Biometric (Required)</h3>
                   </div>
                   <div className={styles.panelBody}>
@@ -1109,7 +977,7 @@ const OnboardBiometrics = () => {
                       <>
                         <p className={styles.statusText}>
                           {deviceChecks.platformAuthenticatorAvailable
-                            ? "✅ Fingerprint sensor available"
+                            ? "✅ Biometric sensor available"
                             : "❌ Device biometric unavailable on this device"}
                         </p>
                         {!enrollmentStatus.webauthn ? (
@@ -1145,7 +1013,7 @@ const OnboardBiometrics = () => {
                                 </>
                               ) : (
                                 <>
-                                  <i className="bx bx-fingerprint"></i>
+                                  <i className="bx bx-face"></i>
                                   <span>Register Device Biometric</span>
                                 </>
                               )}
@@ -1165,7 +1033,7 @@ const OnboardBiometrics = () => {
                             ) : (
                               <>
                                 <i className="bx bx-check"></i>
-                                <span>Test Fingerprint</span>
+                                <span>Test Biometric</span>
                               </>
                             )}
                           </button>
@@ -1256,7 +1124,7 @@ const OnboardBiometrics = () => {
                                   enable enrollment
                                 </p>
                               )}
-                              {isStudent && !otpVerified && (
+                              {(isStudent || isFaculty) && !otpVerified && (
                                 <p
                                   className={styles.statusText}
                                   style={{
@@ -1275,7 +1143,7 @@ const OnboardBiometrics = () => {
                                 title={
                                   !consentChecked
                                     ? "Please check consent checkbox first"
-                                    : isStudent && !otpVerified
+                                    : (isStudent || isFaculty) && !otpVerified
                                     ? "Please verify OTP first"
                                     : !deviceChecks.checksDone
                                     ? "Checking device capabilities..."
@@ -1549,9 +1417,18 @@ const OnboardBiometrics = () => {
               </p>
               <button
                 className={styles.continueButton}
-                onClick={() => navigate("/login")}
+                onClick={() => {
+                  // Redirect based on role
+                  if (isFaculty) {
+                    navigate("/faculty/dashboard", { replace: true });
+                  } else if (isStudent) {
+                    navigate("/student/dashboard", { replace: true });
+                  } else {
+                    navigate("/login", { replace: true });
+                  }
+                }}
               >
-                Continue to Login
+                Continue to Dashboard
               </button>
             </div>
           )}
@@ -1568,7 +1445,7 @@ const OnboardBiometrics = () => {
               </button>
               <p className={styles.skipNote}>
                 Note:{" "}
-                {isStudent
+                {isStudent || isFaculty
                   ? "Face enrollment is required to mark attendance. You can enroll later from your profile."
                   : "Both biometrics are required to mark attendance. You can enroll later from your profile."}
               </p>

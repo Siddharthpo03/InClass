@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
+import useDarkMode from "../hooks/useDarkMode";
 import apiClient from "../utils/apiClient";
 import logo from "../assets/Logo1.jpg";
 import darkLogo from "../assets/darK_logo.png";
 import styles from "./Homepage.module.css";
 
 const Homepage = () => {
+  useDarkMode();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState(null);
@@ -15,15 +17,11 @@ const Homepage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Sync dark mode state
+  // Sync dark mode state for toggle display
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    
-    const shouldBeDark = savedDarkMode !== null 
-      ? savedDarkMode === "true" 
-      : prefersDark;
-    
+    const shouldBeDark = savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
     setIsDarkMode(shouldBeDark);
   }, []);
 
@@ -55,16 +53,18 @@ const Homepage = () => {
     checkAuth();
   }, []);
 
-  // Listen for dark mode changes from Navigation component
+  // Listen for dark mode changes without polling
   useEffect(() => {
     const checkDarkMode = () => {
       setIsDarkMode(document.body.classList.contains("darkMode"));
     };
-    
+
     checkDarkMode();
-    const interval = setInterval(checkDarkMode, 100);
-    
-    return () => clearInterval(interval);
+
+    const observer = new MutationObserver(() => checkDarkMode());
+    observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+    return () => observer.disconnect();
   }, []);
 
   const handleNavigation = (path) => (e) => {
@@ -254,28 +254,110 @@ const Homepage = () => {
 
   // Render Default Homepage (Not Logged In)
   const renderDefaultHomepage = () => (
-    <div className={styles.container}>
-      <img 
-        src={isDarkMode ? darkLogo : logo} 
-        alt="InClass" 
-        className={styles.logo} 
-      />
-      <h1>
-        Welcome to <br /> InClass
-      </h1>
-      <p className={styles.description}>
-        Smart, secure, and supervised attendance <br />
-        system using time-restricted session codes. <br />
-        No proxy, just presence.
-      </p>
-      <a 
-        href="#" 
-        className={styles.loginBtn} 
-        onClick={handleNavigation("/login")}
-      >
-        Login / Register
-      </a>
-    </div>
+    <>
+      <div className={styles.container}>
+        <img 
+          src={isDarkMode ? darkLogo : logo} 
+          alt="InClass" 
+          className={styles.logo} 
+        />
+        <h1>
+          Welcome to <br /> InClass
+        </h1>
+        <p className={styles.description}>
+          Smart, secure, and supervised attendance <br />
+          system using time-restricted session codes. <br />
+          No proxy, just presence.
+        </p>
+        <a 
+          href="#" 
+          className={styles.loginBtn} 
+          onClick={handleNavigation("/login")}
+        >
+          Login / Register
+        </a>
+      </div>
+
+      {/* Value props section for first-time visitors */}
+      <section className={styles.featuresSection}>
+        <h2 className={styles.sectionTitle}>Why teams choose InClass</h2>
+        <p className={styles.sectionSubtitle}>
+          Designed for real classrooms, labs, and exams – not just generic forms.
+        </p>
+        <div className={styles.featuresGrid}>
+          <div className={styles.featureCard}>
+            <i className="bx bx-shield-quarter" />
+            <h3>Proxy-proof attendance</h3>
+            <p>
+              Time-restricted session codes, biometric verification, and device
+              checks make “proxy attendance” extremely hard.
+            </p>
+          </div>
+          <div className={styles.featureCard}>
+            <i className="bx bx-badge-check" />
+            <h3>One-tap experience</h3>
+            <p>
+              Students join with a single code. Faculty see live presence and can
+              export clean, structured reports.
+            </p>
+          </div>
+          <div className={styles.featureCard}>
+            <i className="bx bx-lock-alt" />
+            <h3>Security by default</h3>
+            <p>
+              Biometric encryption, WebAuthn, and strict API security keep
+              attendance data safe by design.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Role-based quick overview */}
+      <section className={styles.rolesSection}>
+        <h2 className={styles.sectionTitle}>Built for everyone in class</h2>
+        <div className={styles.rolesGrid}>
+          <div className={styles.roleCard}>
+            <h3>For Students</h3>
+            <p>
+              Never lose attendance because of paper sheets again. See exactly
+              where you stand, in real time.
+            </p>
+            <button
+              className={styles.secondaryCta}
+              onClick={handleNavigation("/login")}
+            >
+              Student login
+            </button>
+          </div>
+          <div className={styles.roleCard}>
+            <h3>For Faculty</h3>
+            <p>
+              Start a session in seconds, watch live check-ins, and download
+              clean records for audits or grading.
+            </p>
+            <button
+              className={styles.secondaryCta}
+              onClick={handleNavigation("/login")}
+            >
+              Faculty login
+            </button>
+          </div>
+          <div className={styles.roleCard}>
+            <h3>For Admins</h3>
+            <p>
+              Centralized visibility across departments, courses, and campuses
+              with secure, exportable data.
+            </p>
+            <button
+              className={styles.secondaryCta}
+              onClick={handleNavigation("/login")}
+            >
+              Admin login
+            </button>
+          </div>
+        </div>
+      </section>
+    </>
   );
 
   if (loading) {

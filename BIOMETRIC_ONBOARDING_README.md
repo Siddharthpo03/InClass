@@ -1,33 +1,29 @@
-# InClass Biometric Onboarding System
+# InClass FaceNet Biometric System
 
-Complete implementation of biometric onboarding and verification system with OTP flow, face recognition, and WebAuthn fingerprint support.
+Production-grade face recognition in InClass using **FaceNet ONNX** and **PostgreSQL + pgvector**, integrated with OTP and WebAuthn.
 
-## Overview
+---
 
-This system implements:
-- **OTP Verification**: Email-based OTP for student face enrollment
-- **Face Recognition**: Client-side face detection using face-api.js with liveness checks
-- **WebAuthn Fingerprint**: Device biometric enrollment (faculty/admin only)
-- **Course Registration**: Student course registration with faculty approval
-- **Fingerprint Templates**: Skeleton endpoints for vendor-specific fingerprint integration
+## 1. High‑Level Architecture
 
-## Database Setup
+The InClass biometric stack now uses:
 
-### 1. Run Schema Migration
+- **Backend**
+  - Node.js + Express
+  - **FaceNet ONNX model** (`facenet-512.onnx`) via `onnxruntime-node`
+  - **Image preprocessing** via `sharp`
+  - **PostgreSQL + pgvector** for 512‑dim embedding storage and similarity search
+  - Endpoints under:
+    - `/api/biometrics/*` – onboarding, OTP, WebAuthn, FaceNet enrollment/verification
+    - `/api/face/*` – low-level FaceNet enrollment + recognition
+    - `/api/attendance/*` – attendance marking with mandatory face verification
 
-Execute the updated `schema.sql` file in your PostgreSQL database:
-
-```sql
--- Run InClass/backend/schema.sql in pgAdmin or psql
-```
-
-This will create/update:
-- `users` table with `college_id`, `department_id`, `face_enrolled`, `fingerprint_enrolled` columns
-- `otps` table for OTP storage
-- `courses` table for course catalog
-- `student_registrations` table for registration requests
-- `fingerprint_templates` table for vendor-specific templates
-- Existing `colleges` and `departments` tables (already seeded)
+- **Frontend (React / Vite)**
+  - Webcam capture using `getUserMedia`
+  - Sends face images to backend; **all embeddings are computed server‑side**
+  - Flows:
+    - Student / faculty onboarding (`OnboardBiometrics.jsx`, `BiometricOnboard.jsx`)
+    - Student attendance (`AttendanceMarking.jsx`)
 
 ### 2. Environment Variables
 

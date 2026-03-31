@@ -13,7 +13,7 @@
 }
 
 .modalContent {
-  background: white;
+  background: var(--bg-card);
   border-radius: 16px;
   padding: 32px;
   max-width: 600px;
@@ -22,11 +22,7 @@
   overflow-y: auto;
   position: relative;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-:global(body.darkMode) .modalContent {
-  background: #1e293b;
-  color: #f9fafb;
+  color: var(--text-primary);
 }
 
 .closeButton {
@@ -37,35 +33,22 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--text-secondary);
   padding: 8px;
   border-radius: 8px;
   transition: all 0.2s;
 }
 
 .closeButton:hover {
-  background: #f3f4f6;
-  color: #1f2937;
-}
-
-:global(body.darkMode) .closeButton {
-  color: #9ca3af;
-}
-
-:global(body.darkMode) .closeButton:hover {
-  background: #0f172a;
-  color: #f9fafb;
+  background: var(--bg-surface);
+  color: var(--text-primary);
 }
 
 .modalTitle {
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 24px;
-  color: #1f2937;
-}
-
-:global(body.darkMode) .modalTitle {
-  color: #f9fafb;
+  color: var(--text-heading);
 }
 
 .stepContent {
@@ -78,23 +61,15 @@
 
 .instructions {
   font-size: 1rem;
-  color: #4b5563;
+  color: var(--text-body);
   margin-bottom: 16px;
-}
-
-:global(body.darkMode) .instructions {
-  color: #d1d5db;
 }
 
 .instructionsList {
   text-align: left;
   margin: 16px 0;
   padding-left: 24px;
-  color: #4b5563;
-}
-
-:global(body.darkMode) .instructionsList {
-  color: #d1d5db;
+  color: var(--text-body);
 }
 
 .videoContainer {
@@ -133,11 +108,7 @@
 .captureInstructions p {
   margin: 0;
   font-size: 1rem;
-  color: #4b5563;
-}
-
-:global(body.darkMode) .captureInstructions p {
-  color: #d1d5db;
+  color: var(--text-body);
 }
 
 .highlight {
@@ -201,7 +172,7 @@
 
 .secondaryButton {
   padding: 12px 24px;
-  background: white;
+  background: var(--bg-card);
   color: #10b981;
   border: 2px solid #10b981;
   border-radius: 8px;
@@ -219,16 +190,6 @@
 .secondaryButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-:global(body.darkMode) .secondaryButton {
-  background: #1e293b;
-  color: #10b981;
-}
-
-:global(body.darkMode) .secondaryButton:hover:not(:disabled) {
-  background: #10b981;
-  color: white;
 }
 
 .loadingSpinner {

@@ -19,16 +19,63 @@ function auth(requiredRoles = []) {
       // Attach decoded user payload to request
       req.user = decoded;
 
+      // Check if role exists in token
+      if (!decoded.role) {
+        console.error("🔒 Token missing role field:", {
+          decoded,
+          path: req.path,
+          method: req.method
+        });
+        return res.status(401).json({ 
+          message: "Token is missing role information. Please login again.",
+          code: "MISSING_ROLE"
+        });
+      }
+
       // Role-based access control
       if (requiredRoles.length && !requiredRoles.includes(decoded.role)) {
+        console.log("🔒 Role check failed:", {
+          requiredRoles,
+          userRole: decoded.role,
+          userId: decoded.id,
+          path: req.path,
+          method: req.method,
+          tokenPayload: decoded
+        });
         return res
           .status(403)
-          .json({ message: "Forbidden: Insufficient role permissions." });
+          .json({ 
+            message: "Forbidden: Insufficient role permissions.",
+            required: requiredRoles,
+            provided: decoded.role || "none",
+            hint: "Please ensure you are logged in with the correct account type."
+          });
+      }
+      
+      // Log successful auth for debugging
+      if (requiredRoles.length > 0) {
+        console.log("✅ Role check passed:", {
+          requiredRoles,
+          userRole: decoded.role,
+          userId: decoded.id,
+          path: req.path
+        });
       }
 
       next();
     } catch (err) {
-      res.status(401).json({ message: "Invalid or expired token." });
+      // Provide more specific error messages
+      let errorMessage = "Invalid or expired token.";
+      if (err.name === "TokenExpiredError") {
+        errorMessage = "Token expired. Please login again.";
+        console.log("🔒 Token expired for user:", err.expiredAt);
+      } else if (err.name === "JsonWebTokenError") {
+        errorMessage = "Invalid token format.";
+        console.log("🔒 Invalid token format:", err.message);
+      } else {
+        console.log("🔒 Token verification error:", err.message);
+      }
+      res.status(401).json({ message: errorMessage });
     }
   };
 }

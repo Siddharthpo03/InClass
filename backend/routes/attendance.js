@@ -2,18 +2,12 @@
 
 const express = require("express");
 const router = express.Router();
-const pool = require("../db");
+const { pool } = require("../config/database");
 const auth = require("../middleware/auth");
 const getLocation = require("../utils/geo"); // Utility to get location (needs fixing in geo.js)
 const sendMail = require("../utils/mailer"); // Utility to send mail
 const socketIO = require("../socket"); // Socket.io instance
-const { verifyFace, isModelsLoaded } = require("../utils/faceRecognition");
-const {
-  verifyFingerprintAuthentication,
-  ORIGIN,
-  RP_ID,
-} = require("../utils/fingerprintRecognition");
-const { getAuthenticationChallenge, clearAuthenticationChallenge } = require("../middleware/biometricAuth");
+const { findBestMatch } = require("../services/faceMatcher");
 
 // Optional: Use biometric middleware instead of manual verification
 // Example: router.post("/mark", auth(["student"]), biometricAuth({ requireAny: true }), async (req, res) => {
@@ -21,17 +15,15 @@ const { getAuthenticationChallenge, clearAuthenticationChallenge } = require("..
 // });
 
 // @route   POST /api/attendance/mark
-// @desc    Student submits code to mark attendance (with optional face/fingerprint verification)
+// @desc    Student submits code to mark attendance (with face verification)
 // @access  Private (Student only)
 router.post("/mark", auth(["student"]), async (req, res) => {
-  const { code, faceImage, fingerprintAuthResponse, fingerprintChallenge } = req.body;
+  const { code, faceEmbedding } = req.body;
   const student_id = req.user.id;
   const ip = req.ip; // Get client IP address
   let location_text = "Unknown"; // Placeholder
   let faceVerified = false;
   let faceMatchScore = null;
-  let fingerprintVerified = false;
-  let fingerprintCredentialId = null;
 
   try {
     if (!code) {
@@ -39,6 +31,7 @@ router.post("/mark", auth(["student"]), async (req, res) => {
     }
 
     // 1. Look up the session by code (only active sessions)
+    // SECURE: Parameterized query prevents SQL injection
     const result = await pool.query(
       `SELECT id, expires_at, class_id FROM sessions 
              WHERE code = $1 AND is_active = TRUE 
@@ -74,29 +67,23 @@ router.post("/mark", auth(["student"]), async (req, res) => {
       });
     }
 
-    // 2.6. ENFORCE BIOMETRIC VERIFICATION - Check if both WebAuthn and Face are enrolled
-    const webauthnCheck = await pool.query(
-      "SELECT id FROM webauthn_credentials WHERE user_id = $1 AND is_active = TRUE LIMIT 1",
-      [student_id]
-    );
+    // 2.6. ENFORCE FACE VERIFICATION - Check if FaceNet embedding is enrolled
     const faceCheck = await pool.query(
-      "SELECT id FROM biometric_face WHERE user_id = $1 AND is_active = TRUE LIMIT 1",
+      "SELECT embedding FROM users WHERE id = $1 AND embedding IS NOT NULL",
       [student_id]
     );
 
-    const webauthnEnrolled = webauthnCheck.rowCount > 0;
     const faceEnrolled = faceCheck.rowCount > 0;
 
-    if (!webauthnEnrolled || !faceEnrolled) {
+    if (!faceEnrolled) {
       return res.status(403).json({
-        message: "Biometric verification required to mark attendance. Please enroll both device biometric and face recognition.",
-        webauthnEnrolled: webauthnEnrolled,
-        faceEnrolled: faceEnrolled,
+        message: "Face enrollment required to mark attendance. Please enroll your face first.",
+        faceEnrolled: false,
       });
     }
 
     // 3. Face Verification (REQUIRED)
-    if (!faceImage && !req.body.faceEmbedding) {
+    if (!faceEmbedding) {
       return res.status(400).json({
         message: "Face verification is required. Please provide face embedding.",
       });
@@ -115,51 +102,30 @@ router.post("/mark", auth(["student"]), async (req, res) => {
         });
       }
 
-      // Decrypt stored embedding
-      const { decrypt } = require("../utils/crypto");
-      const storedEmbedding = JSON.parse(decrypt(faceEnrollment.rows[0].encrypted_embedding));
-
-      // If face embedding is provided directly, use it; otherwise extract from image
-      let faceEmbedding = req.body.faceEmbedding;
-      if (!faceEmbedding && faceImage) {
-        // Legacy: if faceImage is provided, use old face recognition utility
-        const verificationResult = await verifyFace(faceImage, storedEmbedding);
-        if (verificationResult.error) {
-          return res.status(400).json({
-            message: `Face verification failed: ${verificationResult.error}`,
-          });
-        }
-        faceVerified = verificationResult.match;
-        faceMatchScore = verificationResult.score;
-      } else if (faceEmbedding) {
-        // New: use embedding directly with cosine similarity
-        const cosineSimilarity = (vecA, vecB) => {
-          if (vecA.length !== vecB.length) return 0;
-          let dotProduct = 0;
-          let normA = 0;
-          let normB = 0;
-          for (let i = 0; i < vecA.length; i++) {
-            dotProduct += vecA[i] * vecB[i];
-            normA += vecA[i] * vecA[i];
-            normB += vecB[i] * vecB[i];
-          }
-          const denominator = Math.sqrt(normA) * Math.sqrt(normB);
-          return denominator === 0 ? 0 : dotProduct / denominator;
-        };
-
-        faceMatchScore = cosineSimilarity(faceEmbedding, storedEmbedding);
-        const threshold = parseFloat(process.env.FACE_SIMILARITY_THRESHOLD || "0.62");
-        faceVerified = faceMatchScore >= threshold;
-      } else {
+      // Use pgvector nearest-neighbor search and ensure best match is the logged-in student
+      if (!Array.isArray(faceEmbedding) || faceEmbedding.length !== 512) {
         return res.status(400).json({
-          message: "Face verification data is required.",
+          message: "Face embedding must be a 512-dim array.",
         });
       }
+
+      const bestMatch = await findBestMatch(faceEmbedding);
+
+      if (!bestMatch) {
+        return res.status(400).json({
+          message: "No face enrollments found for verification.",
+        });
+      }
+
+      faceVerified =
+        bestMatch.match && parseInt(bestMatch.userId, 10) === student_id;
+      faceMatchScore = 1 - bestMatch.distance; // convert distance to similarity
 
       // ENFORCE: Face verification must pass
       if (!faceVerified) {
         return res.status(403).json({
-          message: "Face verification failed. Please try again with better lighting and a clear view of your face.",
+          message:
+            "Face verification failed. Captured face does not match logged-in student.",
           score: faceMatchScore,
         });
       }
@@ -168,62 +134,6 @@ router.post("/mark", auth(["student"]), async (req, res) => {
       return res.status(500).json({ error: "Face verification error." });
     }
 
-    // 4. WebAuthn/Fingerprint Verification (REQUIRED)
-    try {
-      // Get stored challenge using middleware helper
-      const storedChallenge = getAuthenticationChallenge(student_id);
-      if (!storedChallenge || storedChallenge.challenge !== fingerprintChallenge) {
-        return res.status(400).json({
-          message: "Invalid or expired fingerprint verification challenge.",
-        });
-      }
-
-      // Get credential from database (use new webauthn_credentials table)
-      const credentialId = fingerprintAuthResponse.id;
-      const credentialResult = await pool.query(
-        "SELECT credential_id, public_key, counter FROM webauthn_credentials WHERE credential_id = $1 AND user_id = $2 AND is_active = TRUE",
-        [credentialId, student_id]
-      );
-
-        if (credentialResult.rowCount > 0) {
-          const credential = credentialResult.rows[0];
-
-          // Verify fingerprint authentication
-          const verification = await verifyFingerprintAuthentication(
-            fingerprintAuthResponse,
-            fingerprintChallenge,
-            credential,
-            credential.counter
-          );
-
-          if (verification.verified) {
-            fingerprintVerified = true;
-            fingerprintCredentialId = credentialId;
-
-            // Update counter and last used timestamp
-            await pool.query(
-              "UPDATE fingerprint_data SET counter = $1, last_used_at = CURRENT_TIMESTAMP WHERE credential_id = $2",
-              [verification.newCounter, credentialId]
-            );
-
-            // Clean up challenge using middleware helper
-            clearAuthenticationChallenge(student_id);
-          } else {
-            return res.status(400).json({
-              message: verification.error || "Fingerprint verification failed.",
-            });
-          }
-      } else {
-        return res.status(400).json({
-          message: "Fingerprint credential not found. Please enroll your fingerprint first.",
-        });
-      }
-    } catch (fingerprintError) {
-      console.error("Fingerprint verification error:", fingerprintError);
-      return res.status(500).json({
-        error: "Fingerprint verification error.",
-      });
-    }
 
     // 4. Attempt to get geo-location (This requires a working geo.js)
     // location_text = await getLocation(ip); // Using mock IP for now, actual IP won't work in development
@@ -235,12 +145,12 @@ router.post("/mark", auth(["student"]), async (req, res) => {
     );
     const student = studentInfo.rows[0];
 
-    // 6. Record Attendance (with biometric verification data if available)
+    // 6. Record Attendance (with face verification data)
     const attendanceResult = await pool.query(
-      `INSERT INTO attendance (student_id, session_id, ip_address, location, status, face_verified, face_match_score, fingerprint_verified, fingerprint_credential_id) 
-             VALUES ($1, $2, $3, $4, 'Present', $5, $6, $7, $8)
+      `INSERT INTO attendance (student_id, session_id, ip_address, location, status, face_verified, face_match_score) 
+             VALUES ($1, $2, $3, $4, 'Present', $5, $6)
              RETURNING id, created_at`,
-      [student_id, session.id, ip, location_text, faceVerified, faceMatchScore, fingerprintVerified, fingerprintCredentialId]
+      [student_id, session.id, ip, location_text, faceVerified, faceMatchScore]
     );
     const attendanceRecord = attendanceResult.rows[0];
 
@@ -248,8 +158,8 @@ router.post("/mark", auth(["student"]), async (req, res) => {
     try {
       const io = socketIO.getIO();
       if (io) {
-        // Emit to session-specific room
-        io.to(`session_${session.id}`).emit("attendanceMarked", {
+        // Emit to session-specific room with verification flags
+        io.to(`session_${session.id}`).emit("attendance:marked", {
           attendanceId: attendanceRecord.id,
           studentId: student.id,
           studentName: student.name,
@@ -258,10 +168,13 @@ router.post("/mark", auth(["student"]), async (req, res) => {
           classId: session.class_id,
           timestamp: attendanceRecord.created_at,
           status: "Present",
+          face_verified: faceVerified,
+          face_match_score: faceMatchScore,
+          is_overridden: false,
         });
 
         // Also emit to class room for broader monitoring
-        io.to(`class_${session.class_id}`).emit("attendanceMarked", {
+        io.to(`class_${session.class_id}`).emit("attendance:marked", {
           attendanceId: attendanceRecord.id,
           studentId: student.id,
           studentName: student.name,
@@ -270,6 +183,9 @@ router.post("/mark", auth(["student"]), async (req, res) => {
           classId: session.class_id,
           timestamp: attendanceRecord.created_at,
           status: "Present",
+          face_verified: faceVerified,
+          face_match_score: faceMatchScore,
+          is_overridden: false,
         });
 
         console.log(`📡 Emitted attendance event for student ${student.name} (${student.roll_no}) in session ${session.id}`);
@@ -292,8 +208,6 @@ router.post("/mark", auth(["student"]), async (req, res) => {
       timestamp: attendanceRecord.created_at,
       faceVerified: faceVerified,
       faceMatchScore: faceMatchScore,
-      fingerprintVerified: fingerprintVerified,
-      fingerprintCredentialId: fingerprintCredentialId,
     });
   } catch (err) {
     if (err.code === "23505") {

@@ -1,15 +1,142 @@
+// @ts-check
 // inclass-backend/utils/crypto.js
 // AES-256 encryption and decryption for biometric embeddings
+// SEC-004: Production-grade encryption key validation
 
 const crypto = require("crypto");
 
-// Get encryption key from environment variable or use default (for development only)
-// In production, ALWAYS use a strong, randomly generated key stored securely
-const ENCRYPTION_KEY = process.env.BIOMETRIC_ENCRYPTION_KEY || crypto.randomBytes(32).toString("hex");
+// ============================================
+// CRITICAL SECURITY: Encryption Key Validation
+// ============================================
+// SEC-004: No fallback keys allowed - server MUST fail if key is missing
+const ENCRYPTION_KEY = process.env.BIOMETRIC_ENCRYPTION_KEY;
+
+if (!ENCRYPTION_KEY) {
+  const errorMessage = `
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  CRITICAL SECURITY ERROR: BIOMETRIC_ENCRYPTION_KEY is not set                ║
+║  Server cannot start. Biometric data encryption requires a secure key.      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+To fix:
+1. Generate a secure 64-character hex key (32 bytes for AES-256):
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+2. Add to your .env file:
+   BIOMETRIC_ENCRYPTION_KEY=<generated-key>
+
+3. Restart the server
+
+SECURITY NOTE: Never commit the encryption key to version control.
+Store it securely in production (e.g., environment variables, secrets manager).
+`;
+  console.error(errorMessage);
+  throw new Error("CRITICAL SECURITY ERROR: BIOMETRIC_ENCRYPTION_KEY is not set. Server cannot start.");
+}
+
+// Validate key length: AES-256 requires 32 bytes = 64 hex characters
+const MIN_KEY_LENGTH = 32; // Minimum 32 bytes (64 hex chars)
+const keyLength = ENCRYPTION_KEY.length;
+
+if (keyLength < MIN_KEY_LENGTH) {
+  const errorMessage = `
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  CRITICAL SECURITY ERROR: BIOMETRIC_ENCRYPTION_KEY is too short             ║
+║  Minimum length required: ${MIN_KEY_LENGTH} characters (${MIN_KEY_LENGTH * 2} hex chars for AES-256) ║
+║  Current length: ${keyLength} characters                                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+To fix:
+1. Generate a secure ${MIN_KEY_LENGTH * 2}-character hex key:
+   node -e "console.log(require('crypto').randomBytes(${MIN_KEY_LENGTH}).toString('hex'))"
+
+2. Update BIOMETRIC_ENCRYPTION_KEY in your .env file
+
+3. Restart the server
+`;
+  console.error(errorMessage);
+  throw new Error(`CRITICAL SECURITY ERROR: BIOMETRIC_ENCRYPTION_KEY must be at least ${MIN_KEY_LENGTH * 2} characters (${MIN_KEY_LENGTH} bytes) for AES-256. Current length: ${keyLength}.`);
+}
+
+// Validate key format (should be hex string for consistency)
+// Allow alphanumeric but warn if not hex
+if (!/^[0-9a-fA-F]+$/.test(ENCRYPTION_KEY)) {
+  console.warn("⚠️  WARNING: BIOMETRIC_ENCRYPTION_KEY contains non-hexadecimal characters.");
+  console.warn("   For best security, use a hex-encoded key (64 hex characters).");
+  console.warn("   Generate with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"");
+}
+
+// Use the validated encryption key (no fallback)
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16; // 16 bytes for AES
 const SALT_LENGTH = 64; // 64 bytes for salt
 const TAG_LENGTH = 16; // 16 bytes for authentication tag
+
+// Keys that must never be logged (biometric/crypto sensitive data)
+const SENSITIVE_KEYS = new Set([
+  "embedding",
+  "encrypted_embedding",
+  "faceDescriptor",
+  "decryptedEmbedding",
+  "key",
+  "iv",
+  "authTag",
+  "tag",
+  "salt",
+  "encrypted",
+  "decrypted",
+  "publicKey",
+  "response",
+  "rawId",
+  "clientDataJSON",
+  "attestationObject",
+  "authenticatorData",
+  "signature",
+]);
+
+/**
+ * Safe predicate: true if value looks like a face embedding (array of numbers, length 512).
+ */
+function looksLikeEmbedding(value) {
+  if (!Array.isArray(value) || value.length !== 512) {
+    return false;
+  }
+  return value.every((x) => typeof x === "number");
+}
+
+/**
+ * Log a message with optional metadata. Never logs decrypted embeddings, keys, IVs,
+ * auth tags, or other sensitive crypto/biometric data. Only metadata such as
+ * embeddingLength, userId, and operationStatus is allowed.
+ *
+ * @param {string} message - Log message
+ * @param {object} [data] - Optional data; only safe keys (e.g. embeddingLength, userId, operationStatus) are logged
+ */
+function secureLog(message, data) {
+  if (data === undefined || data === null) {
+    console.error(message);
+    return;
+  }
+  if (Array.isArray(data) && looksLikeEmbedding(data)) {
+    console.error(message, "(sensitive data omitted)");
+    return;
+  }
+  if (typeof data === "object" && !Array.isArray(data)) {
+    const safe = {};
+    const allowed = new Set(["embeddingLength", "userId", "operationStatus", "code"]);
+    for (const [k, v] of Object.entries(data)) {
+      if (SENSITIVE_KEYS.has(k)) {
+        continue;
+      }
+      if (allowed.has(k)) {
+        safe[k] = v;
+      }
+    }
+    console.error(message, Object.keys(safe).length ? safe : "");
+    return;
+  }
+  console.error(message);
+}
 
 /**
  * Derive a key from the encryption key using PBKDF2
@@ -56,8 +183,8 @@ function encrypt(text) {
     // Return as base64 string
     return combined.toString("base64");
   } catch (error) {
-    console.error("Encryption error:", error);
-    throw new Error("Failed to encrypt data");
+    secureLog("Encryption failed.", { operationStatus: "error" });
+    throw new Error("Failed to encrypt biometric data.");
   }
 }
 
@@ -74,7 +201,10 @@ function decrypt(encryptedData) {
     // Extract components
     const salt = combined.slice(0, SALT_LENGTH);
     const iv = combined.slice(SALT_LENGTH, SALT_LENGTH + IV_LENGTH);
-    const tag = combined.slice(SALT_LENGTH + IV_LENGTH, SALT_LENGTH + IV_LENGTH + TAG_LENGTH);
+    const tag = combined.slice(
+      SALT_LENGTH + IV_LENGTH,
+      SALT_LENGTH + IV_LENGTH + TAG_LENGTH
+    );
     const encrypted = combined.slice(SALT_LENGTH + IV_LENGTH + TAG_LENGTH);
 
     // Derive key from password and salt
@@ -90,13 +220,25 @@ function decrypt(encryptedData) {
 
     return decrypted;
   } catch (error) {
-    console.error("Decryption error:", error);
-    throw new Error("Failed to decrypt data");
+    secureLog("Decryption failed.", { operationStatus: "error", code: error.code });
+
+    // Check for common decryption errors without leaking error.message
+    if (
+      error.message.includes("Unsupported state") ||
+      error.message.includes("bad decrypt")
+    ) {
+      throw new Error(
+        "Failed to decrypt biometric data: Encryption key mismatch. " +
+          "Ensure BIOMETRIC_ENCRYPTION_KEY in .env matches the key used during encryption."
+      );
+    }
+
+    throw new Error("Failed to decrypt biometric data.");
   }
 }
 
 module.exports = {
   encrypt,
   decrypt,
+  secureLog,
 };
-

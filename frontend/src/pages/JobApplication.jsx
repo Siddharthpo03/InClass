@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
+import useDarkMode from "../hooks/useDarkMode";
 import styles from "./JobApplication.module.css";
 
 const JobApplication = () => {
+  useDarkMode();
   const navigate = useNavigate();
   const location = useLocation();
   const jobData = location.state?.job || null;
@@ -28,23 +30,6 @@ const JobApplication = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
   const [errors, setErrors] = useState({});
-
-  // Initialize dark mode from localStorage on mount
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem("darkMode");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-
-    const shouldBeDark =
-      savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
-
-    if (shouldBeDark) {
-      document.body.classList.add("darkMode");
-    } else {
-      document.body.classList.remove("darkMode");
-    }
-  }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -81,7 +66,7 @@ const JobApplication = () => {
     }
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
-    } else if (!/^[\d\s\-\+\(\)]+$/.test(formData.phone)) {
+    } else if (!/^[\d\s\-+()]+$/.test(formData.phone)) {
       newErrors.phone = "Please enter a valid phone number";
     }
     if (!formData.yearsOfExperience) newErrors.yearsOfExperience = "Years of experience is required";

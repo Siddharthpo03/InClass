@@ -1,14 +1,9 @@
 /* Careers Page - Most Beautiful Design */
 
 :global(body) {
-  background: linear-gradient(to top, #d4f5eb 0%, #ffffff 100%);
+  background: var(--bg-page);
   background-attachment: fixed;
   transition: background 0.3s ease;
-}
-
-:global(body.darkMode) {
-  background: linear-gradient(to top, #1a1a2e 0%, #16213e 100%);
-  background-attachment: fixed;
 }
 
 .careersPageWrapper {
@@ -22,12 +17,8 @@
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "kern" 1, "liga" 1;
   text-rendering: optimizeLegibility;
-  color: #111827;
+  color: var(--text-body);
   transition: color 0.3s ease;
-}
-
-:global(body.darkMode) .careersPageWrapper {
-  color: #e5e7eb;
 }
 
 .careersContainer {
@@ -84,16 +75,12 @@
 
 .subtitle {
   font-size: 1.3rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   max-width: 800px;
   margin: 0 auto;
   line-height: 1.8;
   letter-spacing: 0.01em;
   animation: fadeInUp 1s ease;
-}
-
-:global(body.darkMode) .subtitle {
-  color: #9ca3af;
 }
 
 /* ===== Benefits Section ===== */
@@ -127,10 +114,10 @@
 }
 
 .benefitCard {
-  background: #ffffff;
+  background: var(--bg-card);
   padding: 35px 30px;
   border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-card);
   text-align: center;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(16, 185, 129, 0.1);
@@ -161,17 +148,6 @@
   transform: scaleX(1);
 }
 
-:global(body.darkMode) .benefitCard {
-  background: rgba(31, 41, 55, 0.8);
-  border-color: rgba(16, 185, 129, 0.2);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-:global(body.darkMode) .benefitCard:hover {
-  background: rgba(31, 41, 55, 0.95);
-  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.3);
-}
-
 .benefitIcon {
   width: 90px;
   height: 90px;
@@ -199,23 +175,15 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 12px;
-  color: #111827;
+  color: var(--text-heading);
   letter-spacing: -0.01em;
-}
-
-:global(body.darkMode) .benefitCard h3 {
-  color: #f9fafb;
 }
 
 .benefitCard p {
   font-size: 1.05rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   line-height: 1.6;
   letter-spacing: 0.01em;
-}
-
-:global(body.darkMode) .benefitCard p {
-  color: #9ca3af;
 }
 
 /* ===== Jobs Section ===== */
@@ -249,10 +217,10 @@
 }
 
 .jobCard {
-  background: #ffffff;
+  background: var(--bg-card);
   padding: 40px;
   border-radius: 24px;
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
   border: 2px solid rgba(16, 185, 129, 0.1);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -282,17 +250,6 @@
   transform: scaleX(1);
 }
 
-:global(body.darkMode) .jobCard {
-  background: rgba(31, 41, 55, 0.8);
-  border-color: rgba(16, 185, 129, 0.2);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
-}
-
-:global(body.darkMode) .jobCard:hover {
-  background: rgba(31, 41, 55, 0.95);
-  box-shadow: 0 15px 50px rgba(16, 185, 129, 0.35);
-}
-
 .jobHeader {
   display: flex;
   justify-content: space-between;
@@ -309,13 +266,9 @@
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 15px;
-  color: #111827;
+  color: var(--text-heading);
   letter-spacing: -0.01em;
   line-height: 1.2;
-}
-
-:global(body.darkMode) .jobCard h3 {
-  color: #f9fafb;
 }
 
 .jobMeta {
@@ -378,14 +331,10 @@
 
 .jobDescription {
   font-size: 1.05rem;
-  color: #4b5563;
+  color: var(--text-body);
   line-height: 1.8;
   margin-bottom: 25px;
   letter-spacing: 0.01em;
-}
-
-:global(body.darkMode) .jobDescription {
-  color: #9ca3af;
 }
 
 .jobRequirements {
@@ -396,12 +345,8 @@
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 15px;
-  color: #111827;
+  color: var(--text-heading);
   letter-spacing: 0.01em;
-}
-
-:global(body.darkMode) .jobRequirements h4 {
-  color: #e5e7eb;
 }
 
 .jobRequirements ul {
@@ -412,7 +357,7 @@
 
 .jobRequirements ul li {
   font-size: 1rem;
-  color: #4b5563;
+  color: var(--text-body);
   line-height: 1.8;
   padding-left: 28px;
   position: relative;
@@ -427,14 +372,6 @@
   color: #10b981;
   font-weight: bold;
   font-size: 1.1rem;
-}
-
-:global(body.darkMode) .jobRequirements ul li {
-  color: #9ca3af;
-}
-
-:global(body.darkMode) .jobRequirements ul li::before {
-  color: #34d399;
 }
 
 .applyButton {
@@ -503,19 +440,15 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 20px;
-  color: #111827;
+  color: var(--text-heading);
   letter-spacing: -0.01em;
   position: relative;
   z-index: 1;
 }
 
-:global(body.darkMode) .ctaSection h2 {
-  color: #f9fafb;
-}
-
 .ctaSection p {
   font-size: 1.2rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 30px;
   max-width: 600px;
   margin-left: auto;
@@ -524,10 +457,6 @@
   position: relative;
   z-index: 1;
   letter-spacing: 0.01em;
-}
-
-:global(body.darkMode) .ctaSection p {
-  color: #9ca3af;
 }
 
 .contactButton {

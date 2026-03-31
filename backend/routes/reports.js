@@ -24,7 +24,7 @@ router.post(
 
     validateRequired(["session_id", "reason"], req.body);
 
-    // Verify session exists and belongs to a class
+    // SECURE: Parameterized query prevents SQL injection
     const sessionCheck = await pool.query(
       `SELECT s.id, s.class_id, s.expires_at, c.faculty_id 
        FROM sessions s

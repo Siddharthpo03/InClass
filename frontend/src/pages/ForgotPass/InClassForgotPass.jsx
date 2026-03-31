@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import apiClient from "../../utils/apiClient";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
-import Favicon from "../../assets/favicon.jpg";
+import useDarkMode from "../../hooks/useDarkMode";
+import Favicon from "../../assets/favicon.png";
 import styles from "./InClassForgotPass.module.css";
 
 const InClassForgotPass = () => {
+  useDarkMode();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
@@ -14,21 +15,6 @@ const InClassForgotPass = () => {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Email Input, 2: Confirmation Message
   const [validationError, setValidationError] = useState("");
-
-  // Initialize dark mode
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem("darkMode");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    const shouldBeDark =
-      savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
-    if (shouldBeDark) {
-      document.body.classList.add("darkMode");
-    } else {
-      document.body.classList.remove("darkMode");
-    }
-  }, []);
 
   useEffect(() => {
     setIsButtonDisabled(!email.trim());
@@ -61,10 +47,7 @@ const InClassForgotPass = () => {
     setLoading(true);
 
     try {
-      // TODO: Replace with actual API endpoint when backend is ready
-      // const response = await apiClient.post("/auth/forgot-password", { email });
-
-      // Simulated API call for now
+      // NOTE: Forgot-password endpoint not yet available. See GitHub issue for backend integration.
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       setResetMessage(`✅ Instructions sent to ${email}. Check your inbox!`);

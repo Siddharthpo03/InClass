@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import fav from "../assets/favicon.jpg";
+import fav from "../assets/favicon.png";
 import styles from "./Navigation.module.css";
 
 // Helper function for classNames
@@ -25,45 +25,40 @@ const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check authentication status
+  // Check authentication status (token = logged in; re-run when route changes so nav updates right after login)
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("inclass_token");
       const role = localStorage.getItem("user_role");
-      
-      if (token && role) {
+
+      if (token) {
         setIsLoggedIn(true);
-        setUserRole(role);
+        setUserRole(role || null);
       } else {
         setIsLoggedIn(false);
         setUserRole(null);
       }
     };
 
-    // Check on mount
     checkAuth();
 
-    // Listen for storage changes (when user logs in/out in another tab)
     window.addEventListener("storage", checkAuth);
-
-    // Check periodically to catch login/logout in same tab
-    const interval = setInterval(checkAuth, 1000);
 
     return () => {
       window.removeEventListener("storage", checkAuth);
-      clearInterval(interval);
     };
-  }, []);
+  }, [location.pathname]);
 
   // Dark mode initialization and persistence
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    
-    const shouldBeDark = savedDarkMode !== null 
-      ? savedDarkMode === "true" 
-      : prefersDark;
-    
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+
+    const shouldBeDark =
+      savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
+
     setIsDarkMode(shouldBeDark);
     updateDarkMode(shouldBeDark);
   }, []);
@@ -96,54 +91,56 @@ const Navigation = () => {
       <nav className={styles.navBar}>
         <div className={styles.leftSection}>
           <div className={styles.logoSection} onClick={handleNavigation("/")}>
-            <img 
-              src={fav} 
-              alt="InClass" 
-              className={styles.logoIcon} 
-            />
+            <img src={fav} alt="InClass" className={styles.logoIcon} />
             <span className={styles.brandName}>InClass</span>
           </div>
         </div>
 
         <div className={styles.menuContent}>
-          <ul className={styles.navLinks}>
-            <li>
-              <a 
-                href="#" 
-                onClick={handleNavigation("/")}
-                className={location.pathname === "/" ? styles.active : ""}
-              >
-                Home
-              </a>
-            </li>
-            <li>
-              <a 
-                href="#" 
-                onClick={handleNavigation("/features")}
-                className={location.pathname === "/features" ? styles.active : ""}
-              >
-                Features
-              </a>
-            </li>
-            <li>
-              <a 
-                href="#" 
-                onClick={handleNavigation("/about")}
-                className={location.pathname === "/about" ? styles.active : ""}
-              >
-                About
-              </a>
-            </li>
-            <li>
-              <a 
-                href="#" 
-                onClick={handleNavigation("/contact")}
-                className={location.pathname === "/contact" ? styles.active : ""}
-              >
-                Contact
-              </a>
-            </li>
-          </ul>
+          {!isLoggedIn && (
+            <ul className={styles.navLinks}>
+              <li>
+                <a
+                  href="#"
+                  onClick={handleNavigation("/")}
+                  className={location.pathname === "/" ? styles.active : ""}
+                >
+                  Home
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onClick={handleNavigation("/features")}
+                  className={
+                    location.pathname === "/features" ? styles.active : ""
+                  }
+                >
+                  Features
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onClick={handleNavigation("/about")}
+                  className={location.pathname === "/about" ? styles.active : ""}
+                >
+                  About
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onClick={handleNavigation("/contact")}
+                  className={
+                    location.pathname === "/contact" ? styles.active : ""
+                  }
+                >
+                  Contact
+                </a>
+              </li>
+            </ul>
+          )}
 
           <div className={styles.authButtons}>
             <a
@@ -154,21 +151,13 @@ const Navigation = () => {
             >
               Report
             </a>
-            {isLoggedIn && userRole ? (
-              <a
-                href="#"
-                className={styles.navBtn}
-                onClick={handleNavigation(`/${userRole}/dashboard`)}
-              >
-                Dashboard
-              </a>
-            ) : (
+            {!isLoggedIn && (
               <>
                 <a
                   href="#"
                   className={styles.navBtn}
                   onClick={handleNavigation("/login")}
-                  style={{ display: 'inline-block' }}
+                  style={{ display: "inline-block" }}
                 >
                   Login
                 </a>
@@ -176,7 +165,7 @@ const Navigation = () => {
                   href="#"
                   className={classNames(styles.navBtn, styles.navBtnSignup)}
                   onClick={handleNavigation("/register")}
-                  style={{ display: 'inline-block' }}
+                  style={{ display: "inline-block" }}
                 >
                   Register
                 </a>
@@ -186,7 +175,7 @@ const Navigation = () => {
         </div>
 
         {/* Dark Mode Toggle - Always visible in nav bar */}
-        <button 
+        <button
           className={styles.darkModeToggle}
           onClick={toggleDarkMode}
           aria-label="Toggle dark mode"
@@ -232,48 +221,50 @@ const Navigation = () => {
           </button>
         </div>
 
-        <ul className={styles.mobileNavLinks}>
-          <li>
-            <a 
-              href="#" 
-              onClick={handleNavigation("/")}
-              className={location.pathname === "/" ? styles.active : ""}
-            >
-              <i className="fas fa-home" />
-              <span>Home</span>
-            </a>
-          </li>
-          <li>
-            <a 
-              href="#" 
-              onClick={handleNavigation("/features")}
-              className={location.pathname === "/features" ? styles.active : ""}
-            >
-              <i className="fas fa-sitemap" />
-              <span>Features</span>
-            </a>
-          </li>
-          <li>
-            <a 
-              href="#" 
-              onClick={handleNavigation("/about")}
-              className={location.pathname === "/about" ? styles.active : ""}
-            >
-              <i className="fas fa-address-card" />
-              <span>About</span>
-            </a>
-          </li>
-          <li>
-            <a 
-              href="#" 
-              onClick={handleNavigation("/contact")}
-              className={location.pathname === "/contact" ? styles.active : ""}
-            >
-              <i className="fas fa-comments" />
-              <span>Contact</span>
-            </a>
-          </li>
-        </ul>
+        {!isLoggedIn && (
+          <ul className={styles.mobileNavLinks}>
+            <li>
+              <a
+                href="#"
+                onClick={handleNavigation("/")}
+                className={location.pathname === "/" ? styles.active : ""}
+              >
+                <i className="fas fa-home" />
+                <span>Home</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                onClick={handleNavigation("/features")}
+                className={location.pathname === "/features" ? styles.active : ""}
+              >
+                <i className="fas fa-sitemap" />
+                <span>Features</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                onClick={handleNavigation("/about")}
+                className={location.pathname === "/about" ? styles.active : ""}
+              >
+                <i className="fas fa-address-card" />
+                <span>About</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                onClick={handleNavigation("/contact")}
+                className={location.pathname === "/contact" ? styles.active : ""}
+              >
+                <i className="fas fa-comments" />
+                <span>Contact</span>
+              </a>
+            </li>
+          </ul>
+        )}
 
         <div className={styles.mobileAuthSection}>
           <a
@@ -284,16 +275,7 @@ const Navigation = () => {
             <i className="fas fa-flag" />
             <span>Report</span>
           </a>
-          {isLoggedIn && userRole ? (
-            <a
-              href="#"
-              className={styles.mobileNavBtn}
-              onClick={handleNavigation(`/${userRole}/dashboard`)}
-            >
-              <i className="fas fa-tachometer-alt" />
-              <span>Dashboard</span>
-            </a>
-          ) : (
+          {!isLoggedIn && (
             <>
               <a
                 href="#"
@@ -318,7 +300,7 @@ const Navigation = () => {
         <div className={styles.mobileMenuFooter}>
           <div className={styles.mobileDarkModeSection}>
             <span>Theme</span>
-            <button 
+            <button
               className={styles.mobileDarkModeToggle}
               onClick={toggleDarkMode}
               aria-label="Toggle dark mode"
@@ -349,4 +331,3 @@ const Navigation = () => {
 };
 
 export default Navigation;
-

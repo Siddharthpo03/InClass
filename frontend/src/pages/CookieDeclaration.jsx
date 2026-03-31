@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Navigation from "../components/Navigation";
-import Footer from "../components/Footer";
+import PageLayout from "../components/layout/PageLayout";
 import {
   getCookieConsent,
   getConsentDate,
@@ -12,7 +10,6 @@ import {
 import styles from "./CookieDeclaration.module.css";
 
 const CookieDeclaration = () => {
-  const navigate = useNavigate();
   const [currentConsent, setCurrentConsent] = useState(null);
   const [consentDate, setConsentDate] = useState(null);
   const [cookiePreferences, setCookiePreferences] = useState({
@@ -23,38 +20,20 @@ const CookieDeclaration = () => {
   });
   const [activeCookies, setActiveCookies] = useState([]);
 
-  // Initialize dark mode from localStorage on mount
   useEffect(() => {
-    const savedDarkMode = localStorage.getItem("darkMode");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-
-    const shouldBeDark =
-      savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
-
-    if (shouldBeDark) {
-      document.body.classList.add("darkMode");
-    } else {
-      document.body.classList.remove("darkMode");
-    }
-
-    // Load current consent status
     setCurrentConsent(getCookieConsent());
     setConsentDate(getConsentDate());
 
-    // Load saved preferences
     const savedPreferences = localStorage.getItem("cookiePreferences");
     if (savedPreferences) {
       try {
         const prefs = JSON.parse(savedPreferences);
         setCookiePreferences(prefs);
-      } catch (e) {
-        // If parsing fails, use defaults
+      } catch {
+        // use defaults
       }
     }
 
-    // Check which cookies are currently active
     updateActiveCookies();
   }, []);
 
@@ -146,23 +125,15 @@ const CookieDeclaration = () => {
   };
 
   return (
-    <div className={styles.cookiePageWrapper}>
-      <Navigation />
-
-      <div className={styles.cookieContainer}>
-        <section className={styles.heroSection}>
-          <div className={styles.heroBadge}>Cookies</div>
-          <h1>Cookie Declaration</h1>
-          <p className={styles.subtitle}>
-            We use cookies to enhance your experience, analyze site usage, and
-            assist in our security efforts. Learn more about how we use cookies.
-          </p>
-          <div className={styles.lastUpdated}>
-            Last Updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-          </div>
-        </section>
-
-        <div className={styles.contentSection}>
+    <PageLayout
+      heroBadge="Cookies"
+      heroTitle="Cookie Declaration"
+      heroSubtitle="We use cookies to enhance your experience, analyze site usage, and assist in our security efforts. Learn more about how we use cookies."
+    >
+      <div className={styles.lastUpdated}>
+        Last Updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+      </div>
+      <div className={styles.contentSection}>
           <section className={styles.cookieSection}>
             <h2>What Are Cookies?</h2>
             <p>
@@ -470,10 +441,7 @@ const CookieDeclaration = () => {
             </div>
           </section>
         </div>
-      </div>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 };
 

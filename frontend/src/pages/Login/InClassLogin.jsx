@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/apiClient";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
+import useDarkMode from "../../hooks/useDarkMode";
 import styles from "./InClassLogin.module.css";
 
 const InClassLogin = () => {
+  useDarkMode();
   const navigate = useNavigate();
   const [role, setRole] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -21,20 +23,15 @@ const InClassLogin = () => {
   const [checkingEmail, setCheckingEmail] = useState(false);
   const emailCheckTimeoutRef = useRef(null);
 
-  // Initialize dark mode
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem("darkMode");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    const shouldBeDark =
-      savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
-    if (shouldBeDark) {
-      document.body.classList.add("darkMode");
-    } else {
-      document.body.classList.remove("darkMode");
-    }
-  }, []);
+  // Minimal state to keep existing face capture UI wiring without using face-api.js
+  const [faceVerificationRequired, setFaceVerificationRequired] = useState(false);
+  const [passwordVerified, setPasswordVerified] = useState(false);
+  const [showFaceCapture, setShowFaceCapture] = useState(false);
+  const [capturingFace, setCapturingFace] = useState(false);
+  const [modelsLoaded] = useState(true);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
 
   // Check if email belongs to an admin account (with debounce)
   const checkEmailForAdmin = async (email) => {
@@ -65,7 +62,7 @@ const InClassLogin = () => {
         );
 
         // Debug log
-        if (process.env.NODE_ENV === "development") {
+        if (import.meta.env.DEV) {
           console.log("Email check response:", response.data);
         }
 
@@ -74,41 +71,19 @@ const InClassLogin = () => {
           response.data.exists &&
           response.data.role === "admin"
         ) {
-          // Admin detected - set state immediately
-          console.log("✅ Admin account detected for:", email);
+          // Admin detected - redirect to admin login page
+          console.log("✅ Admin account detected - redirecting to admin login");
           setIsAdmin(true);
-          setRole("Admin"); // Auto-set role for admin
-
-          // Immediately check if button should be enabled (if password is already entered)
-          // Check multiple times to ensure state is updated (React state updates are async)
-          const enableButtonIfReady = () => {
-            const currentPassword = formData.password.trim();
-            const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-            const passwordValid = currentPassword.length > 0;
-
-            console.log("🔍 Admin detected - checking button state:", {
-              email,
-              hasPassword: passwordValid,
-              passwordLength: currentPassword.length,
-              emailValid,
-              passwordValid,
+          setLoginMessage("ℹ️ Admin account detected. Redirecting to admin login...");
+          
+          // Redirect to admin login page after a short delay
+          setTimeout(() => {
+            navigate("/inclass/admin/login", { 
+              replace: true,
+              state: { email: email } // Pre-fill email if possible
             });
-
-            if (emailValid && passwordValid) {
-              setIsButtonDisabled(false);
-              console.log("✅ Button ENABLED (admin + password entered)");
-              return true;
-            } else {
-              console.log("⏳ Button will enable when password is entered");
-              return false;
-            }
-          };
-
-          // Check immediately and multiple times to catch async state updates
-          enableButtonIfReady();
-          setTimeout(() => enableButtonIfReady(), 50);
-          setTimeout(() => enableButtonIfReady(), 150);
-          setTimeout(() => enableButtonIfReady(), 300);
+          }, 1500);
+          return;
         } else {
           // Not an admin - clear admin state
           setIsAdmin(false);
@@ -273,6 +248,133 @@ const InClassLogin = () => {
     return isValid;
   };
 
+  // Camera functions
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: "user",
+        },
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (error) {
+      console.error("Camera error:", error);
+      setLoginMessage("❌ Failed to access camera. Please check permissions.");
+      setShowFaceCapture(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  // Capture face and verify
+  const captureAndVerifyFace = async () => {
+    if (!videoRef.current || !canvasRef.current) {
+      setLoginMessage("❌ Camera not ready.");
+      return;
+    }
+
+    if (!modelsLoaded) {
+      setLoginMessage("❌ Face recognition models are not loaded yet.");
+      return;
+    }
+
+    setCapturingFace(true);
+    setLoginMessage("");
+
+    try {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Face login removed – keep camera capture for future use if needed.
+    } catch (error) {
+      console.error("Face capture error:", error);
+      setLoginMessage(
+        `❌ ${error.message || "Failed to capture face. Please try again."}`
+      );
+      setCapturingFace(false);
+    }
+  };
+
+  // Complete login with face embedding
+  const completeLoginWithFace = async (embedding) => {
+    try {
+      // Block admin login from regular endpoint
+      if (isAdmin || role.toLowerCase() === "admin") {
+        setLoginMessage("ℹ️ Admin accounts must use the admin login page. Redirecting...");
+        setTimeout(() => {
+          navigate("/inclass/admin/login", { 
+            replace: true,
+            state: { email: formData.email }
+          });
+        }, 1500);
+        return;
+      }
+
+      const loginRole = role.toLowerCase();
+
+      const response = await apiClient.post("/auth/login", {
+        email: formData.email,
+        password: formData.password,
+        role: loginRole,
+        embedding: embedding, // Include face embedding
+      });
+
+      const { token, role: userRole } = response.data;
+      localStorage.setItem("inclass_token", token);
+      localStorage.setItem("user_role", userRole);
+
+      setLoginMessage("✅ Login successful! Redirecting...");
+
+      let targetPath = "/";
+      if (userRole === "student") {
+        targetPath = "/student/dashboard";
+      } else if (userRole === "faculty") {
+        targetPath = "/faculty/dashboard";
+      } else if (userRole === "admin") {
+        targetPath = "/admin/dashboard";
+      }
+
+      setTimeout(() => navigate(targetPath, { replace: true }), 1000);
+    } catch (error) {
+      setCapturingFace(false);
+      setLoading(false);
+      let errorMessage = "Face verification failed.";
+
+      if (error.response?.data) {
+        if (error.response.data.error?.message) {
+          errorMessage = error.response.data.error.message;
+        } else if (error.response.data.message) {
+          errorMessage = error.response.data.message;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setLoginMessage(`❌ ${errorMessage}`);
+      setFaceVerificationRequired(false);
+      setPasswordVerified(false);
+      console.error("Login Error:", error.response || error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoginMessage("");
@@ -285,15 +387,60 @@ const InClassLogin = () => {
     setLoading(true);
 
     try {
-      // Use detected admin role or selected role
-      const loginRole = isAdmin ? "admin" : role.toLowerCase();
+      // Block admin login from regular endpoint
+      if (isAdmin || role.toLowerCase() === "admin") {
+        setLoginMessage("ℹ️ Admin accounts must use the admin login page. Redirecting...");
+        setTimeout(() => {
+          navigate("/inclass/admin/login", { 
+            replace: true,
+            state: { email: formData.email }
+          });
+        }, 1500);
+        setLoading(false);
+        return;
+      }
 
-      const response = await apiClient.post("/auth/login", {
+      // Use selected role (student or faculty only)
+      const loginRole = role.toLowerCase();
+
+      // Try login with password only
+      // Backend will check if face verification is needed
+      console.log("[Login] Attempting login for:", {
         email: formData.email,
-        password: formData.password,
         role: loginRole,
       });
 
+      let response;
+      try {
+        response = await apiClient.post("/auth/login", {
+          email: formData.email,
+          password: formData.password,
+          role: loginRole,
+        });
+      } catch (loginError) {
+        // Check if error is about admin account
+        if (loginError.response?.data?.error?.message?.includes("admin")) {
+          setLoginMessage("ℹ️ Admin accounts must use the admin login page. Redirecting...");
+          setTimeout(() => {
+            navigate("/inclass/admin/login", { 
+              replace: true,
+              state: { email: formData.email }
+            });
+          }, 1500);
+          setLoading(false);
+          return;
+        }
+        // Re-throw to be handled by outer catch block
+        throw loginError;
+      }
+
+      console.log("[Login] Login response received:", {
+        status: response.status,
+        data: response.data,
+        hasToken: !!response.data?.token,
+      });
+
+      // If we get here, login succeeded (no face verification needed or already provided)
       const { token, role: userRole } = response.data;
       localStorage.setItem("inclass_token", token);
       localStorage.setItem("user_role", userRole);
@@ -319,6 +466,51 @@ const InClassLogin = () => {
       setLoading(false);
       let errorMessage = "Login failed. Please check your credentials.";
 
+      // Log full error for debugging
+      console.log("[Login] Full error object:", {
+        hasResponse: !!error.response,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+        errorObject: error,
+      });
+
+      // Check if this is a face verification requirement (400 status)
+      if (error.response?.status === 400) {
+        const responseData = error.response.data;
+
+        // Check if backend is asking for face verification
+        const requiresFaceVerification =
+          responseData?.requiresFaceVerification === true ||
+          responseData?.error?.code === "FACE_VERIFICATION_REQUIRED" ||
+          responseData?.error?.message?.includes(
+            "Face verification required"
+          ) ||
+          responseData?.error?.message?.includes("capture your face") ||
+          responseData?.message?.includes("Face verification required") ||
+          responseData?.message?.includes("capture your face");
+
+        console.log("[Login] Face verification check (400 status):", {
+          requiresFaceVerification,
+          errorCode: responseData?.error?.code,
+          errorMessage: responseData?.error?.message || responseData?.message,
+          hasFlag: responseData?.requiresFaceVerification,
+          fullData: responseData,
+        });
+
+        if (requiresFaceVerification) {
+          // Password is verified, now need face
+          console.log("[Login] Triggering face verification modal");
+          setPasswordVerified(true);
+          setFaceVerificationRequired(true);
+          setShowFaceCapture(true);
+          await startCamera();
+          setLoginMessage("✅ Password verified. Please verify your face.");
+          return;
+        }
+      }
+
       if (error.response?.data) {
         if (error.response.data.error?.message) {
           errorMessage = error.response.data.error.message;
@@ -343,7 +535,7 @@ const InClassLogin = () => {
           <div className={styles.loginHeader}>
             <div className={styles.logoSection}>
               <div className={styles.logoIcon}>
-                <img src="/favicon.jpg" alt="InClass Logo" />
+                <img src="/favicon.png" alt="InClass Logo" />
               </div>
             </div>
             <h1 className={styles.loginTitle}>Welcome Back</h1>
@@ -535,11 +727,68 @@ const InClassLogin = () => {
               </a>
             </div>
 
+            {/* Face Capture Modal */}
+            {showFaceCapture && (
+              <div className={styles.faceCaptureModal}>
+                <div className={styles.faceCaptureContent}>
+                  <h3>Face Verification Required</h3>
+                  <p>Please look at the camera to verify your identity.</p>
+                  <div className={styles.videoContainer}>
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className={styles.videoPreview}
+                    />
+                    <canvas ref={canvasRef} style={{ display: "none" }} />
+                  </div>
+                  <div className={styles.faceCaptureButtons}>
+                    <button
+                      type="button"
+                      onClick={captureAndVerifyFace}
+                      disabled={capturingFace || !modelsLoaded}
+                      className={styles.captureButton}
+                    >
+                      {capturingFace ? (
+                        <>
+                          <div className={styles.spinner}></div>
+                          <span>Verifying...</span>
+                        </>
+                      ) : (
+                        <>
+                          <i className="bx bx-camera"></i>
+                          <span>Verify Face</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        stopCamera();
+                        setShowFaceCapture(false);
+                        setFaceVerificationRequired(false);
+                        setPasswordVerified(false);
+                        setLoading(false);
+                      }}
+                      className={styles.cancelButton}
+                      disabled={capturingFace}
+                    >
+                      <i className="bx bx-x"></i>
+                      <span>Cancel</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Submit Button */}
             <button
               type="submit"
               className={styles.submitButton}
-              disabled={isButtonDisabled || loading || checkingEmail}
+              disabled={
+                isButtonDisabled || loading || checkingEmail || showFaceCapture
+              }
             >
               {loading ? (
                 <>

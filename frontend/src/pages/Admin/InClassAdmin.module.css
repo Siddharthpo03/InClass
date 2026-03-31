@@ -1,14 +1,9 @@
 /* Professional Admin Dashboard Styles */
 
 :global(body) {
-  background: linear-gradient(to top, #d4f5eb 0%, #ffffff 100%);
+  background: var(--bg-page);
   background-attachment: fixed;
   transition: background 0.3s ease;
-}
-
-:global(body.darkMode) {
-  background: linear-gradient(to top, #1a1a2e 0%, #16213e 100%);
-  background-attachment: fixed;
 }
 
 .dashboardWrapper {
@@ -160,11 +155,7 @@
   display: flex;
   gap: 12px;
   margin-bottom: 32px;
-  border-bottom: 2px solid #e5e7eb;
-}
-
-:global(body.darkMode) .adminTabs {
-  border-bottom-color: #334155;
+  border-bottom: 2px solid var(--border-color);
 }
 
 .tabBtn {
@@ -172,7 +163,7 @@
   background: none;
   border: none;
   border-bottom: 3px solid transparent;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -181,10 +172,6 @@
   gap: 8px;
   transition: all 0.3s ease;
   margin-bottom: -2px;
-}
-
-:global(body.darkMode) .tabBtn {
-  color: #9ca3af;
 }
 
 .tabBtn:hover {
@@ -211,15 +198,10 @@
 
 /* Content Area */
 .contentArea {
-  background: white;
+  background: var(--bg-card);
   border-radius: 16px;
   padding: 32px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-:global(body.darkMode) .contentArea {
-  background: #1e293b;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-card);
 }
 
 /* Metrics Grid */
@@ -230,19 +212,14 @@
 }
 
 .metricCard {
-  background: #f9fafb;
+  background: var(--bg-surface);
   border-radius: 12px;
   padding: 24px;
   display: flex;
   align-items: center;
   gap: 20px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   transition: all 0.3s ease;
-}
-
-:global(body.darkMode) .metricCard {
-  background: #0f172a;
-  border-color: #334155;
 }
 
 .metricCard:hover {
@@ -271,22 +248,14 @@
   font-size: 2rem;
   font-weight: 700;
   margin: 0 0 4px 0;
-  color: #1f2937;
-}
-
-:global(body.darkMode) .metricValue {
-  color: #f9fafb;
+  color: var(--text-heading);
 }
 
 .metricLabel {
   font-size: 0.875rem;
   margin: 0;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
-}
-
-:global(body.darkMode) .metricLabel {
-  color: #9ca3af;
 }
 
 /* User Management */
@@ -300,21 +269,13 @@
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0;
-  color: #1f2937;
-}
-
-:global(body.darkMode) .userManagement h3 {
-  color: #f9fafb;
+  color: var(--text-heading);
 }
 
 .userCount {
   font-size: 1rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
-}
-
-:global(body.darkMode) .userCount {
-  color: #9ca3af;
 }
 
 .userListCard {
@@ -331,17 +292,11 @@
 .userSearch input {
   flex: 1;
   padding: 12px 16px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-input);
   border-radius: 10px;
   font-size: 1rem;
-  background: white;
-  color: #1f2937;
-}
-
-:global(body.darkMode) .userSearch input {
-  background: #0f172a;
-  border-color: #334155;
-  color: #f9fafb;
+  background: var(--bg-input);
+  color: var(--text-primary);
 }
 
 .userSearch input:focus {

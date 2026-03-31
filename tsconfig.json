@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "allowJs": true,
+    "checkJs": true,
+    "jsx": "react-jsx",
+    "strict": false,
+    "noEmit": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true
+  },
+  "include": ["frontend/src", "backend"]
+}
