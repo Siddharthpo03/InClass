@@ -33,7 +33,8 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 
 # Copy application code (including models directory)
-COPY backend ./
+# Note: When deployed to Azure with just the backend folder, use . instead of backend/
+COPY . ./
 
 # Ensure models directory exists and has proper permissions
 RUN mkdir -p ./models && chmod 755 ./models
