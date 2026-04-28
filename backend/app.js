@@ -8,11 +8,12 @@ const cors = require("cors");
 const helmet = require("helmet");
 const pool = require("./db");
 const errorHandler = require("./middleware/errorHandler");
+const logger = require("./utils/logger");
 
 // --- SEC-004: Critical Security Validation ---
 // Validate biometric encryption key before server starts
 if (!process.env.BIOMETRIC_ENCRYPTION_KEY) {
-  console.error(`
+  logger.error(`
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  CRITICAL SECURITY ERROR: BIOMETRIC_ENCRYPTION_KEY is not set                ║
 ║  Server cannot start. Biometric data encryption requires a secure key.      ║
@@ -35,7 +36,7 @@ Store it securely in production (e.g., environment variables, secrets manager).
 
 // Validate key length (minimum 32 bytes = 64 hex characters for AES-256)
 if (process.env.BIOMETRIC_ENCRYPTION_KEY.length < 32) {
-  console.error(`
+  logger.error(`
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  CRITICAL SECURITY ERROR: BIOMETRIC_ENCRYPTION_KEY is too short             ║
 ║  Minimum length required: 32 characters (64 hex chars for AES-256)         ║
@@ -56,7 +57,7 @@ To fix:
 // --- SEC-005: Critical JWT Secret Validation ---
 // Validate JWT secret before server starts
 if (!process.env.JWT_SECRET) {
-  console.error(`
+  logger.error(`
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  CRITICAL SECURITY ERROR: JWT_SECRET is not set                             ║
 ║  Server cannot start. JWT authentication requires a secure secret.         ║
@@ -80,7 +81,7 @@ Store it securely in production (e.g., environment variables, secrets manager).
 // Validate JWT secret strength (minimum 32 characters for security)
 const MIN_JWT_SECRET_LENGTH = 32;
 if (process.env.JWT_SECRET.length < MIN_JWT_SECRET_LENGTH) {
-  console.error(`
+  logger.error(`
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  CRITICAL SECURITY ERROR: JWT_SECRET is too weak                             ║
 ║  Minimum length required: ${MIN_JWT_SECRET_LENGTH} characters for security        ║
@@ -149,15 +150,14 @@ if (isDevelopment) {
     "http://localhost:5173", // Vite default port
     "http://localhost:3000", // React default port
   ];
-  console.log(
-    "🔒 CORS: Development mode - Allowing:",
-    allowedOrigins.join(", "),
+  logger.info(
+    "CORS: Development mode - Allowing: " + allowedOrigins.join(", "),
   );
 } else {
   // Production: Only allow FRONTEND_URL from environment
   const frontendUrl = process.env.FRONTEND_URL;
   if (!frontendUrl) {
-    console.error(`
+    logger.error(`
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  CRITICAL SECURITY ERROR: FRONTEND_URL is not set                            ║
 ║  Server cannot start in production without FRONTEND_URL.                    ║
@@ -174,7 +174,7 @@ SECURITY NOTE: Never use wildcard origins (*) in production.
     process.exit(1);
   }
   allowedOrigins = [frontendUrl];
-  console.log("🔒 CORS: Production mode - Allowing:", frontendUrl);
+  logger.info("CORS: Production mode - Allowing: " + frontendUrl);
 }
 
 // Expose allowedOrigins for Socket.io setup in server.js
@@ -186,8 +186,8 @@ app.use(
       // Block requests with no origin (except for same-origin requests)
       if (!origin) {
         if (isDevelopment) {
-          console.warn(
-            "⚠️  CORS: Request with no origin header (allowed in development only)",
+          logger.warn(
+            "CORS: Request with no origin header (allowed in development only)",
           );
           return callback(null, true);
         }
@@ -204,7 +204,7 @@ app.use(
       }
 
       // Origin not allowed - log and block
-      console.warn(`🚫 CORS: Blocked request from origin: ${origin}`);
+      logger.warn("CORS: Blocked request from origin: " + origin);
       callback(
         new Error(`CORS: Origin ${origin} is not allowed by CORS policy`),
       );
@@ -234,15 +234,14 @@ const { initVectorSupport } = require("./config/database");
 if (process.env.NODE_ENV !== "test") {
   pool.query("SELECT NOW()", async (err, res) => {
     if (err) {
-      console.error(
-        "❌ FATAL: Database connection failed. Check db.js and .env.",
-        err.message,
+      logger.error(
+        "FATAL: Database connection failed. Check db.js and .env: " +
+          err.message,
       );
       process.exit(1);
     } else {
-      console.log(
-        "✅ PostgreSQL connected successfully. Date:",
-        res.rows[0].now,
+      logger.info(
+        "PostgreSQL connected successfully. Date: " + res.rows[0].now,
       );
       await initVectorSupport();
     }
@@ -325,7 +324,7 @@ app.get("/health", async (req, res) => {
       responseTimeMs: Date.now() - start,
     });
   } catch (err) {
-    console.error("Health check database error:", err.message);
+    logger.error("Health check database error: " + err.message);
 
     const memory = process.memoryUsage();
 
@@ -361,7 +360,7 @@ app.get("/api/health", async (req, res) => {
       responseTimeMs: Date.now() - start,
     });
   } catch (err) {
-    console.error("API health check database error:", err.message);
+    logger.error("API health check database error: " + err.message);
 
     const memory = process.memoryUsage();
 
@@ -389,7 +388,3 @@ if (process.env.SENTRY_DSN) {
 app.use(errorHandler);
 
 module.exports = app;
-
-app.get("/sentry-test", (req, res) => {
-  throw new Error("Sentry test error from InClass backend");
-});

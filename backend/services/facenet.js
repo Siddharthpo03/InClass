@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 const ort = require("onnxruntime-node");
+const logger = require("../utils/logger");
 
 let sessionPromise = null;
 let modelAvailable = false;
@@ -22,11 +23,10 @@ const MODEL_PATH = getModelPath();
 if (fs.existsSync(MODEL_PATH)) {
   modelAvailable = true;
 } else {
-  console.warn(
-    `⚠️  FaceNet model not found at ${MODEL_PATH}\n` +
-      "   Face recognition features are disabled until the model is placed there.\n" +
-      "   Download facenet-512.onnx and save it to the backend/models/ folder,\n" +
-      "   or set FACENET_MODEL_PATH in .env to an alternative path."
+  logger.warn(
+    `FaceNet model not found at ${MODEL_PATH}. ` +
+      "Face recognition features are disabled until the model is placed there. " +
+      "Download facenet-512.onnx and save it to backend/models/ or set FACENET_MODEL_PATH in .env",
   );
 }
 
@@ -41,7 +41,7 @@ async function loadModel() {
 
   if (!modelAvailable) {
     throw new Error(
-      "FaceNet model is not available. Place facenet-512.onnx in backend/models/ or set FACENET_MODEL_PATH."
+      "FaceNet model is not available. Place facenet-512.onnx in backend/models/ or set FACENET_MODEL_PATH.",
     );
   }
 
@@ -54,9 +54,9 @@ async function loadModel() {
     return session;
   } catch (err) {
     sessionPromise = null;
-    console.error("Model load failed:", err);
+    logger.error("Model load failed: " + err.message);
     throw new Error(
-      `Failed to load FaceNet ONNX model from ${MODEL_PATH}: ${err.message}`
+      `Failed to load FaceNet ONNX model from ${MODEL_PATH}: ${err.message}`,
     );
   }
 }
@@ -130,7 +130,7 @@ async function extractEmbedding(imageBuffer) {
 
   if (!output || !output.data || output.data.length !== 512) {
     throw new Error(
-      `Unexpected FaceNet output shape. Expected 512-dim, got ${output?.data?.length || 0}.`
+      `Unexpected FaceNet output shape. Expected 512-dim, got ${output?.data?.length || 0}.`,
     );
   }
 
@@ -143,4 +143,3 @@ module.exports = {
   extractEmbedding,
   isFaceNetAvailable,
 };
-

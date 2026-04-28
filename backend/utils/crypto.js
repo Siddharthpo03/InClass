@@ -4,6 +4,7 @@
 // SEC-004: Production-grade encryption key validation
 
 const crypto = require("crypto");
+const logger = require("./logger");
 
 // ============================================
 // CRITICAL SECURITY: Encryption Key Validation
@@ -30,8 +31,10 @@ To fix:
 SECURITY NOTE: Never commit the encryption key to version control.
 Store it securely in production (e.g., environment variables, secrets manager).
 `;
-  console.error(errorMessage);
-  throw new Error("CRITICAL SECURITY ERROR: BIOMETRIC_ENCRYPTION_KEY is not set. Server cannot start.");
+  logger.error(errorMessage);
+  throw new Error(
+    "CRITICAL SECURITY ERROR: BIOMETRIC_ENCRYPTION_KEY is not set. Server cannot start.",
+  );
 }
 
 // Validate key length: AES-256 requires 32 bytes = 64 hex characters
@@ -54,16 +57,18 @@ To fix:
 
 3. Restart the server
 `;
-  console.error(errorMessage);
-  throw new Error(`CRITICAL SECURITY ERROR: BIOMETRIC_ENCRYPTION_KEY must be at least ${MIN_KEY_LENGTH * 2} characters (${MIN_KEY_LENGTH} bytes) for AES-256. Current length: ${keyLength}.`);
+  logger.error(errorMessage);
+  throw new Error(
+    `CRITICAL SECURITY ERROR: BIOMETRIC_ENCRYPTION_KEY must be at least ${MIN_KEY_LENGTH * 2} characters (${MIN_KEY_LENGTH} bytes) for AES-256. Current length: ${keyLength}.`,
+  );
 }
 
 // Validate key format (should be hex string for consistency)
 // Allow alphanumeric but warn if not hex
 if (!/^[0-9a-fA-F]+$/.test(ENCRYPTION_KEY)) {
-  console.warn("⚠️  WARNING: BIOMETRIC_ENCRYPTION_KEY contains non-hexadecimal characters.");
-  console.warn("   For best security, use a hex-encoded key (64 hex characters).");
-  console.warn("   Generate with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"");
+  logger.warn(
+    "BIOMETRIC_ENCRYPTION_KEY contains non-hexadecimal characters. For best security, use a hex-encoded key (64 hex characters).",
+  );
 }
 
 // Use the validated encryption key (no fallback)
@@ -114,16 +119,21 @@ function looksLikeEmbedding(value) {
  */
 function secureLog(message, data) {
   if (data === undefined || data === null) {
-    console.error(message);
+    logger.error(message);
     return;
   }
   if (Array.isArray(data) && looksLikeEmbedding(data)) {
-    console.error(message, "(sensitive data omitted)");
+    logger.error(message + " (sensitive data omitted)");
     return;
   }
   if (typeof data === "object" && !Array.isArray(data)) {
     const safe = {};
-    const allowed = new Set(["embeddingLength", "userId", "operationStatus", "code"]);
+    const allowed = new Set([
+      "embeddingLength",
+      "userId",
+      "operationStatus",
+      "code",
+    ]);
     for (const [k, v] of Object.entries(data)) {
       if (SENSITIVE_KEYS.has(k)) {
         continue;
@@ -132,10 +142,10 @@ function secureLog(message, data) {
         safe[k] = v;
       }
     }
-    console.error(message, Object.keys(safe).length ? safe : "");
+    logger.error(message, Object.keys(safe).length ? safe : {});
     return;
   }
-  console.error(message);
+  logger.error(message);
 }
 
 /**
@@ -203,7 +213,7 @@ function decrypt(encryptedData) {
     const iv = combined.slice(SALT_LENGTH, SALT_LENGTH + IV_LENGTH);
     const tag = combined.slice(
       SALT_LENGTH + IV_LENGTH,
-      SALT_LENGTH + IV_LENGTH + TAG_LENGTH
+      SALT_LENGTH + IV_LENGTH + TAG_LENGTH,
     );
     const encrypted = combined.slice(SALT_LENGTH + IV_LENGTH + TAG_LENGTH);
 
@@ -220,7 +230,10 @@ function decrypt(encryptedData) {
 
     return decrypted;
   } catch (error) {
-    secureLog("Decryption failed.", { operationStatus: "error", code: error.code });
+    secureLog("Decryption failed.", {
+      operationStatus: "error",
+      code: error.code,
+    });
 
     // Check for common decryption errors without leaking error.message
     if (
@@ -229,7 +242,7 @@ function decrypt(encryptedData) {
     ) {
       throw new Error(
         "Failed to decrypt biometric data: Encryption key mismatch. " +
-          "Ensure BIOMETRIC_ENCRYPTION_KEY in .env matches the key used during encryption."
+          "Ensure BIOMETRIC_ENCRYPTION_KEY in .env matches the key used during encryption.",
       );
     }
 

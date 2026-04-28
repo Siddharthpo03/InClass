@@ -3,6 +3,7 @@
 
 const twilio = require("twilio");
 require("dotenv").config();
+const logger = require("./logger");
 
 const ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
@@ -16,25 +17,22 @@ let twilioClient = null;
   if (ACCOUNT_SID && AUTH_TOKEN) {
     try {
       twilioClient = twilio(ACCOUNT_SID, AUTH_TOKEN);
-      console.log("✅ Twilio initialized");
-      console.log(`   Account SID: ${ACCOUNT_SID}`);
+      logger.info("Twilio initialized successfully");
+      logger.debug("Account SID: " + ACCOUNT_SID);
       if (VERIFY_SERVICE_SID) {
-        console.log(`   Verify Service SID: ${VERIFY_SERVICE_SID}`);
+        logger.debug("Verify Service SID: " + VERIFY_SERVICE_SID);
       } else {
-        console.warn(
-          "   ⚠️  TWILIO_VERIFY_SERVICE_SID not set. OTP sending will fail."
+        logger.warn(
+          "TWILIO_VERIFY_SERVICE_SID not set. OTP sending will fail.",
         );
       }
     } catch (error) {
-      console.error("❌ Failed to initialize Twilio:", error.message);
+      logger.error("Failed to initialize Twilio: " + error.message);
       twilioClient = null;
     }
   } else {
-    console.warn(
-      "⚠️  Twilio credentials not set. SMS functionality will be disabled."
-    );
-    console.warn(
-      "   Please set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_VERIFY_SERVICE_SID in .env file"
+    logger.warn(
+      "Twilio credentials not set. SMS functionality will be disabled. Please set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_VERIFY_SERVICE_SID in .env file",
     );
   }
 })();
@@ -56,8 +54,7 @@ async function sendOtpSms(phone) {
   if (!VERIFY_SERVICE_SID) {
     return {
       success: false,
-      error:
-        "TWILIO_VERIFY_SERVICE_SID not configured. Please set it in .env",
+      error: "TWILIO_VERIFY_SERVICE_SID not configured. Please set it in .env",
     };
   }
 
@@ -69,7 +66,10 @@ async function sendOtpSms(phone) {
   }
 
   // Clean phone number - remove spaces, dashes, parentheses
-  let cleanPhone = phone.toString().trim().replace(/[\s\-\(\)]/g, "");
+  let cleanPhone = phone
+    .toString()
+    .trim()
+    .replace(/[\s\-\(\)]/g, "");
 
   // Ensure phone number starts with + (E.164 format)
   if (!cleanPhone.startsWith("+")) {
@@ -98,7 +98,7 @@ async function sendOtpSms(phone) {
   }
 
   try {
-    console.log(`[Twilio Verify] Sending OTP to: ${cleanPhone}`);
+    logger.info(`Sending OTP to: ${cleanPhone}`);
 
     // Use Twilio Verify API to send OTP
     const verification = await twilioClient.verify.v2
@@ -108,8 +108,8 @@ async function sendOtpSms(phone) {
         channel: "sms",
       });
 
-    console.log(`✅ Twilio OTP sent successfully to ${cleanPhone}`);
-    console.log(`   Verification SID: ${verification.sid}`);
+    logger.info(`Twilio OTP sent successfully to ${cleanPhone}`);
+    logger.debug(`Verification SID: ${verification.sid}`);
 
     return {
       success: true,
@@ -117,7 +117,7 @@ async function sendOtpSms(phone) {
       response: verification,
     };
   } catch (error) {
-    console.error("❌ Twilio Verify API error:", error.message || error);
+    logger.error("Twilio Verify API error: " + (error.message || error));
 
     let errorMessage = "Failed to send OTP. Please try again.";
     if (error.message) {
@@ -165,7 +165,10 @@ async function verifyOtpSms(phone, otp) {
   }
 
   // Clean phone number (same as sendOtpSms)
-  let cleanPhone = phone.toString().trim().replace(/[\s\-\(\)]/g, "");
+  let cleanPhone = phone
+    .toString()
+    .trim()
+    .replace(/[\s\-\(\)]/g, "");
   if (!cleanPhone.startsWith("+")) {
     if (cleanPhone.startsWith("91") && cleanPhone.length === 12) {
       cleanPhone = "+" + cleanPhone;
@@ -212,4 +215,3 @@ module.exports = {
   sendOtpSms,
   verifyOtpSms,
 };
-

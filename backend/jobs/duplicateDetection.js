@@ -9,6 +9,7 @@
 // existing rows. Existing attendance APIs and inserts remain unchanged.
 
 const pool = require("../db");
+const logger = require("../utils/logger");
 
 const LOG_PREFIX = "[DuplicateDetection]";
 
@@ -42,9 +43,9 @@ async function detectDuplicateAttendance() {
     const result = await client.query(updateSql);
     const updated = result.rowCount ?? 0;
     if (updated > 0) {
-      console.log(`${LOG_PREFIX} Marked ${updated} duplicate attendance row(s).`);
+      logger.info(`Marked ${updated} duplicate attendance row(s).`);
     } else {
-      console.log(`${LOG_PREFIX} No duplicate attendance rows to mark.`);
+      logger.info("No duplicate attendance rows to mark.");
     }
     return { updated };
   } finally {
@@ -69,9 +70,9 @@ async function deleteDuplicateAttendance() {
     const result = await client.query(deleteSql);
     const deleted = result.rowCount ?? 0;
     if (deleted > 0) {
-      console.log(`${LOG_PREFIX} Deleted ${deleted} duplicate attendance row(s).`);
+      logger.info(`Deleted ${deleted} duplicate attendance row(s).`);
     } else {
-      console.log(`${LOG_PREFIX} No duplicate attendance rows to delete.`);
+      logger.info("No duplicate attendance rows to delete.");
     }
     return { deleted };
   } finally {
@@ -85,12 +86,12 @@ async function deleteDuplicateAttendance() {
  */
 async function runDuplicateDetectionJob() {
   try {
-    console.log(`${LOG_PREFIX} Starting scheduled duplicate detection.`);
+    logger.info("Starting scheduled duplicate detection.");
     const { updated } = await detectDuplicateAttendance();
-    console.log(`${LOG_PREFIX} Finished. Updated: ${updated}`);
+    logger.info(`Finished. Updated: ${updated}`);
   } catch (err) {
-    console.error(`${LOG_PREFIX} Error during duplicate detection:`, err.message);
-    console.error(err);
+    logger.error("Error during duplicate detection: " + err.message);
+    logger.error(err);
   }
 }
 
@@ -105,7 +106,9 @@ function startDuplicateDetectionSchedule() {
   try {
     cron = require("node-cron");
   } catch (e) {
-    console.warn(`${LOG_PREFIX} node-cron not installed. Skipping schedule. Run duplicate detection manually or add node-cron.`);
+    logger.warn(
+      "node-cron not installed. Skipping schedule. Run duplicate detection manually or add node-cron.",
+    );
     return null;
   }
 
@@ -115,7 +118,7 @@ function startDuplicateDetectionSchedule() {
     timezone: process.env.TZ || undefined,
   });
 
-  console.log(`${LOG_PREFIX} Scheduled to run daily at 2:00 AM.`);
+  logger.info("Scheduled to run daily at 2:00 AM.");
   return task;
 }
 

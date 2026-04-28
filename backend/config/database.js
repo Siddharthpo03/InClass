@@ -3,6 +3,7 @@
 // Falls back to native float8[] arrays when the pgvector extension is unavailable.
 
 const pool = require("../db");
+const logger = require("../utils/logger");
 
 let pgvector;
 try {
@@ -46,7 +47,7 @@ async function initVectorSupport() {
         }
 
         vectorMode = "pgvector";
-        console.log("✅ pgvector extension ready (vector(512) column ensured)");
+        logger.info("pgvector extension ready (vector(512) column ensured)");
         return;
       } catch {
         // pgvector not available on this server – fall through to native path
@@ -95,8 +96,8 @@ async function initVectorSupport() {
     `);
 
     vectorMode = "native";
-    console.log(
-      "✅ Vector support ready (native float8[] + cosine_distance function)"
+    logger.info(
+      "Vector support ready (native float8[] + cosine_distance function)",
     );
   } finally {
     client.release();

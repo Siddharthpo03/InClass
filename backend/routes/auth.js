@@ -24,10 +24,10 @@ const {
 } = require("../middleware/rateLimiter");
 
 // Utility to generate JWT (requires JWT_SECRET in .env)
-// Token expires in 7 days for better user experience
+// Token expires in 24 hours for security (production best practice)
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
-    expiresIn: "7d", // Extended from 3d to 7d for better session persistence
+    expiresIn: "24h", // Production security standard: 24-hour token lifetime
   });
 };
 
@@ -57,7 +57,7 @@ router.get(
       exists: true,
       role: result.rows[0].role,
     });
-  })
+  }),
 );
 
 // @route   GET /api/auth/profile
@@ -72,7 +72,7 @@ router.get(
     // SECURE: Parameterized query prevents SQL injection
     const result = await pool.query(
       "SELECT name, email, role, roll_no, college, department, college_id, department_id FROM users WHERE id = $1",
-      [userId]
+      [userId],
     );
 
     if (result.rowCount === 0) {
@@ -95,7 +95,7 @@ router.get(
       college_id: user.college_id,
       department_id: user.department_id,
     });
-  })
+  }),
 );
 
 // @route   POST /api/auth/register
@@ -124,7 +124,7 @@ router.post(
             filename: req.files.passportPhoto[0].filename,
             size: req.files.passportPhoto[0].size,
           }
-        : null
+        : null,
     );
     console.log(
       "📥 faceImage:",
@@ -133,19 +133,19 @@ router.post(
             filename: req.files.faceImage[0].filename,
             size: req.files.faceImage[0].size,
           }
-        : null
+        : null,
     );
 
     // Check if req.body exists - multer should populate this
     if (!req.body) {
       console.error(
-        "❌ req.body is undefined - multer may not have parsed the request"
+        "❌ req.body is undefined - multer may not have parsed the request",
       );
       console.error(
-        "❌ This usually means the request isn't multipart/form-data"
+        "❌ This usually means the request isn't multipart/form-data",
       );
       throw new ValidationError(
-        "Request body is missing. Please ensure the form is submitted correctly."
+        "Request body is missing. Please ensure the form is submitted correctly.",
       );
     }
 
@@ -185,7 +185,7 @@ router.post(
     // Validate required fields - use individual variables
     if (!name || !email || !password || !role) {
       throw new ValidationError(
-        "Missing required fields: name, email, password, and role are required."
+        "Missing required fields: name, email, password, and role are required.",
       );
     }
 
@@ -222,17 +222,16 @@ router.post(
       console.log("👤 Face image saved:", faceImagePath);
     }
 
-  
     // Validate roll_no uniqueness within college (if roll_no and college_id provided)
     if (roll_no && college_id) {
       const existingRollNo = await pool.query(
         `SELECT id FROM users WHERE roll_no = $1 AND college_id = $2`,
-        [roll_no, college_id]
+        [roll_no, college_id],
       );
 
       if (existingRollNo.rowCount > 0) {
         throw new ConflictError(
-          `Roll number ${roll_no} already exists in this college. Please use a different roll number.`
+          `Roll number ${roll_no} already exists in this college. Please use a different roll number.`,
         );
       }
     }
@@ -267,7 +266,7 @@ router.post(
           department || null,
           college_id || null,
           department_id || null,
-        ]
+        ],
       );
 
       console.log("✅ User inserted successfully, ID:", result.rows[0].id);
@@ -292,7 +291,7 @@ router.post(
       console.error("❌ ====================================");
       throw dbError; // Re-throw to be caught by errorHandler
     }
-  })
+  }),
 );
 
 // @route   POST /api/auth/login
@@ -312,7 +311,7 @@ router.post(
     // Admins must use the separate /inclass/admin/login endpoint
     if (role === "admin") {
       throw new AuthenticationError(
-        "Admin accounts must use the admin login page at /inclass/admin/login"
+        "Admin accounts must use the admin login page at /inclass/admin/login",
       );
     }
 
@@ -330,7 +329,7 @@ router.post(
     // Also block if user is admin (even if they didn't select admin role)
     if (user.role === "admin") {
       throw new AuthenticationError(
-        "Admin accounts must use the admin login page at /inclass/admin/login"
+        "Admin accounts must use the admin login page at /inclass/admin/login",
       );
     }
 
@@ -338,7 +337,7 @@ router.post(
     if (user.role !== role) {
       throw new AuthenticationError(
         "Role mismatch. Please select the correct role.",
-        { expected: role, actual: user.role }
+        { expected: role, actual: user.role },
       );
     }
 
@@ -356,7 +355,7 @@ router.post(
       // Check if student has enrolled face
       const faceCheck = await pool.query(
         `SELECT id FROM biometric_face WHERE user_id = $1 AND is_active = TRUE LIMIT 1`,
-        [user.id]
+        [user.id],
       );
 
       const hasFace = faceCheck.rowCount > 0;
@@ -364,7 +363,7 @@ router.post(
       // If no face enrollment, block login
       if (!hasFace) {
         console.log(
-          `[Login] ❌ Student ${user.id} has no face enrollment - blocking login`
+          `[Login] ❌ Student ${user.id} has no face enrollment - blocking login`,
         );
 
         return res.status(403).json({
@@ -379,33 +378,31 @@ router.post(
         });
       }
 
-      console.log(
-        `[Login] ✅ Student ${user.id} face enrollment check passed`
-      );
+      console.log(`[Login] ✅ Student ${user.id} face enrollment check passed`);
     }
 
     // Face verification for students and faculty (only if face is enrolled)
     if (user.role === "student" || user.role === "faculty") {
       const faceCheck = await pool.query(
         "SELECT id FROM biometric_face WHERE user_id = $1 AND is_active = TRUE LIMIT 1",
-        [user.id]
+        [user.id],
       );
 
       console.log(`[Login] ========================================`);
       console.log(
         `[Login] User ${user.id} (${user.role}): Face enrolled = ${
           faceCheck.rowCount > 0
-        }`
+        }`,
       );
       console.log(
-        `[Login] Face check query result: ${faceCheck.rowCount} rows`
+        `[Login] Face check query result: ${faceCheck.rowCount} rows`,
       );
 
       if (faceCheck.rowCount > 0) {
         console.log(`[Login] Face record found for user ${user.id}`);
       } else {
         console.log(
-          `[Login] No face record found for user ${user.id} - skipping face verification`
+          `[Login] No face record found for user ${user.id} - skipping face verification`,
         );
         console.log(`[Login] ========================================`);
       }
@@ -418,17 +415,17 @@ router.post(
         console.log(
           `[Login] Embedding provided = ${
             !!embedding && Array.isArray(embedding) && embedding.length > 0
-          }`
+          }`,
         );
         console.log(
           `[Login] Embedding type: ${typeof embedding}, isArray: ${Array.isArray(
-            embedding
-          )}, length: ${embedding?.length || 0}`
+            embedding,
+          )}, length: ${embedding?.length || 0}`,
         );
 
         if (!embedding || !Array.isArray(embedding) || embedding.length === 0) {
           console.log(
-            `[Login] ❌ Face verification required for user ${user.id} - returning 400 error`
+            `[Login] ❌ Face verification required for user ${user.id} - returning 400 error`,
           );
           // Return specific error that frontend can catch
           const errorResponse = {
@@ -441,7 +438,7 @@ router.post(
           };
           console.log(
             `[Login] Sending error response:`,
-            JSON.stringify(errorResponse, null, 2)
+            JSON.stringify(errorResponse, null, 2),
           );
           console.log(`[Login] ========================================`);
           // Use res.status().json() and ensure it's returned
@@ -453,13 +450,13 @@ router.post(
         const { decrypt } = require("../utils/crypto");
         const storedResult = await pool.query(
           "SELECT encrypted_embedding FROM biometric_face WHERE user_id = $1 AND is_active = TRUE",
-          [user.id]
+          [user.id],
         );
 
         if (storedResult.rowCount > 0) {
           // Decrypt stored embedding
           const decryptedEmbedding = JSON.parse(
-            decrypt(storedResult.rows[0].encrypted_embedding)
+            decrypt(storedResult.rows[0].encrypted_embedding),
           );
 
           // Calculate cosine similarity
@@ -484,13 +481,13 @@ router.post(
 
           const similarity = cosineSimilarity(embedding, decryptedEmbedding);
           const threshold = parseFloat(
-            process.env.FACE_SIMILARITY_THRESHOLD || "0.62"
+            process.env.FACE_SIMILARITY_THRESHOLD || "0.62",
           );
           const match = similarity >= threshold;
 
           if (!match) {
             throw new AuthenticationError(
-              "Face mismatch – identity could not be verified."
+              "Face mismatch – identity could not be verified.",
             );
           }
         }
@@ -498,7 +495,7 @@ router.post(
     }
 
     console.log(
-      `[Login] ✅ Login successful for user ${user.id} (${user.role})`
+      `[Login] ✅ Login successful for user ${user.id} (${user.role})`,
     );
     console.log(`[Login] ========================================`);
     res.json({
@@ -508,7 +505,7 @@ router.post(
       token: generateToken(user.id, user.role),
       role: user.role,
     });
-  })
+  }),
 );
 
 // @route   GET /api/auth/faculty-by-college
@@ -525,7 +522,7 @@ router.get(
 
     const result = await pool.query(
       "SELECT id, name, email, roll_no FROM users WHERE role = 'faculty' AND college ILIKE $1 ORDER BY name",
-      [`%${college.trim()}%`]
+      [`%${college.trim()}%`],
     );
 
     res.json({
@@ -536,7 +533,7 @@ router.get(
         roll_no: row.roll_no,
       })),
     });
-  })
+  }),
 );
 
 // @route   POST /api/auth/submit-pending-student
@@ -554,7 +551,7 @@ router.post(
     // Check if student exists
     const studentCheck = await pool.query(
       "SELECT id, role FROM users WHERE id = $1",
-      [studentId]
+      [studentId],
     );
     if (
       studentCheck.rowCount === 0 ||
@@ -566,7 +563,7 @@ router.post(
     // Check if faculty exists
     const facultyCheck = await pool.query(
       "SELECT id, role FROM users WHERE id = $1",
-      [facultyId]
+      [facultyId],
     );
     if (
       facultyCheck.rowCount === 0 ||
@@ -582,7 +579,7 @@ router.post(
        ON CONFLICT (student_id, faculty_id) 
        DO UPDATE SET status = 'Pending', created_at = CURRENT_TIMESTAMP
        RETURNING id, student_id, faculty_id, status, created_at`,
-      [studentId, facultyId]
+      [studentId, facultyId],
     );
 
     res.status(201).json({
@@ -591,7 +588,7 @@ router.post(
         "Registration request submitted successfully. Faculty will review your application.",
       pendingRequest: result.rows[0],
     });
-  })
+  }),
 );
 
 // @route   GET /api/auth/colleges
@@ -626,7 +623,7 @@ router.get(
         type: row.type,
       })),
     });
-  })
+  }),
 );
 
 // @route   GET /api/auth/departments
@@ -661,7 +658,7 @@ router.get(
         description: row.description,
       })),
     });
-  })
+  }),
 );
 
 // @route   POST /api/auth/send-otp
@@ -677,14 +674,14 @@ router.post(
     const targetUserId = userId || (authUser ? authUser.id : null);
     if (!targetUserId) {
       throw new ValidationError(
-        "User ID is required. Please provide userId in request body or authenticate with a valid token."
+        "User ID is required. Please provide userId in request body or authenticate with a valid token.",
       );
     }
 
     // Get user mobile number and country code
     const userResult = await pool.query(
       "SELECT id, name, mobile_number, country_code FROM users WHERE id = $1",
-      [targetUserId]
+      [targetUserId],
     );
 
     if (userResult.rowCount === 0) {
@@ -696,7 +693,7 @@ router.post(
     // Validate mobile number exists
     if (!user.mobile_number) {
       throw new ValidationError(
-        "Mobile number is required. Please update your profile with a valid mobile number."
+        "Mobile number is required. Please update your profile with a valid mobile number.",
       );
     }
 
@@ -716,7 +713,7 @@ router.post(
       console.error("Failed to send OTP SMS:", smsResult.error);
       throw new ValidationError(
         smsResult.error ||
-          "Failed to send OTP. Please check your mobile number and try again."
+          "Failed to send OTP. Please check your mobile number and try again.",
       );
     }
 
@@ -731,7 +728,7 @@ router.post(
         targetUserId,
         `twilio_${smsResult.sid}`,
         new Date(Date.now() + 5 * 60 * 1000),
-      ] // 5 minutes
+      ], // 5 minutes
     );
 
     res.json({
@@ -740,7 +737,7 @@ router.post(
       expiresIn: 300, // 5 minutes in seconds
       phoneNumber: phoneNumber.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2"), // Masked phone number
     });
-  })
+  }),
 );
 
 // @route   POST /api/auth/verify-otp
@@ -765,7 +762,7 @@ router.post(
     // Get user mobile number and country code
     const userResult = await pool.query(
       "SELECT id, mobile_number, country_code FROM users WHERE id = $1",
-      [targetUserId]
+      [targetUserId],
     );
 
     if (userResult.rowCount === 0) {
@@ -776,7 +773,7 @@ router.post(
 
     if (!user.mobile_number) {
       throw new ValidationError(
-        "Mobile number not found. Please update your profile."
+        "Mobile number not found. Please update your profile.",
       );
     }
 
@@ -795,7 +792,7 @@ router.post(
     if (!verifyResult.success) {
       throw new AuthenticationError(
         verifyResult.error ||
-          "Invalid or expired OTP. Please request a new one."
+          "Invalid or expired OTP. Please request a new one.",
       );
     }
 
@@ -804,14 +801,14 @@ router.post(
       `UPDATE otps SET is_used = TRUE 
        WHERE user_id = $1 AND is_used = FALSE 
        AND expires_at > CURRENT_TIMESTAMP`,
-      [targetUserId]
+      [targetUserId],
     );
 
     res.json({
       success: true,
       message: "OTP verified successfully.",
     });
-  })
+  }),
 );
 
 module.exports = router;

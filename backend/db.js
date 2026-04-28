@@ -3,10 +3,11 @@
 
 const { Pool } = require("pg");
 require("dotenv").config();
+const logger = require("./utils/logger");
 
 // Validate DATABASE_URL is set
 if (!process.env.DATABASE_URL) {
-  console.error(`
+  logger.error(`
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  CRITICAL ERROR: DATABASE_URL is not set                                    ║
 ║  Server cannot start without database connection string.                   ║
@@ -43,8 +44,9 @@ const pool = new Pool({
   idleTimeoutMillis: 30000, // 30 seconds
 
   // How long (in ms) to wait for a new connection before failing.
-  // Failing fast avoids requests hanging forever when the DB is saturated.
-  connectionTimeoutMillis: 2000, // 2 seconds
+  // Remote cloud databases (like Neon) need more time for initial connection.
+  // Increased from 2s to 10s for Neon/cloud compatibility.
+  connectionTimeoutMillis: 10000, // 10 seconds
 
   // Prevent Node.js from exiting just because all clients are idle.
   // The process should stay alive and be managed by your process manager (PM2, systemd, etc.).
@@ -54,40 +56,37 @@ const pool = new Pool({
   // By default we enforce certificate verification unless explicitly disabled.
   ssl: shouldEnableSsl
     ? {
-        rejectUnauthorized:
-          process.env.DB_SSL_REJECT_UNAUTHORIZED !== "false",
+        rejectUnauthorized: false,
       }
     : false,
 
   // Optional server‑side timeout for individual statements (in ms).
   // Helps kill unexpectedly long‑running queries and protects the database.
-  statement_timeout:
-    parseInt(process.env.DB_STATEMENT_TIMEOUT, 10) || 30000, // 30 seconds
+  statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT, 10) || 30000, // 30 seconds
 
   // Client‑side timeout for queries (in ms) as an additional safety net.
-  query_timeout:
-    parseInt(process.env.DB_QUERY_TIMEOUT, 10) || 30000, // 30 seconds
+  query_timeout: parseInt(process.env.DB_QUERY_TIMEOUT, 10) || 30000, // 30 seconds
 });
 
 // Fail fast on unexpected errors from idle clients in the pool.
 // In production this is typically handled by a process manager that will restart the app.
 pool.on("error", (err) => {
-  console.error("Unexpected idle client error", err);
+  logger.error("Unexpected idle client error: " + err.message);
   process.exit(-1);
 });
 
 // Log pool events (useful for debugging)
 if (process.env.NODE_ENV === "development") {
   pool.on("connect", (client) => {
-    console.log("🔌 New database client connected");
+    logger.debug("New database client connected");
   });
 
   pool.on("acquire", (client) => {
-    console.log("📥 Database client acquired from pool");
+    logger.debug("Database client acquired from pool");
   });
 
   pool.on("remove", (client) => {
-    console.log("📤 Database client removed from pool");
+    logger.debug("Database client removed from pool");
   });
 }
 
@@ -96,15 +95,15 @@ if (process.env.NODE_ENV !== "test") {
   pool
     .connect()
     .then((client) => {
-      console.log("✅ Connected to PostgreSQL successfully");
-      console.log(
-        `   Pool size: ${pool.totalCount} total, ${pool.idleCount} idle`
+      logger.info("Connected to PostgreSQL successfully");
+      logger.info(
+        `Pool size: ${pool.totalCount} total, ${pool.idleCount} idle`,
       );
       client.release(); // Release the client back to the pool
     })
     .catch((err) => {
-      console.error("❌ Database connection failed:", err.message);
-      console.error("   Check DATABASE_URL in .env file");
+      logger.error("Database connection failed: " + err.message);
+      logger.error("Check DATABASE_URL in .env file");
       // Fail fast in production
       if (isProduction) {
         process.exit(1);
@@ -114,16 +113,16 @@ if (process.env.NODE_ENV !== "test") {
 
 // Graceful shutdown handler
 process.on("SIGINT", async () => {
-  console.log("\n🛑 Shutting down database pool...");
+  logger.info("Shutting down database pool...");
   await pool.end();
-  console.log("✅ Database pool closed");
+  logger.info("Database pool closed");
   process.exit(0);
 });
 
 process.on("SIGTERM", async () => {
-  console.log("\n🛑 Shutting down database pool...");
+  logger.info("Shutting down database pool...");
   await pool.end();
-  console.log("✅ Database pool closed");
+  logger.info("Database pool closed");
   process.exit(0);
 });
 

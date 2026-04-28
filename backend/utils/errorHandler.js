@@ -129,26 +129,23 @@ function errorHandler(err, req, res, next) {
       error = new AppError(
         error.message || "Internal server error",
         500,
-        "INTERNAL_ERROR"
+        "INTERNAL_ERROR",
       );
     }
   }
 
   // Log error
+  const logger = require("./logger");
   const logLevel = error.statusCode >= 500 ? "error" : "warn";
-  console[logLevel]("========== ERROR ==========");
-  console[logLevel]("Path:", req.path);
-  console[logLevel]("Method:", req.method);
-  console[logLevel]("Message:", error.message);
-  console[logLevel]("Code:", error.code);
-  console[logLevel]("Status Code:", error.statusCode);
-  if (error.details) {
-    console[logLevel]("Details:", JSON.stringify(error.details, null, 2));
-  }
-  if (process.env.NODE_ENV === "development" && error.stack) {
-    console[logLevel]("Stack:", error.stack);
-  }
-  console[logLevel]("===========================");
+  logger[logLevel]("Error occurred", {
+    path: req.path,
+    method: req.method,
+    message: error.message,
+    code: error.code,
+    statusCode: error.statusCode,
+    details: error.details,
+    stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+  });
 
   // Send error response
   res.status(error.statusCode || 500).json(formatErrorResponse(error));
@@ -169,14 +166,21 @@ function asyncHandler(fn) {
 function validateRequired(fields, data) {
   const missing = [];
   for (const field of fields) {
-    if (data[field] === undefined || data[field] === null || data[field] === "") {
+    if (
+      data[field] === undefined ||
+      data[field] === null ||
+      data[field] === ""
+    ) {
       missing.push(field);
     }
   }
   if (missing.length > 0) {
-    throw new ValidationError(`Missing required fields: ${missing.join(", ")}`, {
-      missingFields: missing,
-    });
+    throw new ValidationError(
+      `Missing required fields: ${missing.join(", ")}`,
+      {
+        missingFields: missing,
+      },
+    );
   }
 }
 
@@ -196,7 +200,9 @@ function validateEmail(email) {
 function validateRole(role) {
   const validRoles = ["admin", "faculty", "student"];
   if (!validRoles.includes(role)) {
-    throw new ValidationError(`Invalid role. Must be one of: ${validRoles.join(", ")}`);
+    throw new ValidationError(
+      `Invalid role. Must be one of: ${validRoles.join(", ")}`,
+    );
   }
 }
 
@@ -215,4 +221,3 @@ module.exports = {
   validateEmail,
   validateRole,
 };
-

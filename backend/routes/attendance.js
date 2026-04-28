@@ -4,6 +4,7 @@ const express = require("express");
 const router = express.Router();
 const { pool } = require("../config/database");
 const auth = require("../middleware/auth");
+const logger = require("../utils/logger");
 const getLocation = require("../utils/geo"); // Utility to get location (needs fixing in geo.js)
 const sendMail = require("../utils/mailer"); // Utility to send mail
 const socketIO = require("../socket"); // Socket.io instance
@@ -36,7 +37,7 @@ router.post("/mark", auth(["student"]), async (req, res) => {
       `SELECT id, expires_at, class_id FROM sessions 
              WHERE code = $1 AND is_active = TRUE 
              ORDER BY created_at DESC LIMIT 1`,
-      [code]
+      [code],
     );
 
     if (result.rowCount === 0) {
@@ -48,36 +49,37 @@ router.post("/mark", auth(["student"]), async (req, res) => {
     // 2. Check Expiration Time (Use Case 04: Allow reporting expired codes)
     if (new Date(session.expires_at) < new Date()) {
       // Code expired - return error but allow student to report it
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: "Code expired.",
         expired: true,
         session_id: session.id,
-        expires_at: session.expires_at
+        expires_at: session.expires_at,
       });
     }
 
     // 2.5. Verify student is enrolled in the class
     const enrollmentCheck = await pool.query(
       "SELECT id FROM enrollments WHERE student_id = $1 AND class_id = $2",
-      [student_id, session.class_id]
+      [student_id, session.class_id],
     );
     if (enrollmentCheck.rowCount === 0) {
-      return res.status(403).json({ 
-        message: "You are not enrolled in this class." 
+      return res.status(403).json({
+        message: "You are not enrolled in this class.",
       });
     }
 
     // 2.6. ENFORCE FACE VERIFICATION - Check if FaceNet embedding is enrolled
     const faceCheck = await pool.query(
       "SELECT embedding FROM users WHERE id = $1 AND embedding IS NOT NULL",
-      [student_id]
+      [student_id],
     );
 
     const faceEnrolled = faceCheck.rowCount > 0;
 
     if (!faceEnrolled) {
       return res.status(403).json({
-        message: "Face enrollment required to mark attendance. Please enroll your face first.",
+        message:
+          "Face enrollment required to mark attendance. Please enroll your face first.",
         faceEnrolled: false,
       });
     }
@@ -85,7 +87,8 @@ router.post("/mark", auth(["student"]), async (req, res) => {
     // 3. Face Verification (REQUIRED)
     if (!faceEmbedding) {
       return res.status(400).json({
-        message: "Face verification is required. Please provide face embedding.",
+        message:
+          "Face verification is required. Please provide face embedding.",
       });
     }
 
@@ -93,7 +96,7 @@ router.post("/mark", auth(["student"]), async (req, res) => {
       // Get stored face embedding (from new biometric_face table)
       const faceEnrollment = await pool.query(
         "SELECT encrypted_embedding FROM biometric_face WHERE user_id = $1 AND is_active = TRUE",
-        [student_id]
+        [student_id],
       );
 
       if (faceEnrollment.rowCount === 0) {
@@ -130,10 +133,9 @@ router.post("/mark", auth(["student"]), async (req, res) => {
         });
       }
     } catch (faceError) {
-      console.error("Face verification error:", faceError);
+      logger.error("Face verification error: " + faceError.message);
       return res.status(500).json({ error: "Face verification error." });
     }
-
 
     // 4. Attempt to get geo-location (This requires a working geo.js)
     // location_text = await getLocation(ip); // Using mock IP for now, actual IP won't work in development
@@ -141,7 +143,7 @@ router.post("/mark", auth(["student"]), async (req, res) => {
     // 5. Get student info for real-time notification
     const studentInfo = await pool.query(
       "SELECT id, name, roll_no FROM users WHERE id = $1",
-      [student_id]
+      [student_id],
     );
     const student = studentInfo.rows[0];
 
@@ -150,7 +152,7 @@ router.post("/mark", auth(["student"]), async (req, res) => {
       `INSERT INTO attendance (student_id, session_id, ip_address, location, status, face_verified, face_match_score) 
              VALUES ($1, $2, $3, $4, 'Present', $5, $6)
              RETURNING id, created_at`,
-      [student_id, session.id, ip, location_text, faceVerified, faceMatchScore]
+      [student_id, session.id, ip, location_text, faceVerified, faceMatchScore],
     );
     const attendanceRecord = attendanceResult.rows[0];
 
@@ -188,21 +190,23 @@ router.post("/mark", auth(["student"]), async (req, res) => {
           is_overridden: false,
         });
 
-        console.log(`📡 Emitted attendance event for student ${student.name} (${student.roll_no}) in session ${session.id}`);
+        logger.debug(
+          `Emitted attendance event for student ${student.name} (${student.roll_no}) in session ${session.id}`,
+        );
       }
     } catch (socketError) {
       // Don't fail the request if Socket.io fails
-      console.error("Socket.io emission error:", socketError);
+      logger.error("Socket.io emission error: " + socketError.message);
     }
 
     // 7. Optional: Notify faculty (using mock email)
     sendMail(
       "faculty@college.com",
       "Attendance Marked",
-      `Student ${student.name} (${student.roll_no}) marked attendance for session ${session.id}.`
+      `Student ${student.name} (${student.roll_no}) marked attendance for session ${session.id}.`,
     );
 
-    res.json({ 
+    res.json({
       message: "Attendance marked successfully.",
       attendanceId: attendanceRecord.id,
       timestamp: attendanceRecord.created_at,
@@ -212,13 +216,11 @@ router.post("/mark", auth(["student"]), async (req, res) => {
   } catch (err) {
     if (err.code === "23505") {
       // Unique constraint violation (Student already marked attendance for this session)
-      return res
-        .status(400)
-        .json({
-          message: "You have already marked attendance for this session.",
-        });
+      return res.status(400).json({
+        message: "You have already marked attendance for this session.",
+      });
     }
-    console.error("Attendance marking error:", err);
+    logger.error("Attendance marking error: " + err.message);
     res.status(500).json({ error: "Server error during attendance marking." });
   }
 });

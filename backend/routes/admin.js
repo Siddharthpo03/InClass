@@ -7,6 +7,7 @@ const pool = require("../db");
 const auth = require("../middleware/auth");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const logger = require("../utils/logger");
 const {
   asyncHandler,
   ValidationError,
@@ -31,7 +32,7 @@ router.get("/login", async (req, res) => {
   try {
     // Check if any admin accounts exist (for debugging)
     const adminCount = await pool.query(
-      "SELECT COUNT(*) as count FROM users WHERE role = 'admin'"
+      "SELECT COUNT(*) as count FROM users WHERE role = 'admin'",
     );
 
     res.json({
@@ -79,7 +80,7 @@ router.post(
       success: true,
       message: "Gate passphrase verified.",
     });
-  })
+  }),
 );
 
 // @route   POST /inclass/admin/login
@@ -95,47 +96,47 @@ router.post(
     }
 
     // Find admin user - check both email and role
-    console.log(`[Admin Login] Attempting login for email: ${email}`);
+    logger.debug("Admin login attempt for email: " + email);
 
     // SECURE: Parameterized query prevents SQL injection (admin login)
     const emailCheck = await pool.query(
       "SELECT id, email, role FROM users WHERE LOWER(email) = LOWER($1)",
-      [email]
+      [email],
     );
 
-    console.log(
-      `[Admin Login] Email check: ${emailCheck.rowCount} user(s) found with this email`
+    logger.debug(
+      "Admin login email check: " +
+        emailCheck.rowCount +
+        " user(s) found with this email",
     );
 
     if (emailCheck.rowCount === 0) {
       throw new AuthenticationError(
-        "No account found with this email. Admin accounts can only be created by InClass."
+        "No account found with this email. Admin accounts can only be created by InClass.",
       );
     }
 
     const emailUser = emailCheck.rows[0];
-    console.log(`[Admin Login] Email exists - Role: ${emailUser.role}`);
+    logger.debug("Admin account exists. Role: " + emailUser.role);
 
     // Check if it's an admin
     if (emailUser.role !== "admin") {
       throw new AuthenticationError(
-        `This email is registered as ${emailUser.role}, not admin. Admin accounts can only be created by InClass.`
+        `This email is registered as ${emailUser.role}, not admin. Admin accounts can only be created by InClass.`,
       );
     }
 
     // Now get full user data for password verification
     const result = await pool.query(
       "SELECT * FROM users WHERE id = $1 AND role = 'admin'",
-      [emailUser.id]
+      [emailUser.id],
     );
 
-    console.log(
-      `[Admin Login] Admin query result: ${result.rowCount} admin(s) found`
-    );
+    logger.debug("Admin query result: " + result.rowCount + " admin(s) found");
 
     if (result.rowCount === 0) {
       throw new AuthenticationError(
-        "Admin account verification failed. Please contact InClass support."
+        "Admin account verification failed. Please contact InClass support.",
       );
     }
 
@@ -145,7 +146,7 @@ router.post(
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       throw new AuthenticationError(
-        "Invalid password. Please check your credentials."
+        "Invalid password. Please check your credentials.",
       );
     }
 
@@ -163,7 +164,7 @@ router.post(
         role: user.role,
       },
     });
-  })
+  }),
 );
 
 // @route   GET /inclass/admin/dashboard
@@ -189,7 +190,7 @@ router.get(
       success: true,
       stats: stats.rows[0],
     });
-  })
+  }),
 );
 
 module.exports = router;
