@@ -13,16 +13,29 @@ RUN npm ci
 # Stage 2: Production
 FROM node:22-alpine
 
-# Install dumb-init to properly handle signals
-RUN apk add --no-cache dumb-init
+# Install system dependencies for Sharp (image processing) and other native modules
+# These libraries are needed for image manipulation and face recognition
+RUN apk add --no-cache \
+    dumb-init \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    giflib-dev \
+    pixman-dev \
+    python3 \
+    make \
+    g++
 
 WORKDIR /app
 
 # Copy built modules from builder
 COPY --from=builder /app/node_modules ./node_modules
 
-# Copy application code
+# Copy application code (including models directory)
 COPY backend ./
+
+# Ensure models directory exists and has proper permissions
+RUN mkdir -p ./models && chmod 755 ./models
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
