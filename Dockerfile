@@ -14,15 +14,17 @@ RUN npm ci
 FROM node:22-bookworm-slim
 
 # Install system dependencies for:
-# - Sharp (image processing)
-# - TensorFlow.js (face-api models will auto-download at runtime)
+# - Sharp (image processing): libcairo2, libpango-1.0-0, libpangocairo-1.0-0
+# - ONNX Runtime: libomp (OpenMP for CPU execution), libgomp
+# - General: dumb-init for signal handling
 RUN apt-get update && apt-get install -y --no-install-recommends \
     dumb-init \
     libcairo2 \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
     giflib-tools \
-    python3 \
+    libomp-dev \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -30,10 +32,12 @@ WORKDIR /app
 # Copy built modules from builder
 COPY --from=builder /app/node_modules ./node_modules
 
-# Copy application code
+# Copy application code (including models directory)
+# Note: When deployed to Azure with just the backend folder, use . instead of backend/
 COPY . ./
 
-# TensorFlow.js face-api models will auto-download on first run
+# Ensure models directory exists and has proper permissions
+RUN mkdir -p ./models && chmod 755 ./models
 
 # Create non-root user for security
 RUN groupadd -g 1001 nodejs && \
