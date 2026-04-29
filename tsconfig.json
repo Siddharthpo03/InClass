@@ -8,6 +8,7 @@
     "strict": false,
     "noEmit": true,
     "moduleResolution": "node",
+    "types": ["node"],
     "skipLibCheck": true
   },
   "include": ["frontend/src", "backend"]
