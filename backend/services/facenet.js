@@ -5,7 +5,7 @@
 
 const tf = require("@tensorflow/tfjs");
 const Jimp = require("jimp");
-const faceapi = require("@vladmandic/face-api");
+const faceapi = require("@vladmandic/face-api/dist/face-api.node-cpu.js");
 const crypto = require("crypto");
 const logger = require("../utils/logger");
 
