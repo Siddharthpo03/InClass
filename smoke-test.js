@@ -5,13 +5,14 @@
  * Run with: node smoke-test.js
  *
  * Requires:
- * - Backend server running on http://localhost:4000
+ * - Backend server running on https://api.inclass.siddharthp.com
  * - Valid JWT token (set in TOKEN env var or create test user)
  */
 
 const axios = require("axios");
 
-const BASE_URL = process.env.API_BASE_URL || "http://localhost:4000/api";
+const BASE_URL =
+  process.env.API_BASE_URL || "https://api.inclass.siddharthp.com/api";
 const TEST_TOKEN = process.env.TOKEN || "";
 
 // Color codes for terminal output

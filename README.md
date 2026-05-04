@@ -75,11 +75,31 @@ Create a `.env` file in the `frontend/` directory (optional - has defaults):
 # API Configuration
 VITE_API_BASE_URL=http://localhost:4000/api
 VITE_SOCKET_URL=http://localhost:4000
+VITE_ADMIN_BASE_URL=http://localhost:4000
+VITE_BACKEND_ORIGIN=http://localhost:4000
 ```
 
 **Note:** If not set, frontend defaults to:
+
 - API: `http://localhost:4000/api` (dev) or `/api` (production)
 - Socket: `http://localhost:4000`
+- Admin: `http://localhost:4000`
+- Uploaded image URLs: backend origin, derived automatically from the current host
+
+### Required Backend Environment Variables
+
+Create a `.env` file in the `backend/` directory with the following minimum values:
+
+```env
+PORT=4000
+NODE_ENV=development
+DATABASE_URL=postgresql://user:password@localhost:5432/inclass
+JWT_SECRET=your_jwt_secret_key_here
+BIOMETRIC_ENCRYPTION_KEY=your_biometric_encryption_key_here
+FRONTEND_URL=http://localhost:5173
+```
+
+The backend also supports optional variables for email, SMS, Sentry, metrics, and SSL tuning. See [backend/ENV_SECURITY.md](backend/ENV_SECURITY.md) and [backend/.env.production.template](backend/.env.production.template) for the full list.
 
 ### Backend Setup
 
@@ -159,6 +179,7 @@ Results are saved to `smoke-test-report.json`.
 ### API Documentation
 
 See `api-spec.md` for complete API documentation including:
+
 - All endpoints with request/response formats
 - Authentication requirements
 - Known issues and mismatches

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import io from "socket.io-client";
+import { getSocketUrl } from "../utils/apiConfig";
 
 /**
  * useSessionSocket - Hook for managing Socket.io connection for attendance sessions
@@ -22,7 +23,7 @@ const useSessionSocket = (
   sessionId,
   onAttendanceUpdate,
   onSessionEnd,
-  enabled = true
+  enabled = true,
 ) => {
   const socketRef = useRef(null);
   const isConnectedRef = useRef(false);
@@ -41,17 +42,14 @@ const useSessionSocket = (
     }
 
     // Initialize socket connection
-    const socket = io(
-      import.meta.env.VITE_SOCKET_URL || "http://localhost:4000",
-      {
-        auth: { token },
-        transports: ["websocket", "polling"],
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        reconnectionAttempts: maxReconnectAttempts,
-      }
-    );
+    const socket = io(getSocketUrl(), {
+      auth: { token },
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: maxReconnectAttempts,
+    });
 
     socketRef.current = socket;
 
@@ -76,7 +74,7 @@ const useSessionSocket = (
         reconnectAttemptsRef.current++;
         if (reconnectAttemptsRef.current < maxReconnectAttempts) {
           console.log(
-            `[Socket] Reconnecting... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
+            `[Socket] Reconnecting... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`,
           );
         }
       }
@@ -149,6 +147,3 @@ const useSessionSocket = (
 };
 
 export default useSessionSocket;
-
-
-

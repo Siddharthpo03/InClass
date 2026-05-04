@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/apiClient";
+import { recognizeFace } from "../../services/faceRecognitionApi";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import useDarkMode from "../../hooks/useDarkMode";
@@ -303,11 +304,31 @@ const InClassLogin = () => {
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Face login removed – keep camera capture for future use if needed.
+      const imageBlob = await new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error("Failed to capture face image."));
+          }
+        }, "image/jpeg", 0.95);
+      });
+
+      const result = await recognizeFace({ imageBlob });
+
+      if (!result?.match || !Array.isArray(result.embedding)) {
+        setLoginMessage(
+          `❌ ${result?.message || "Face could not be verified. Please try again."}`
+        );
+        setCapturingFace(false);
+        return;
+      }
+
+      await completeLoginWithFace(result.embedding);
     } catch (error) {
       console.error("Face capture error:", error);
       setLoginMessage(
-        `❌ ${error.message || "Failed to capture face. Please try again."}`
+        `❌ ${error.response?.data?.message || error.message || "Failed to capture face. Please try again."}`
       );
       setCapturingFace(false);
     }

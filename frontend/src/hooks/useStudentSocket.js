@@ -1,19 +1,20 @@
 import { useEffect, useRef, useCallback } from "react";
 import io from "socket.io-client";
+import { getSocketUrl } from "../utils/apiConfig";
 
 /**
  * useStudentSocket - Hook for managing Socket.io connection for students
- * 
+ *
  * Automatically connects on mount, joins course rooms, and listens for session events.
- * 
+ *
  * @param {Array<number>} enrolledCourseIds - Array of course IDs the student is enrolled in
  * @param {Function} onSessionStarted - Callback when a session starts
  * @param {Function} onSessionEnded - Callback when a session ends
  * @param {Function} onAttendanceUpdate - Callback when attendance is updated
  * @param {boolean} [enabled=true] - Whether socket connection is enabled
- * 
+ *
  * @returns {Object} { socket, isConnected, error }
- * 
+ *
  * @example
  * const { socket, isConnected } = useStudentSocket(
  *   [1, 2, 3], // enrolled course IDs
@@ -27,7 +28,7 @@ const useStudentSocket = (
   onSessionStarted,
   onSessionEnded,
   onAttendanceUpdate,
-  enabled = true
+  enabled = true,
 ) => {
   const socketRef = useRef(null);
   const isConnectedRef = useRef(false);
@@ -48,17 +49,14 @@ const useStudentSocket = (
     }
 
     // Initialize socket connection
-    const socket = io(
-      import.meta.env.VITE_SOCKET_URL || "http://localhost:4000",
-      {
-        auth: { token },
-        transports: ["websocket", "polling"],
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        reconnectionAttempts: maxReconnectAttempts,
-      }
-    );
+    const socket = io(getSocketUrl(), {
+      auth: { token },
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: maxReconnectAttempts,
+    });
 
     socketRef.current = socket;
     errorRef.current = null;
@@ -89,7 +87,7 @@ const useStudentSocket = (
         reconnectAttemptsRef.current++;
         if (reconnectAttemptsRef.current < maxReconnectAttempts) {
           console.log(
-            `[StudentSocket] Reconnecting... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
+            `[StudentSocket] Reconnecting... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`,
           );
         } else {
           errorRef.current = "Failed to reconnect to server";
@@ -181,5 +179,3 @@ const useStudentSocket = (
 };
 
 export default useStudentSocket;
-
-

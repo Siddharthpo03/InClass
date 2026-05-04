@@ -1,6 +1,7 @@
 import React from "react";
 import PageLayout from "../components/layout/PageLayout";
 import styles from "./Developers.module.css";
+import { BASE_URL } from "../config/api";
 
 const Developers = () => {
   return (
@@ -51,7 +52,7 @@ const Developers = () => {
         <div className={styles.codeBlock}>
           <pre>
 {`// Example API Request
-const response = await fetch('https://api.inclass.com/attendance', {
+const response = await fetch(\`${BASE_URL}/api/attendance\`, {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_TOKEN',

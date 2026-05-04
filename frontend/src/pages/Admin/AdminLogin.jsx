@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import { adminApi } from "../../config/api";
 import styles from "./AdminLogin.module.css";
 
 const AdminLogin = () => {
@@ -19,19 +19,17 @@ const AdminLogin = () => {
   React.useEffect(() => {
     const checkPassphrase = async () => {
       try {
-        // Use full URL for admin routes (not /api prefix)
-        const adminBaseUrl = import.meta.env.VITE_API_BASE_URL 
-          ? import.meta.env.VITE_API_BASE_URL.replace('/api', '')
-          : 'http://localhost:4000';
-        const response = await axios.get(`${adminBaseUrl}/inclass/admin/login`);
+        const response = await adminApi.get("/inclass/admin/login");
         if (response.data.requiresPassphrase) {
           setRequiresPassphrase(true);
           setShowPassphraseGate(true);
         }
-        
+
         // Warn if no admin accounts exist
         if (response.data.adminAccountsExist === false) {
-          console.warn("⚠️ No admin accounts found in database. Create one using: node scripts/createAdmin.js");
+          console.warn(
+            "⚠️ No admin accounts found in database. Create one using: node scripts/createAdmin.js",
+          );
         }
       } catch (error) {
         console.error("Failed to check passphrase requirement:", error);
@@ -47,11 +45,7 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      // Use full URL for admin routes (not /api prefix)
-      const adminBaseUrl = import.meta.env.VITE_API_BASE_URL 
-        ? import.meta.env.VITE_API_BASE_URL.replace('/api', '')
-        : 'http://localhost:4000';
-      const response = await axios.post(`${adminBaseUrl}/inclass/admin/login/verify-gate`, {
+      const response = await adminApi.post("/inclass/admin/login/verify-gate", {
         passphrase,
       });
 
@@ -61,8 +55,8 @@ const AdminLogin = () => {
     } catch (error) {
       setError(
         error.response?.data?.error?.message ||
-        error.response?.data?.message || 
-        "Invalid passphrase. Access denied."
+          error.response?.data?.message ||
+          "Invalid passphrase. Access denied.",
       );
     } finally {
       setLoading(false);
@@ -75,15 +69,9 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      // Use full URL for admin routes (not /api prefix from apiClient)
-      // Admin routes are mounted at /inclass/admin, not /api/inclass/admin
-      const adminBaseUrl = import.meta.env.VITE_API_BASE_URL 
-        ? import.meta.env.VITE_API_BASE_URL.replace('/api', '')
-        : 'http://localhost:4000';
-      
-      console.log(`[Admin Login] Calling: ${adminBaseUrl}/inclass/admin/login`);
-      
-      const response = await axios.post(`${adminBaseUrl}/inclass/admin/login`, {
+      console.log(`[Admin Login] Calling: /inclass/admin/login`);
+
+      const response = await adminApi.post("/inclass/admin/login", {
         email,
         password,
       });
@@ -106,17 +94,18 @@ const AdminLogin = () => {
       });
       // Backend returns: { success: false, error: { message: "...", code: "..." } }
       // Extract error message from the correct path
-      const errorMessage = 
+      const errorMessage =
         error.response?.data?.error?.message ||
         error.response?.data?.message ||
-        (error.response?.status === 401 
+        (error.response?.status === 401
           ? "Invalid email or password. Please check your credentials."
           : error.response?.status === 404
-          ? "Admin account not found. Please contact InClass to create an admin account."
-          : error.message || "Unable to connect to server. Please try again later.");
-      
+            ? "Admin account not found. Please contact InClass to create an admin account."
+            : error.message ||
+              "Unable to connect to server. Please try again later.");
+
       setError(errorMessage);
-      
+
       // Log for debugging
       if (import.meta.env.DEV) {
         console.error("Admin login error:", {
@@ -220,7 +209,14 @@ const AdminLogin = () => {
             <i className="bx bx-lock"></i>
             Secure admin access only
           </p>
-          <p style={{ marginTop: "1rem", fontSize: "0.85rem", color: "var(--text-secondary, #6b7280)", textAlign: "center" }}>
+          <p
+            style={{
+              marginTop: "1rem",
+              fontSize: "0.85rem",
+              color: "var(--text-secondary, #6b7280)",
+              textAlign: "center",
+            }}
+          >
             Admin accounts can only be created by "InClass".
           </p>
         </div>
@@ -230,4 +226,3 @@ const AdminLogin = () => {
 };
 
 export default AdminLogin;
-

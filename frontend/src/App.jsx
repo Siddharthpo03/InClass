@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
+import "./styles/designTokens.css";
 import LoadingSpinner from "./components/shared/LoadingSpinner";
 import ErrorBoundary from "./components/shared/ErrorBoundary";
 import CookieConsent from "./components/CookieConsent";
@@ -7,12 +8,12 @@ import ScrollToTop from "./components/ScrollToTop";
 
 // Lazy load pages for better performance
 const Homepage = lazy(() => import("./pages/Homepage"));
-const InClassLogin = lazy(() => import("./pages/Login/InClassLogin"));
-const InClassRegister = lazy(() => import("./pages/Register/InClassRegister"));
+const InClassLogin = lazy(() => import("./pages/Login/InClassLoginModern"));
+const InClassRegister = lazy(() => import("./pages/Register/InClassRegisterModern"));
 const OnboardBiometrics = lazy(() =>
-  import("./pages/Onboard/OnboardBiometrics")
+  import("./pages/Onboard/OnboardBiometricsModern")
 );
-const InClassStudent = lazy(() => import("./pages/Student/InClassStudent"));
+const InClassStudent = lazy(() => import("./pages/Student/InClassStudentModern"));
 const InClassFaculty = lazy(() => import("./pages/Faculty/InClassFaculty"));
 const InClassAdmin = lazy(() => import("./pages/Admin/InClassAdmin"));
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));

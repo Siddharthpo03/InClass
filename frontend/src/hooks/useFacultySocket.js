@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import io from "socket.io-client";
+import { getSocketUrl } from "../utils/apiConfig";
 
 /**
  * useFacultySocket - Hook for managing Socket.io connection for faculty-specific events
@@ -41,17 +42,14 @@ const useFacultySocket = ({
     }
 
     // Initialize socket connection
-    const socket = io(
-      import.meta.env.VITE_SOCKET_URL || "http://localhost:4000",
-      {
-        auth: { token },
-        transports: ["websocket", "polling"],
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        reconnectionAttempts: maxReconnectAttempts,
-      }
-    );
+    const socket = io(getSocketUrl(), {
+      auth: { token },
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: maxReconnectAttempts,
+    });
 
     socketRef.current = socket;
 
@@ -81,7 +79,7 @@ const useFacultySocket = ({
         reconnectAttemptsRef.current++;
         if (reconnectAttemptsRef.current < maxReconnectAttempts) {
           console.log(
-            `[FacultySocket] Reconnecting... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
+            `[FacultySocket] Reconnecting... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`,
           );
         }
       }

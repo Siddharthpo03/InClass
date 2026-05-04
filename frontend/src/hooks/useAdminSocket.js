@@ -1,9 +1,10 @@
 import { useEffect, useRef, useCallback } from "react";
 import io from "socket.io-client";
+import { getSocketUrl } from "../utils/apiConfig";
 
 /**
  * useAdminSocket - Hook for managing Socket.io connection for admin-specific events
- * 
+ *
  * @param {Object} options - Configuration options
  * @param {number|string} options.adminId - Admin user ID
  * @param {Function} options.onAssistCreated - Callback when new assist request is created
@@ -14,7 +15,7 @@ import io from "socket.io-client";
  * @param {Function} options.onAttendanceMarked - Callback when attendance is marked
  * @param {Function} options.onRegistrationCreated - Callback when new registration request is created
  * @param {boolean} options.enabled - Whether socket connection is enabled
- * 
+ *
  * @returns {Object} { socket, isConnected, emit, disconnect }
  */
 const useAdminSocket = ({
@@ -45,17 +46,14 @@ const useAdminSocket = ({
     }
 
     // Initialize socket connection
-    const socket = io(
-      import.meta.env.VITE_SOCKET_URL || "http://localhost:4000",
-      {
-        auth: { token },
-        transports: ["websocket", "polling"],
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        reconnectionAttempts: maxReconnectAttempts,
-      }
-    );
+    const socket = io(getSocketUrl(), {
+      auth: { token },
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: maxReconnectAttempts,
+    });
 
     socketRef.current = socket;
 
@@ -81,7 +79,7 @@ const useAdminSocket = ({
         reconnectAttemptsRef.current++;
         if (reconnectAttemptsRef.current < maxReconnectAttempts) {
           console.log(
-            `[AdminSocket] Reconnecting... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
+            `[AdminSocket] Reconnecting... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`,
           );
         }
       }
@@ -166,12 +164,3 @@ const useAdminSocket = ({
 };
 
 export default useAdminSocket;
-
-
-
-
-
-
-
-
-

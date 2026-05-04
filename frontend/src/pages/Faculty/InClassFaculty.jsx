@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/apiClient";
+import { buildImageUrl } from "../../utils/apiConfig";
 import TopNav from "../../components/faculty/TopNav";
 import Sidebar from "../../components/faculty/Sidebar";
 import LoadingSpinner from "../../components/shared/LoadingSpinner";
@@ -34,7 +35,7 @@ const InClassFaculty = ({ previewMode = false }) => {
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
     const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
+      "(prefers-color-scheme: dark)",
     ).matches;
     const shouldBeDark =
       savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
@@ -46,7 +47,9 @@ const InClassFaculty = ({ previewMode = false }) => {
   }, []);
 
   // State variables
-  const [facultyProfile, setFacultyProfile] = useState(previewMode ? MOCK_FACULTY_PROFILE : null);
+  const [facultyProfile, setFacultyProfile] = useState(
+    previewMode ? MOCK_FACULTY_PROFILE : null,
+  );
   const [registeredCourses, setRegisteredCourses] = useState([]);
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [liveAttendanceList, setLiveAttendanceList] = useState([]);
@@ -87,7 +90,7 @@ const InClassFaculty = ({ previewMode = false }) => {
   const getCourseRoster = useCallback(async (courseId) => {
     try {
       const response = await apiClient.get(
-        `/faculty/course-roster/${courseId}`
+        `/faculty/course-roster/${courseId}`,
       );
       const roster = response.data.roster || [];
       return roster.map((s) => ({
@@ -139,7 +142,7 @@ const InClassFaculty = ({ previewMode = false }) => {
 
         const response = await apiClient.post(
           "/faculty/register-course",
-          payload
+          payload,
         );
         const newCourse = response.data.course;
 
@@ -152,7 +155,7 @@ const InClassFaculty = ({ previewMode = false }) => {
 
         showToast(
           `Course ${newCourse.title} registered successfully.`,
-          "success"
+          "success",
         );
       } catch (error) {
         const msg =
@@ -164,7 +167,7 @@ const InClassFaculty = ({ previewMode = false }) => {
         console.error("Registration Error:", error.response || error);
       }
     },
-    [newCourseCode, newCourseTitle, numClasses, showToast]
+    [newCourseCode, newCourseTitle, numClasses, showToast],
   );
 
   const generateSessionCode = useCallback(
@@ -173,7 +176,7 @@ const InClassFaculty = ({ previewMode = false }) => {
       if (activeSession || !selectedCourseId) return;
 
       const currentCourse = registeredCourses.find(
-        (c) => c.id === selectedCourseId
+        (c) => c.id === selectedCourseId,
       );
       if (!currentCourse) return;
 
@@ -184,7 +187,7 @@ const InClassFaculty = ({ previewMode = false }) => {
 
         const { id, code, expires_at } = response.data.session;
         const durationSeconds = Math.floor(
-          (new Date(expires_at).getTime() - Date.now()) / 1000
+          (new Date(expires_at).getTime() - Date.now()) / 1000,
         );
 
         const sessionData = {
@@ -206,16 +209,16 @@ const InClassFaculty = ({ previewMode = false }) => {
 
         showToast(
           `Session code ${code} is active for ${Math.floor(
-            durationSeconds / 60
+            durationSeconds / 60,
           )} minutes.`,
-          "success"
+          "success",
         );
       } catch (error) {
         console.error("Failed to start session:", error);
         showToast("Could not start session. Please try again.", "error");
       }
     },
-    [activeSession, selectedCourseId, registeredCourses, showToast]
+    [activeSession, selectedCourseId, registeredCourses, showToast],
   );
 
   const handleManualOverride = useCallback(
@@ -228,7 +231,7 @@ const InClassFaculty = ({ previewMode = false }) => {
       const reason = prompt(
         `Enter reason for manually marking ${student.name} as ${
           student.present ? "Absent" : "Present"
-        }:`
+        }:`,
       );
       if (!reason) return;
 
@@ -249,13 +252,13 @@ const InClassFaculty = ({ previewMode = false }) => {
                   statusTime: new Date().toLocaleTimeString(),
                   overrideReason: reason,
                 }
-              : s
-          )
+              : s,
+          ),
         );
 
         showToast(
           `Attendance manually updated for ${student.name}.`,
-          "success"
+          "success",
         );
       } catch (error) {
         const errorMessage =
@@ -265,7 +268,7 @@ const InClassFaculty = ({ previewMode = false }) => {
         showToast(errorMessage, "error");
       }
     },
-    [activeSession, liveAttendanceList, showToast]
+    [activeSession, liveAttendanceList, showToast],
   );
 
   const handleDuplicateDetection = useCallback(async () => {
@@ -273,7 +276,7 @@ const InClassFaculty = ({ previewMode = false }) => {
 
     if (
       !confirm(
-        "This will check for duplicate submissions and remove all attendance if duplicates are found. Continue?"
+        "This will check for duplicate submissions and remove all attendance if duplicates are found. Continue?",
       )
     ) {
       return;
@@ -287,7 +290,7 @@ const InClassFaculty = ({ previewMode = false }) => {
       if (response.data.duplicatesFound > 0) {
         showToast(
           `${response.data.duplicatesFound} duplicate(s) detected and removed. Please restart the attendance session.`,
-          "warning"
+          "warning",
         );
         endSession(false);
         // Reload roster
@@ -327,11 +330,11 @@ const InClassFaculty = ({ previewMode = false }) => {
       if (!forceLogout) {
         showToast(
           "Attendance session ended and saved successfully.",
-          "success"
+          "success",
         );
       }
     },
-    [activeSession, showToast]
+    [activeSession, showToast],
   );
 
   const formatTime = useCallback((seconds) => {
@@ -344,7 +347,7 @@ const InClassFaculty = ({ previewMode = false }) => {
     (courseId) => {
       navigate(`/faculty/reports/${courseId}`);
     },
-    [navigate]
+    [navigate],
   );
 
   // Fetch Faculty Profile (skip when preview mode)
@@ -412,13 +415,13 @@ const InClassFaculty = ({ previewMode = false }) => {
           `/faculty/pending-students/${pendingId}/${endpoint}`,
           {
             notes,
-          }
+          },
         );
         showToast(
           `Student ${
             action === "approve" ? "approved" : "rejected"
           } successfully.`,
-          "success"
+          "success",
         );
 
         // Refresh pending students list
@@ -432,7 +435,7 @@ const InClassFaculty = ({ previewMode = false }) => {
         showToast(errorMessage, "error");
       }
     },
-    [showToast]
+    [showToast],
   );
 
   // Load Roster when Course Changes
@@ -458,7 +461,7 @@ const InClassFaculty = ({ previewMode = false }) => {
         if (savedSession && savedTimer && sessionStartTime) {
           const sessionData = JSON.parse(savedSession);
           const elapsed = Math.floor(
-            (Date.now() - parseInt(sessionStartTime)) / 1000
+            (Date.now() - parseInt(sessionStartTime)) / 1000,
           );
           const remainingTime = parseInt(savedTimer) - elapsed;
 
@@ -466,7 +469,7 @@ const InClassFaculty = ({ previewMode = false }) => {
             // Verify session is still active on backend
             try {
               const response = await apiClient.get(
-                `/faculty/sessions/${sessionData.id}`
+                `/faculty/sessions/${sessionData.id}`,
               );
               if (
                 response.data &&
@@ -564,7 +567,7 @@ const InClassFaculty = ({ previewMode = false }) => {
         handleLogout();
         showToast(
           "Session expired. You have been logged out for security.",
-          "warning"
+          "warning",
         );
       }, FACULTY_AUTO_LOGOUT_TIME);
     } else {
@@ -603,10 +606,10 @@ const InClassFaculty = ({ previewMode = false }) => {
         `New course registration request from ${
           data.studentName || data.student_name
         }`,
-        "info"
+        "info",
       );
     },
-    [showToast]
+    [showToast],
   );
 
   // Initialize faculty socket
@@ -628,7 +631,7 @@ const InClassFaculty = ({ previewMode = false }) => {
 
   const currentSelectedCourse = useMemo(
     () => registeredCourses.find((c) => c.id === selectedCourseId),
-    [registeredCourses, selectedCourseId]
+    [registeredCourses, selectedCourseId],
   );
 
   if (loading) {
@@ -647,7 +650,16 @@ const InClassFaculty = ({ previewMode = false }) => {
   return (
     <div className={styles.dashboardWrapper}>
       {previewMode && (
-        <div style={{ background: "#f59e0b", color: "#000", padding: "8px 16px", textAlign: "center", fontSize: "14px", fontWeight: 600 }}>
+        <div
+          style={{
+            background: "#f59e0b",
+            color: "#000",
+            padding: "8px 16px",
+            textAlign: "center",
+            fontSize: "14px",
+            fontWeight: 600,
+          }}
+        >
           Preview mode — no login (testing only)
         </div>
       )}
@@ -714,7 +726,9 @@ const InClassFaculty = ({ previewMode = false }) => {
                         <div className={styles.studentInfo}>
                           {pending.student.passportPhotoUrl && (
                             <img
-                              src={`http://localhost:4000${pending.student.passportPhotoUrl}`}
+                              src={buildImageUrl(
+                                pending.student.passportPhotoUrl,
+                              )}
                               alt={pending.student.name}
                               className={styles.studentPhoto}
                               loading="lazy"
@@ -750,13 +764,13 @@ const InClassFaculty = ({ previewMode = false }) => {
                             className={styles.approveButton}
                             onClick={() => {
                               const notes = prompt(
-                                "Add approval notes (optional):"
+                                "Add approval notes (optional):",
                               );
                               if (notes !== null) {
                                 handleStudentAction(
                                   pending.pendingId,
                                   "approve",
-                                  notes
+                                  notes,
                                 );
                               }
                             }}
@@ -769,13 +783,13 @@ const InClassFaculty = ({ previewMode = false }) => {
                             className={styles.rejectButton}
                             onClick={() => {
                               const notes = prompt(
-                                "Add rejection reason (optional):"
+                                "Add rejection reason (optional):",
                               );
                               if (notes !== null) {
                                 handleStudentAction(
                                   pending.pendingId,
                                   "reject",
-                                  notes
+                                  notes,
                                 );
                               }
                             }}
@@ -1006,8 +1020,8 @@ const InClassFaculty = ({ previewMode = false }) => {
                               {student.present
                                 ? "PRESENT"
                                 : activeSession
-                                ? "PENDING"
-                                : "N/A"}
+                                  ? "PENDING"
+                                  : "N/A"}
                               {student.overridden && (
                                 <i
                                   className="bx bx-edit"
