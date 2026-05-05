@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import "./styles/designTokens.css";
 import LoadingSpinner from "./components/shared/LoadingSpinner";
 import ErrorBoundary from "./components/shared/ErrorBoundary";
@@ -9,17 +9,21 @@ import ScrollToTop from "./components/ScrollToTop";
 // Lazy load pages for better performance
 const Homepage = lazy(() => import("./pages/Homepage"));
 const InClassLogin = lazy(() => import("./pages/Login/InClassLoginModern"));
-const InClassRegister = lazy(() => import("./pages/Register/InClassRegisterModern"));
-const OnboardBiometrics = lazy(() =>
-  import("./pages/Onboard/OnboardBiometricsModern")
+const InClassRegister = lazy(
+  () => import("./pages/Register/InClassRegisterModern"),
 );
-const InClassStudent = lazy(() => import("./pages/Student/InClassStudentModern"));
+const OnboardBiometrics = lazy(
+  () => import("./pages/Onboard/OnboardBiometricsModern"),
+);
+const InClassStudent = lazy(
+  () => import("./pages/Student/InClassStudentModern"),
+);
 const InClassFaculty = lazy(() => import("./pages/Faculty/InClassFaculty"));
 const InClassAdmin = lazy(() => import("./pages/Admin/InClassAdmin"));
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const AdminLogin = lazy(() => import("./pages/Admin/AdminLogin"));
-const InClassForgotPass = lazy(() =>
-  import("./pages/ForgotPass/InClassForgotPass")
+const InClassForgotPass = lazy(
+  () => import("./pages/ForgotPass/InClassForgotPass"),
 );
 const About = lazy(() => import("./pages/About"));
 const Features = lazy(() => import("./pages/Features"));
@@ -50,8 +54,8 @@ const ProfileEdit = lazy(() => import("./pages/Faculty/ProfileEdit"));
 const BiometricOnboard = lazy(() => import("./pages/Faculty/BiometricOnboard"));
 
 // Lazy load new student pages
-const CourseRegistration = lazy(() =>
-  import("./pages/Student/CourseRegistration")
+const CourseRegistration = lazy(
+  () => import("./pages/Student/CourseRegistration"),
 );
 
 function App() {
@@ -90,6 +94,10 @@ function App() {
               }
             />
             <Route
+              path="/onboard-biometrics"
+              element={<Navigate to="/onboard/biometrics" replace />}
+            />
+            <Route
               path="/student/dashboard"
               element={
                 <ErrorBoundary
@@ -100,7 +108,10 @@ function App() {
                 </ErrorBoundary>
               }
             />
-            <Route path="/preview/student" element={<InClassStudent previewMode />} />
+            <Route
+              path="/preview/student"
+              element={<InClassStudent previewMode />}
+            />
             <Route
               path="/student/register-courses"
               element={
@@ -110,7 +121,10 @@ function App() {
               }
             />
             <Route path="/faculty/dashboard" element={<InClassFaculty />} />
-            <Route path="/preview/faculty" element={<InClassFaculty previewMode />} />
+            <Route
+              path="/preview/faculty"
+              element={<InClassFaculty previewMode />}
+            />
             <Route
               path="/faculty/onboard"
               element={
@@ -148,7 +162,10 @@ function App() {
                 </ErrorBoundary>
               }
             />
-            <Route path="/preview/admin" element={<AdminDashboard previewMode />} />
+            <Route
+              path="/preview/admin"
+              element={<AdminDashboard previewMode />}
+            />
             <Route
               path="/inclass/admin/login"
               element={

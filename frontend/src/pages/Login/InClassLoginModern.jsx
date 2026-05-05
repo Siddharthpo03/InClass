@@ -20,7 +20,8 @@ const InClassLoginModern = () => {
   const [showFaceCapture, setShowFaceCapture] = useState(false);
   const [passwordVerified, setPasswordVerified] = useState(false);
   const [capturingFace, setCapturingFace] = useState(false);
-  const [faceVerificationRequired, setFaceVerificationRequired] = useState(false);
+  const [faceVerificationRequired, setFaceVerificationRequired] =
+    useState(false);
   const [modelsLoaded, setModelsLoaded] = useState(false);
 
   // Load face-api models
@@ -28,7 +29,8 @@ const InClassLoginModern = () => {
     const loadFaceModels = async () => {
       try {
         const script = document.createElement("script");
-        script.src = "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js";
+        script.src =
+          "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js";
         script.async = true;
         script.onload = () => {
           console.log("Face-API loaded");
@@ -67,7 +69,11 @@ const InClassLoginModern = () => {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 320 }, height: { ideal: 320 } },
+        video: {
+          facingMode: "user",
+          width: { ideal: 320 },
+          height: { ideal: 320 },
+        },
         audio: false,
       });
       if (videoRef.current) {
@@ -109,7 +115,8 @@ const InClassLoginModern = () => {
       localStorage.setItem("user_role", response.data.role);
       navigate("/student/dashboard");
     } catch (err) {
-      const errorMsg = err.response?.data?.error?.message || "Face verification failed";
+      const errorMsg =
+        err.response?.data?.error?.message || "Face verification failed";
       setServerError(errorMsg);
     } finally {
       setCapturingFace(false);
@@ -137,7 +144,9 @@ const InClassLoginModern = () => {
       });
 
       if (!checkRes.data.exists) {
-        setValidationErrors({ email: "Email not found. Please register first." });
+        setValidationErrors({
+          email: "Email not found. Please register first.",
+        });
         setLoading(false);
         return;
       }
@@ -218,7 +227,9 @@ const InClassLoginModern = () => {
                   />
                 </div>
                 {validationErrors.email && (
-                  <span className={styles.errorText}>{validationErrors.email}</span>
+                  <span className={styles.errorText}>
+                    {validationErrors.email}
+                  </span>
                 )}
               </div>
 
@@ -245,7 +256,9 @@ const InClassLoginModern = () => {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className={validationErrors.password ? styles.inputError : ""}
+                    className={
+                      validationErrors.password ? styles.inputError : ""
+                    }
                     disabled={loading}
                     autoComplete="current-password"
                   />
@@ -253,14 +266,20 @@ const InClassLoginModern = () => {
                     type="button"
                     className={styles.passwordToggle}
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                     disabled={loading}
                   >
-                    <i className={`bx ${showPassword ? "bx-hide-alt" : "bx-show-alt"}`}></i>
+                    <i
+                      className={`bx ${showPassword ? "bx-hide-alt" : "bx-show-alt"}`}
+                    ></i>
                   </button>
                 </div>
                 {validationErrors.password && (
-                  <span className={styles.errorText}>{validationErrors.password}</span>
+                  <span className={styles.errorText}>
+                    {validationErrors.password}
+                  </span>
                 )}
               </div>
 
@@ -321,7 +340,10 @@ const InClassLoginModern = () => {
               <i className="bx bx-book-reader"></i>
             </div>
             <h2>Smart Attendance System</h2>
-            <p>Secure, efficient, and reliable attendance management for modern education</p>
+            <p>
+              Secure, efficient, and reliable attendance management for modern
+              education
+            </p>
             <ul className={styles.featureList}>
               <li>
                 <i className="bx bx-check-circle"></i>
@@ -345,7 +367,9 @@ const InClassLoginModern = () => {
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
             <h3 className={styles.modalTitle}>Face Verification Required</h3>
-            <p className={styles.modalDescription}>Look at the camera to verify your identity</p>
+            <p className={styles.modalDescription}>
+              Look at the camera to verify your identity
+            </p>
 
             <div className={styles.videoContainer}>
               <video

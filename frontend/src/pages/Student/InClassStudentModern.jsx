@@ -41,8 +41,20 @@ const InClassStudentModern = ({ previewMode = false }) => {
         absent: 6,
       });
       setActiveSessions([
-        { id: 1, name: "Data Structures", faculty: "Dr. Smith", room: "A101", time: "10:00 AM" },
-        { id: 2, name: "Algorithms", faculty: "Prof. Johnson", room: "B205", time: "2:00 PM" },
+        {
+          id: 1,
+          name: "Data Structures",
+          faculty: "Dr. Smith",
+          room: "A101",
+          time: "10:00 AM",
+        },
+        {
+          id: 2,
+          name: "Algorithms",
+          faculty: "Prof. Johnson",
+          room: "B205",
+          time: "2:00 PM",
+        },
       ]);
       setLoading(false);
       return;
@@ -99,8 +111,11 @@ const InClassStudentModern = ({ previewMode = false }) => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const params = filterDateRange !== "all" ? { range: filterDateRange } : {};
-        const response = await apiClient.get("/student/attendance-history", { params });
+        const params =
+          filterDateRange !== "all" ? { range: filterDateRange } : {};
+        const response = await apiClient.get("/student/attendance-history", {
+          params,
+        });
         setAttendanceHistory(response.data.history || []);
       } catch (err) {
         console.error("Failed to fetch history:", err);
@@ -130,7 +145,8 @@ const InClassStudentModern = ({ previewMode = false }) => {
         setAttendanceHistory(historyRes.data.history || []);
       }
     } catch (err) {
-      const msg = err.response?.data?.error?.message || "Failed to mark attendance";
+      const msg =
+        err.response?.data?.error?.message || "Failed to mark attendance";
       addToast(msg, "error");
     }
   };
@@ -178,7 +194,9 @@ const InClassStudentModern = ({ previewMode = false }) => {
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div>
-              <h1 className={styles.title}>Welcome, {userData?.name?.split(" ")[0]}!</h1>
+              <h1 className={styles.title}>
+                Welcome, {userData?.name?.split(" ")[0]}!
+              </h1>
               <p className={styles.subtitle}>Here's your attendance overview</p>
             </div>
             <button className={styles.logoutButton} onClick={handleLogout}>
@@ -191,18 +209,32 @@ const InClassStudentModern = ({ previewMode = false }) => {
         {/* Stats Cards */}
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
-            <div className={styles.statIcon} style={{ background: "rgba(14, 165, 233, 0.1)" }}>
-              <i className="bx bx-pie-chart" style={{ color: "var(--primary-500)" }}></i>
+            <div
+              className={styles.statIcon}
+              style={{ background: "rgba(14, 165, 233, 0.1)" }}
+            >
+              <i
+                className="bx bx-pie-chart"
+                style={{ color: "var(--primary-500)" }}
+              ></i>
             </div>
             <div>
               <p className={styles.statLabel}>Attendance</p>
-              <h3 className={styles.statValue}>{attendanceStats.percentage}%</h3>
+              <h3 className={styles.statValue}>
+                {attendanceStats.percentage}%
+              </h3>
             </div>
           </div>
 
           <div className={styles.statCard}>
-            <div className={styles.statIcon} style={{ background: "rgba(34, 197, 94, 0.1)" }}>
-              <i className="bx bx-check-circle" style={{ color: "var(--success-500)" }}></i>
+            <div
+              className={styles.statIcon}
+              style={{ background: "rgba(34, 197, 94, 0.1)" }}
+            >
+              <i
+                className="bx bx-check-circle"
+                style={{ color: "var(--success-500)" }}
+              ></i>
             </div>
             <div>
               <p className={styles.statLabel}>Present</p>
@@ -211,8 +243,14 @@ const InClassStudentModern = ({ previewMode = false }) => {
           </div>
 
           <div className={styles.statCard}>
-            <div className={styles.statIcon} style={{ background: "rgba(239, 68, 68, 0.1)" }}>
-              <i className="bx bx-x-circle" style={{ color: "var(--danger-500)" }}></i>
+            <div
+              className={styles.statIcon}
+              style={{ background: "rgba(239, 68, 68, 0.1)" }}
+            >
+              <i
+                className="bx bx-x-circle"
+                style={{ color: "var(--danger-500)" }}
+              ></i>
             </div>
             <div>
               <p className={styles.statLabel}>Absent</p>
@@ -221,12 +259,20 @@ const InClassStudentModern = ({ previewMode = false }) => {
           </div>
 
           <div className={styles.statCard}>
-            <div className={styles.statIcon} style={{ background: "rgba(245, 158, 11, 0.1)" }}>
-              <i className="bx bx-book" style={{ color: "var(--warning-500)" }}></i>
+            <div
+              className={styles.statIcon}
+              style={{ background: "rgba(245, 158, 11, 0.1)" }}
+            >
+              <i
+                className="bx bx-book"
+                style={{ color: "var(--warning-500)" }}
+              ></i>
             </div>
             <div>
               <p className={styles.statLabel}>Total Classes</p>
-              <h3 className={styles.statValue}>{attendanceStats.totalClasses}</h3>
+              <h3 className={styles.statValue}>
+                {attendanceStats.totalClasses}
+              </h3>
             </div>
           </div>
         </div>
@@ -276,7 +322,10 @@ const InClassStudentModern = ({ previewMode = false }) => {
             <div className={styles.sectionHeader}>
               <h2>Mark Attendance</h2>
             </div>
-            <form onSubmit={handleMarkAttendance} className={styles.attendanceForm}>
+            <form
+              onSubmit={handleMarkAttendance}
+              className={styles.attendanceForm}
+            >
               <div className={styles.formGroup}>
                 <label>Session Code</label>
                 <div className={styles.inputWrapper}>
@@ -285,7 +334,9 @@ const InClassStudentModern = ({ previewMode = false }) => {
                     type="text"
                     placeholder="Enter session code (e.g., ABC123)"
                     value={sessionCode}
-                    onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
+                    onChange={(e) =>
+                      setSessionCode(e.target.value.toUpperCase())
+                    }
                     maxLength="6"
                   />
                 </div>
@@ -324,7 +375,9 @@ const InClassStudentModern = ({ previewMode = false }) => {
                     }`}
                     onClick={() => setFilterDateRange(range)}
                   >
-                    {range === "all" ? "All Time" : range.charAt(0).toUpperCase() + range.slice(1)}
+                    {range === "all"
+                      ? "All Time"
+                      : range.charAt(0).toUpperCase() + range.slice(1)}
                   </button>
                 ))}
               </div>
@@ -361,7 +414,10 @@ const InClassStudentModern = ({ previewMode = false }) => {
               <i className="bx bx-inbox"></i>
             </div>
             <h3>No Active Sessions</h3>
-            <p>Check back later for active sessions or view your attendance history.</p>
+            <p>
+              Check back later for active sessions or view your attendance
+              history.
+            </p>
           </section>
         )}
       </div>
@@ -369,10 +425,15 @@ const InClassStudentModern = ({ previewMode = false }) => {
       {/* Toast Notifications */}
       <div className={styles.toastContainer}>
         {toasts.map((toast) => (
-          <div key={toast.id} className={`${styles.toast} ${styles[`toast${toast.type}`]}`}>
+          <div
+            key={toast.id}
+            className={`${styles.toast} ${styles[`toast${toast.type}`]}`}
+          >
             <i
               className={`bx ${
-                toast.type === "success" ? "bx-check-circle" : "bx-exclamation-circle"
+                toast.type === "success"
+                  ? "bx-check-circle"
+                  : "bx-exclamation-circle"
               }`}
             ></i>
             <span>{toast.message}</span>

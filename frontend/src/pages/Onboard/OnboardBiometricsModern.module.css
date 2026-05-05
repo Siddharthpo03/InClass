@@ -38,7 +38,7 @@ body.darkMode .wrapper {
 .header {
   text-align: center;
   padding: 2rem;
-  background: linear-gradient(135deg, var(--primary-50) 0%, transparent 100%);
+  background: linear-gradient(to bottom, #f0f9ff 0%, #ffffff 50%, #ffffff 100%);
   border-bottom: 1px solid var(--border-color);
 
   @media (max-width: 768px) {
@@ -341,7 +341,18 @@ body.darkMode .successAlert {
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: var(--bg-primary);
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  max-width: 480px;
+  width: 100%;
+  overflow: hidden;
+  animation: slideUp var(--duration-300) var(--easing-ease-out);
+
+ body.darkMode .card {
+   background: #1f2937;
+   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+ }
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   transition: all var(--duration-200) var(--easing-ease-out));
@@ -552,3 +563,73 @@ body.darkMode .successAlert {
     transform: translateY(0);
   }
 }
+
+/* OTP Styles */
+.otpBox {
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.otpLabel {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.otpInput {
+  width: 100%;
+  padding: 1rem;
+  font-size: var(--text-xl);
+  text-align: center;
+  letter-spacing: 0.5rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-weight: var(--font-bold);
+  transition: all var(--duration-200) var(--easing-ease-out));
+  margin-bottom: 0.75rem;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.otpHint {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0;
+}
+
+.resendButton {
+  background: none;
+  border: none;
+  color: var(--primary-600);
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: var(--font-semibold);
+  transition: color var(--duration-200) var(--easing-ease-out));
+
+  &:hover:not(:disabled) {
+    color: var(--primary-700);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+

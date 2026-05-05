@@ -1,9 +1,16 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/apiClient";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import useDarkMode from "../../hooks/useDarkMode";
+import CountryCodeSelector from "../../components/CountryCodeSelector";
 import styles from "./InClassRegisterModern.module.css";
 
 const STEPS = [
@@ -15,6 +22,16 @@ const STEPS = [
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MOBILE_REGEX = /^\d{10}$/;
 
+const ROLE_OPTIONS = [
+  { value: "student", label: "Student", icon: "bx-book" },
+  { value: "faculty", label: "Faculty", icon: "bx-briefcase" },
+];
+
+const getRoleLabel = (role) => {
+  if (!role) return "";
+  return role.charAt(0).toUpperCase() + role.slice(1);
+};
+
 const getPasswordStrength = (pwd) => {
   if (!pwd) return { score: 0, label: "", width: "0%" };
   let score = 0;
@@ -24,8 +41,20 @@ const getPasswordStrength = (pwd) => {
   if (/\d/.test(pwd)) score++;
   if (/[^A-Za-z0-9]/.test(pwd)) score++;
   const labels = ["", "Weak", "Fair", "Good", "Strong", "Very Strong"];
-  const colors = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e", "#22c55e"];
-  return { score, label: labels[score], color: colors[score], width: `${(score / 5) * 100}%` };
+  const colors = [
+    "#ef4444",
+    "#f97316",
+    "#eab308",
+    "#84cc16",
+    "#22c55e",
+    "#22c55e",
+  ];
+  return {
+    score,
+    label: labels[score],
+    color: colors[score],
+    width: `${(score / 5) * 100}%`,
+  };
 };
 
 const InClassRegisterModern = () => {
@@ -37,11 +66,16 @@ const InClassRegisterModern = () => {
   const collegeRef = useRef(null);
   const departmentRef = useRef(null);
 
-  const [formData, setFormData] = useState({
+  /**
+   * Initial form data object. Kept as a separate constant so TypeScript/JSDoc
+   * can infer the shape and editor won't treat `formData` as `{}`.
+   */
+  const INITIAL_FORM_DATA = {
     name: "",
     email: "",
     mobile_number: "",
-    role: "Student",
+    country_code: "+1",
+    role: "student",
     password: "",
     confirmPassword: "",
     college: "",
@@ -49,8 +83,34 @@ const InClassRegisterModern = () => {
     department: "",
     department_id: null,
     roll_no: "",
-  });
+  };
 
+  /**
+   * @typedef {{
+   *  name: string,
+   *  email: string,
+   *  mobile_number: string,
+   *  country_code: string,
+   *  role: string,
+   *  password: string,
+   *  confirmPassword: string,
+   *  college: string,
+   *  college_id: number|string|null,
+   *  department: string,
+   *  department_id: number|string|null,
+   *  roll_no: string,
+   * }} FormData
+   */
+  /**
+   * `useState` tuple typing so the TS server understands the destructured array.
+   * @type {[FormData, import('react').Dispatch<import('react').SetStateAction<FormData>>]}
+   */
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+
+  /**
+   * Validation errors map and its setter typed as the useState tuple.
+   * @type {[{[key:string]: string}, import('react').Dispatch<import('react').SetStateAction<{[key:string]: string}>>]}
+   */
   const [validationErrors, setValidationErrors] = useState({});
   const [collegesList, setCollegesList] = useState([]);
   const [departmentsList, setDepartmentsList] = useState([]);
@@ -61,7 +121,10 @@ const InClassRegisterModern = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const passwordStrength = useMemo(() => getPasswordStrength(formData.password), [formData.password]);
+  const passwordStrength = useMemo(
+    () => getPasswordStrength(formData.password),
+    [formData.password],
+  );
 
   // Fetch colleges
   useEffect(() => {
@@ -100,44 +163,66 @@ const InClassRegisterModern = () => {
   }, [departmentSearch]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    /** @type {{ name?: string, value?: any, target?: any }} */
+    const { name, value } = e.target || {};
     setFormData((prev) => ({ ...prev, [name]: value }));
     setValidationErrors((prev) => ({ ...prev, [name]: "" }));
     setServerError("");
   };
 
+  const handleCountryCodeChange = (code) => {
+    setFormData((prev) => ({ ...prev, country_code: code }));
+    setValidationErrors((prev) => ({ ...prev, country_code: "" }));
+  };
+
   const validateStep1 = useCallback(() => {
+    /** @type {{ [key: string]: string }} */
     const errors = {};
     if (!formData.name?.trim()) errors.name = "Name is required";
-    else if (formData.name.trim().length < 2) errors.name = "At least 2 characters";
+    else if (formData.name.trim().length < 2)
+      errors.name = "At least 2 characters";
 
     if (!formData.email?.trim()) errors.email = "Email is required";
-    else if (!EMAIL_REGEX.test(formData.email)) errors.email = "Invalid email format";
+    else if (!EMAIL_REGEX.test(formData.email))
+      errors.email = "Invalid email format";
 
-    if (!formData.mobile_number?.trim()) errors.mobile_number = "Mobile number is required";
-    else if (!MOBILE_REGEX.test(formData.mobile_number.trim())) errors.mobile_number = "10-digit number required";
+    if (!formData.mobile_number?.trim())
+      errors.mobile_number = "Mobile number is required";
+    else if (!MOBILE_REGEX.test(formData.mobile_number.trim()))
+      errors.mobile_number = "10-digit number required";
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   }, [formData.name, formData.email, formData.mobile_number]);
 
   const validateStep2 = useCallback(() => {
+    /** @type {{ [key: string]: string }} */
     const errors = {};
     if (!formData.college_id) errors.college = "Select a college";
     if (!formData.department_id) errors.department = "Select a department";
-    if (!formData.roll_no?.trim()) errors.roll_no = `${formData.role} ID is required`;
+    if (!formData.roll_no?.trim())
+      errors.roll_no = `${getRoleLabel(formData.role)} ID is required`;
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [formData.college_id, formData.department_id, formData.roll_no, formData.role]);
+  }, [
+    formData.college_id,
+    formData.department_id,
+    formData.roll_no,
+    formData.role,
+  ]);
 
   const validateStep3 = useCallback(() => {
+    /** @type {{ [key: string]: string }} */
     const errors = {};
     if (!formData.password?.trim()) errors.password = "Password is required";
-    else if (formData.password.length < 6) errors.password = "At least 6 characters";
+    else if (formData.password.length < 6)
+      errors.password = "At least 6 characters";
 
-    if (!formData.confirmPassword?.trim()) errors.confirmPassword = "Confirm your password";
-    else if (formData.password !== formData.confirmPassword) errors.confirmPassword = "Passwords don't match";
+    if (!formData.confirmPassword?.trim())
+      errors.confirmPassword = "Confirm your password";
+    else if (formData.password !== formData.confirmPassword)
+      errors.confirmPassword = "Passwords don't match";
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -181,10 +266,12 @@ const InClassRegisterModern = () => {
         localStorage.setItem("inclass_token", response.data.token);
         localStorage.setItem("user_id", response.data.userId);
         localStorage.setItem("user_role", response.data.role);
-        navigate(`/onboard-biometrics?userId=${response.data.userId}`);
+        navigate(`/onboard/biometrics?userId=${response.data.userId}`);
       }
     } catch (error) {
-      const msg = error.response?.data?.error?.message || "Registration failed. Try again.";
+      const msg =
+        error.response?.data?.error?.message ||
+        "Registration failed. Try again.";
       setServerError(msg);
     } finally {
       setLoading(false);
@@ -195,7 +282,8 @@ const InClassRegisterModern = () => {
     setFormData((prev) => ({
       ...prev,
       college: college.name,
-      college_id: college.id,
+      college_id:
+        typeof college.id === "number" ? college.id : Number(college.id),
     }));
     setCollegeSearch("");
     setCollegesOpen(false);
@@ -206,7 +294,7 @@ const InClassRegisterModern = () => {
     setFormData((prev) => ({
       ...prev,
       department: dept.name,
-      department_id: dept.id,
+      department_id: typeof dept.id === "number" ? dept.id : Number(dept.id),
     }));
     setDepartmentSearch("");
     setDepartmentsOpen(false);
@@ -221,23 +309,25 @@ const InClassRegisterModern = () => {
         <div className={styles.progressSection}>
           <div className={styles.stepsIndicator}>
             {STEPS.map((step, idx) => (
-              <div key={step.id} className={styles.stepContainer}>
-                <div
-                  className={`${styles.stepCircle} ${
-                    currentStep >= step.id ? styles.active : ""
-                  }`}
-                >
-                  <i className={`bx ${step.icon}`}></i>
+              <React.Fragment key={step.id}>
+                <div className={styles.stepContainer}>
+                  <span className={styles.stepLabel}>{step.title}</span>
+                  <div
+                    className={`${styles.stepCircle} ${
+                      currentStep >= step.id ? styles.active : ""
+                    }`}
+                  >
+                    <i className={`bx ${step.icon}`}></i>
+                  </div>
                 </div>
-                <span className={styles.stepLabel}>{step.title}</span>
                 {idx < STEPS.length - 1 && (
                   <div
-                    className={`${styles.stepLine} ${
+                    className={`${styles.connector} ${
                       currentStep > step.id ? styles.completed : ""
                     }`}
                   />
                 )}
-              </div>
+              </React.Fragment>
             ))}
           </div>
           <div className={styles.progressBar}>
@@ -273,7 +363,7 @@ const InClassRegisterModern = () => {
                     id="name"
                     type="text"
                     name="name"
-                    placeholder="John Doe"
+                    placeholder="Full Name"
                     value={formData.name}
                     onChange={handleInputChange}
                     className={validationErrors.name ? styles.inputError : ""}
@@ -281,7 +371,9 @@ const InClassRegisterModern = () => {
                   />
                 </div>
                 {validationErrors.name && (
-                  <span className={styles.errorText}>{validationErrors.name}</span>
+                  <span className={styles.errorText}>
+                    {validationErrors.name}
+                  </span>
                 )}
               </div>
 
@@ -302,46 +394,62 @@ const InClassRegisterModern = () => {
                   />
                 </div>
                 {validationErrors.email && (
-                  <span className={styles.errorText}>{validationErrors.email}</span>
+                  <span className={styles.errorText}>
+                    {validationErrors.email}
+                  </span>
                 )}
               </div>
 
               <div className={styles.formGroup}>
-                <label htmlFor="mobile">Mobile Number</label>
-                <div className={styles.inputWrapper}>
-                  <i className="bx bx-phone"></i>
-                  <input
-                    id="mobile"
-                    type="tel"
-                    name="mobile_number"
-                    placeholder="9876543210"
-                    value={formData.mobile_number}
-                    onChange={handleInputChange}
-                    className={validationErrors.mobile_number ? styles.inputError : ""}
-                    disabled={loading}
-                    autoComplete="tel"
+                <label>Mobile Number</label>
+                <div className={styles.mobileInputContainer}>
+                  <CountryCodeSelector
+                    value={formData.country_code}
+                    onChange={handleCountryCodeChange}
+                    error={validationErrors.country_code}
                   />
+                  <div className={styles.inputWrapper} style={{ flex: 1 }}>
+                    <i className="bx bx-phone"></i>
+                    <input
+                      id="mobile"
+                      type="tel"
+                      name="mobile_number"
+                      placeholder="10-digit number"
+                      value={formData.mobile_number}
+                      onChange={handleInputChange}
+                      className={
+                        validationErrors.mobile_number ? styles.inputError : ""
+                      }
+                      disabled={loading}
+                      autoComplete="tel-national"
+                      maxLength={10}
+                    />
+                  </div>
                 </div>
                 {validationErrors.mobile_number && (
-                  <span className={styles.errorText}>{validationErrors.mobile_number}</span>
+                  <span className={styles.errorText}>
+                    {validationErrors.mobile_number}
+                  </span>
                 )}
               </div>
 
               <div className={styles.roleSelector}>
                 <label>I am a</label>
                 <div className={styles.roleButtons}>
-                  {["Student", "Faculty"].map((r) => (
+                  {ROLE_OPTIONS.map((r) => (
                     <button
-                      key={r}
+                      key={r.value}
                       type="button"
                       className={`${styles.roleButton} ${
-                        formData.role === r ? styles.selected : ""
+                        formData.role === r.value ? styles.selected : ""
                       }`}
-                      onClick={() => setFormData((prev) => ({ ...prev, role: r }))}
+                      onClick={() =>
+                        setFormData((prev) => ({ ...prev, role: r.value }))
+                      }
                       disabled={loading}
                     >
-                      <i className={`bx ${r === "Student" ? "bx-book" : "bx-briefcase"}`}></i>
-                      <span>{r}</span>
+                      <i className={`bx ${r.icon}`}></i>
+                      <span>{r.label}</span>
                     </button>
                   ))}
                 </div>
@@ -359,10 +467,7 @@ const InClassRegisterModern = () => {
 
               <div className={styles.formGroup}>
                 <label htmlFor="college">College</label>
-                <div
-                  className={styles.autocompleteWrapper}
-                  ref={collegeRef}
-                >
+                <div className={styles.autocompleteWrapper} ref={collegeRef}>
                   <div className={styles.inputWrapper}>
                     <i className="bx bx-building"></i>
                     <input
@@ -372,7 +477,9 @@ const InClassRegisterModern = () => {
                       value={collegeSearch || formData.college}
                       onChange={(e) => setCollegeSearch(e.target.value)}
                       onFocus={() => setCollegesOpen(true)}
-                      className={validationErrors.college ? styles.inputError : ""}
+                      className={
+                        validationErrors.college ? styles.inputError : ""
+                      }
                       disabled={loading}
                     />
                   </div>
@@ -390,22 +497,23 @@ const InClassRegisterModern = () => {
                           </button>
                         ))
                       ) : (
-                        <div className={styles.dropdownEmpty}>No colleges found</div>
+                        <div className={styles.dropdownEmpty}>
+                          No colleges found
+                        </div>
                       )}
                     </div>
                   )}
                 </div>
                 {validationErrors.college && (
-                  <span className={styles.errorText}>{validationErrors.college}</span>
+                  <span className={styles.errorText}>
+                    {validationErrors.college}
+                  </span>
                 )}
               </div>
 
               <div className={styles.formGroup}>
                 <label htmlFor="department">Department</label>
-                <div
-                  className={styles.autocompleteWrapper}
-                  ref={departmentRef}
-                >
+                <div className={styles.autocompleteWrapper} ref={departmentRef}>
                   <div className={styles.inputWrapper}>
                     <i className="bx bx-folder"></i>
                     <input
@@ -415,7 +523,9 @@ const InClassRegisterModern = () => {
                       value={departmentSearch || formData.department}
                       onChange={(e) => setDepartmentSearch(e.target.value)}
                       onFocus={() => setDepartmentsOpen(true)}
-                      className={validationErrors.department ? styles.inputError : ""}
+                      className={
+                        validationErrors.department ? styles.inputError : ""
+                      }
                       disabled={loading}
                     />
                   </div>
@@ -433,33 +543,43 @@ const InClassRegisterModern = () => {
                           </button>
                         ))
                       ) : (
-                        <div className={styles.dropdownEmpty}>No departments found</div>
+                        <div className={styles.dropdownEmpty}>
+                          No departments found
+                        </div>
                       )}
                     </div>
                   )}
                 </div>
                 {validationErrors.department && (
-                  <span className={styles.errorText}>{validationErrors.department}</span>
+                  <span className={styles.errorText}>
+                    {validationErrors.department}
+                  </span>
                 )}
               </div>
 
               <div className={styles.formGroup}>
-                <label htmlFor="rollNo">{formData.role} ID</label>
+                <label htmlFor="rollNo">{getRoleLabel(formData.role)} ID</label>
                 <div className={styles.inputWrapper}>
                   <i className="bx bx-barcode"></i>
                   <input
                     id="rollNo"
                     type="text"
                     name="roll_no"
-                    placeholder={formData.role === "Student" ? "STU12345" : "FAC001"}
+                    placeholder={
+                      formData.role === "student" ? "STU12345" : "FAC001"
+                    }
                     value={formData.roll_no}
                     onChange={handleInputChange}
-                    className={validationErrors.roll_no ? styles.inputError : ""}
+                    className={
+                      validationErrors.roll_no ? styles.inputError : ""
+                    }
                     disabled={loading}
                   />
                 </div>
                 {validationErrors.roll_no && (
-                  <span className={styles.errorText}>{validationErrors.roll_no}</span>
+                  <span className={styles.errorText}>
+                    {validationErrors.roll_no}
+                  </span>
                 )}
               </div>
             </div>
@@ -484,7 +604,9 @@ const InClassRegisterModern = () => {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className={validationErrors.password ? styles.inputError : ""}
+                    className={
+                      validationErrors.password ? styles.inputError : ""
+                    }
                     disabled={loading}
                     autoComplete="new-password"
                   />
@@ -494,11 +616,15 @@ const InClassRegisterModern = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={loading}
                   >
-                    <i className={`bx ${showPassword ? "bx-hide-alt" : "bx-show-alt"}`}></i>
+                    <i
+                      className={`bx ${showPassword ? "bx-hide-alt" : "bx-show-alt"}`}
+                    ></i>
                   </button>
                 </div>
                 {validationErrors.password && (
-                  <span className={styles.errorText}>{validationErrors.password}</span>
+                  <span className={styles.errorText}>
+                    {validationErrors.password}
+                  </span>
                 )}
 
                 {formData.password && (
@@ -533,7 +659,9 @@ const InClassRegisterModern = () => {
                     placeholder="••••••••"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className={validationErrors.confirmPassword ? styles.inputError : ""}
+                    className={
+                      validationErrors.confirmPassword ? styles.inputError : ""
+                    }
                     disabled={loading}
                     autoComplete="new-password"
                   />
@@ -549,7 +677,9 @@ const InClassRegisterModern = () => {
                   </button>
                 </div>
                 {validationErrors.confirmPassword && (
-                  <span className={styles.errorText}>{validationErrors.confirmPassword}</span>
+                  <span className={styles.errorText}>
+                    {validationErrors.confirmPassword}
+                  </span>
                 )}
               </div>
             </div>

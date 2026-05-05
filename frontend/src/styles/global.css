@@ -2,6 +2,8 @@
 
 /* ===== Unified Design System Variables ===== */
 :root {
+  --nav-height: 84px;
+
   /* Primary Colors */
   --color-primary: #2563eb;
   --color-secondary: #1e293b;
@@ -206,6 +208,17 @@ body,
 #root {
   max-width: 100vw;
   overflow-x: hidden;
+}
+
+.app-main-content {
+  min-height: 100vh;
+  padding-top: var(--nav-height);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --nav-height: 72px;
+  }
 }
 
 /* ===== Prevent Layout Shifts ===== */

@@ -4,6 +4,7 @@ import apiClient from "../../utils/apiClient";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import useDarkMode from "../../hooks/useDarkMode";
+import { enrollFace } from "../../services/faceRecognitionApi";
 import styles from "./OnboardBiometricsModern.module.css";
 
 const OnboardBiometricsModern = () => {
@@ -21,6 +22,13 @@ const OnboardBiometricsModern = () => {
     webauthn: false,
   });
 
+  // OTP Flow State
+  const [otpCode, setOtpCode] = useState("");
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
@@ -37,6 +45,81 @@ const OnboardBiometricsModern = () => {
       }
     }
   }, [searchParams, navigate]);
+
+  // Auto-send OTP when consent is checked
+  useEffect(() => {
+    if (consentChecked && !otpVerified && !otpSent && !sendingOtp && userId) {
+      handleSendOtp();
+    }
+  }, [consentChecked, otpVerified, otpSent, sendingOtp, userId]);
+
+  // OTP Handlers
+  const handleSendOtp = async () => {
+    if (!userId) {
+      setErrorMessage("User ID not found.");
+      return;
+    }
+
+    // Mark OTP as sent immediately to prevent rapid retry loops
+    setOtpSent(true);
+    // Cooldown: allow resend after 60s
+    setTimeout(() => setOtpSent(false), 60000);
+
+    setSendingOtp(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      const response = await apiClient.post("/auth/send-otp", { userId });
+      const phoneNumber = response.data?.phoneNumber || "your mobile number";
+      setSuccessMessage(
+        `✅ OTP sent to ${phoneNumber}. Please check your SMS.`,
+      );
+    } catch (error) {
+      console.error("Send OTP error:", error);
+      setErrorMessage(
+        error.response?.data?.message ||
+          "Failed to send OTP. Please try again.",
+      );
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode || otpCode.length < 4 || otpCode.length > 8) {
+      setErrorMessage("Please enter a valid OTP code (4-8 digits).");
+      return;
+    }
+
+    if (!userId) {
+      setErrorMessage("User ID not found.");
+      return;
+    }
+
+    setVerifyingOtp(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      await apiClient.post("/auth/verify-otp", { userId, otp: otpCode });
+      setOtpVerified(true);
+      setSuccessMessage("✅ OTP verified! You can now enroll your face.");
+      // Move to face capture step after 1 second
+      setTimeout(() => {
+        setStep("face");
+        setTimeout(startCamera, 100);
+      }, 1000);
+    } catch (error) {
+      console.error("Verify OTP error:", error);
+      setErrorMessage(
+        error.response?.data?.message || "Invalid OTP. Please try again.",
+      );
+      setOtpCode("");
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
 
   const startCamera = async () => {
     try {
@@ -75,24 +158,31 @@ const OnboardBiometricsModern = () => {
       canvasRef.current.height = videoRef.current.videoHeight;
       ctx.drawImage(videoRef.current, 0, 0);
 
-      const imageData = canvasRef.current.toDataURL("image/jpeg");
-      const formData = new FormData();
-      formData.append("image", imageData);
-      formData.append("userId", userId);
-
-      // Call face enrollment API
-      const response = await apiClient.post("/face/enroll", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const imageBlob = await new Promise((resolve, reject) => {
+        canvasRef.current.toBlob(
+          (blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error("Failed to capture face image."));
+          },
+          "image/jpeg",
+          0.92,
+        );
       });
 
-      if (response.data?.message) {
+      // Call face enrollment API with a real file upload
+      const response = await enrollFace({ userId, imageBlob });
+
+      if (response?.message || response?.success !== false) {
         setEnrolledMethods((prev) => ({ ...prev, face: true }));
         setSuccessMessage("Face enrolled successfully!");
         stopCamera();
         setStep("complete");
+      } else {
+        throw new Error("Face enrollment did not return a success response.");
       }
     } catch (err) {
-      const msg = err.response?.data?.error?.message || "Face enrollment failed";
+      const msg =
+        err.response?.data?.error?.message || "Face enrollment failed";
       setErrorMessage(msg);
     } finally {
       setIsEnrolling(false);
@@ -134,8 +224,9 @@ const OnboardBiometricsModern = () => {
                 <h3>Biometric Data Agreement</h3>
                 <div className={styles.consentText}>
                   <p>
-                    <strong>Your Privacy & Security:</strong> We use biometric data to verify your identity
-                    securely. Your face and device credentials are:
+                    <strong>Your Privacy & Security:</strong> We use biometric
+                    data to verify your identity securely. Your face and device
+                    credentials are:
                   </p>
                   <ul>
                     <li>
@@ -152,12 +243,14 @@ const OnboardBiometricsModern = () => {
                     </li>
                     <li>
                       <i className="bx bx-check"></i>
-                      <span>Protected by industry-standard security protocols</span>
+                      <span>
+                        Protected by industry-standard security protocols
+                      </span>
                     </li>
                   </ul>
                   <p style={{ marginTop: "1rem" }}>
-                    By proceeding, you consent to the collection and use of your biometric data for account
-                    security purposes.
+                    By proceeding, you consent to the collection and use of your
+                    biometric data for account security purposes.
                   </p>
                 </div>
               </div>
@@ -183,13 +276,102 @@ const OnboardBiometricsModern = () => {
               <button
                 className={styles.primaryButton}
                 onClick={() => {
-                  setStep("face");
-                  setTimeout(startCamera, 100);
+                  setStep("otp");
                 }}
                 disabled={!consentChecked}
               >
                 <i className="bx bx-camera"></i>
                 Continue to Setup
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* OTP Verification Step */}
+        {step === "otp" && (
+          <div className={styles.card}>
+            <div className={styles.header}>
+              <div className={styles.icon}>
+                <i className="bx bx-lock-alt"></i>
+              </div>
+              <h1>Verify Your Identity</h1>
+              <p>Enter the OTP code sent to your mobile number</p>
+            </div>
+
+            <div className={styles.content}>
+              {errorMessage && (
+                <div className={styles.alert} role="alert">
+                  <i className="bx bx-exclamation-circle"></i>
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              {successMessage && (
+                <div className={styles.successAlert}>
+                  <i className="bx bx-check-circle"></i>
+                  <span>{successMessage}</span>
+                </div>
+              )}
+
+              <div className={styles.otpBox}>
+                <p className={styles.otpLabel}>
+                  {otpSent
+                    ? "A 6-digit OTP has been sent to your registered mobile number."
+                    : "Sending OTP..."}
+                </p>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength="8"
+                  placeholder="Enter OTP code"
+                  value={otpCode}
+                  onChange={(e) =>
+                    setOtpCode(e.target.value.replace(/\D/g, ""))
+                  }
+                  className={styles.otpInput}
+                  disabled={verifyingOtp}
+                />
+                <p className={styles.otpHint}>
+                  {otpSent && (
+                    <>
+                      Didn't receive OTP?{" "}
+                      <button
+                        className={styles.resendButton}
+                        onClick={handleSendOtp}
+                        disabled={sendingOtp}
+                      >
+                        {sendingOtp ? "Sending..." : "Resend OTP"}
+                      </button>
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className={styles.actions}>
+              <button
+                className={styles.secondaryButton}
+                onClick={() => setStep("consent")}
+              >
+                <i className="bx bx-arrow-back"></i>
+                Back
+              </button>
+              <button
+                className={styles.primaryButton}
+                onClick={handleVerifyOtp}
+                disabled={verifyingOtp || !otpCode}
+              >
+                {verifyingOtp ? (
+                  <>
+                    <span className={styles.spinner}></span>
+                    <span>Verifying...</span>
+                  </>
+                ) : (
+                  <>
+                    <i className="bx bx-check"></i>
+                    <span>Verify OTP</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -233,8 +415,14 @@ const OnboardBiometricsModern = () => {
                 <div className={styles.frameGuide}>
                   <div className={styles.corner} style={{ top: 0, left: 0 }} />
                   <div className={styles.corner} style={{ top: 0, right: 0 }} />
-                  <div className={styles.corner} style={{ bottom: 0, left: 0 }} />
-                  <div className={styles.corner} style={{ bottom: 0, right: 0 }} />
+                  <div
+                    className={styles.corner}
+                    style={{ bottom: 0, left: 0 }}
+                  />
+                  <div
+                    className={styles.corner}
+                    style={{ bottom: 0, right: 0 }}
+                  />
                 </div>
               </div>
 
@@ -262,7 +450,10 @@ const OnboardBiometricsModern = () => {
             </div>
 
             <div className={styles.actions}>
-              <button className={styles.secondaryButton} onClick={() => setStep("consent")}>
+              <button
+                className={styles.secondaryButton}
+                onClick={() => setStep("otp")}
+              >
                 <i className="bx bx-arrow-back"></i>
                 Back
               </button>
@@ -302,7 +493,9 @@ const OnboardBiometricsModern = () => {
               <div className={styles.completionBox}>
                 <h3>Enrolled Methods</h3>
                 <div className={styles.methodsList}>
-                  <div className={`${styles.method} ${enrolledMethods.face ? styles.enabled : ""}`}>
+                  <div
+                    className={`${styles.method} ${enrolledMethods.face ? styles.enabled : ""}`}
+                  >
                     <div className={styles.methodIcon}>
                       <i className="bx bx-face"></i>
                     </div>
@@ -340,7 +533,10 @@ const OnboardBiometricsModern = () => {
             </div>
 
             <div className={styles.actions}>
-              <button className={styles.primaryButton} onClick={handleContinueToDashboard}>
+              <button
+                className={styles.primaryButton}
+                onClick={handleContinueToDashboard}
+              >
                 <i className="bx bx-arrow-right"></i>
                 Go to Dashboard
               </button>
