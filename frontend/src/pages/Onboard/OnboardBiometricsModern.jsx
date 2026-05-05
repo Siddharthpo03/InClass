@@ -71,9 +71,12 @@ const OnboardBiometricsModern = () => {
 
     try {
       const response = await apiClient.post("/auth/send-otp", { userId });
-      const phoneNumber = response.data?.phoneNumber || "your mobile number";
+      const deliveryAddress =
+        response.data?.maskedEmail ||
+        response.data?.email ||
+        "your college email";
       setSuccessMessage(
-        `✅ OTP sent to ${phoneNumber}. Please check your SMS.`,
+        `✅ OTP sent to ${deliveryAddress}. Please check your inbox.`,
       );
     } catch (error) {
       console.error("Send OTP error:", error);
@@ -322,7 +325,7 @@ const OnboardBiometricsModern = () => {
                 <input
                   type="text"
                   inputMode="numeric"
-                  maxLength="8"
+                  maxLength={6}
                   placeholder="Enter OTP code"
                   value={otpCode}
                   onChange={(e) =>
