@@ -326,6 +326,23 @@ body.darkMode .errorText {
   );
   color: white;
   border: none;
+.faceStatus {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+body.darkMode .faceStatus {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.22);
+  color: #dbeafe;
+}
+
   border-radius: var(--radius-lg);
   font-size: var(--text-base);
   font-weight: var(--font-semibold);

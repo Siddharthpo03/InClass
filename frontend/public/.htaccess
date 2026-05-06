@@ -1,6 +1,8 @@
 # SPA rewrite rules for React/Vite on Hostinger/Apache
 RewriteEngine On
 RewriteBase /
+RewriteCond %{REQUEST_URI} !^/models/
+RewriteCond %{REQUEST_URI} !^/vendor/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.html [L]

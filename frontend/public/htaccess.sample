@@ -2,6 +2,8 @@
 # SPA rewrite rules for React/Vite
 RewriteEngine On
 RewriteBase /
+RewriteCond %{REQUEST_URI} !^/models/
+RewriteCond %{REQUEST_URI} !^/vendor/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.html [L]

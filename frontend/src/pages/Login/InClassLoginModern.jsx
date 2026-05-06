@@ -22,56 +22,121 @@ const InClassLoginModern = () => {
   const [capturingFace, setCapturingFace] = useState(false);
   const [faceVerificationRequired, setFaceVerificationRequired] =
     useState(false);
-  const [modelsLoaded, setModelsLoaded] = useState(false);
+  const [faceModelState, setFaceModelState] = useState("loading");
+  const [faceModelMessage, setFaceModelMessage] = useState(
+    "Loading face models...",
+  );
   const [faceError, setFaceError] = useState("");
+  const FACE_MODEL_TIMEOUT_MS = 15000;
+
+  const loadFaceModels = useCallback(async () => {
+    setFaceModelState("loading");
+    setFaceModelMessage("Loading face models...");
+
+    const loadScript = (src) =>
+      new Promise((resolve, reject) => {
+        const existingScript = document.querySelector(`script[data-face-api="${src}"]`);
+        if (existingScript) {
+          resolve();
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = src;
+        script.async = true;
+        script.dataset.faceApi = src;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Failed to load face-api.js from ${src}`));
+        document.body.appendChild(script);
+      });
+
+    const loadModelSet = async (faceapi, baseUrl, label) => {
+      let timeoutId;
+      const loadPromise = Promise.all([
+        faceapi.nets.ssdMobilenetv1.loadFromUri(baseUrl),
+        faceapi.nets.faceLandmark68Net.loadFromUri(baseUrl),
+        faceapi.nets.faceRecognitionNet.loadFromUri(baseUrl),
+      ]);
+
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(`${label} timed out after ${FACE_MODEL_TIMEOUT_MS / 1000}s`));
+        }, FACE_MODEL_TIMEOUT_MS);
+      });
+
+      try {
+        await Promise.race([loadPromise, timeoutPromise]);
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    };
+
+    try {
+      const scriptSources = [
+        "/vendor/face-api.min.js",
+        "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js",
+      ];
+
+      let scriptLoaded = false;
+      let faceapi = null;
+
+      for (const scriptSource of scriptSources) {
+        try {
+          await loadScript(scriptSource);
+          faceapi = window.faceapi;
+          if (faceapi) {
+            scriptLoaded = true;
+            break;
+          }
+        } catch (error) {
+          console.warn(error.message);
+        }
+      }
+
+      if (!scriptLoaded || !faceapi) {
+        throw new Error(
+          "Face API library could not be loaded. Please refresh the page or clear cache.",
+        );
+      }
+
+      const modelBases = [
+        new URL("/models", window.location.origin).toString(),
+        "https://justadudewhohacks.github.io/face-api.js/models",
+      ];
+
+      let loaded = false;
+      let lastError = null;
+
+      for (const modelBase of modelBases) {
+        try {
+          await loadModelSet(faceapi, modelBase, `Face models from ${modelBase}`);
+          loaded = true;
+          break;
+        } catch (error) {
+          lastError = error;
+          console.warn(error.message);
+        }
+      }
+
+      if (!loaded) {
+        throw lastError || new Error("Face models could not be loaded.");
+      }
+
+      setFaceModelState("ready");
+      setFaceModelMessage("Face models ready.");
+    } catch (error) {
+      console.error("Error initializing face-api models:", error);
+      setFaceModelState("error");
+      setFaceModelMessage(
+        error.message || "Face models failed to load. Please try again.",
+      );
+    }
+  }, []);
 
   // Load face-api models
   useEffect(() => {
-    const loadFaceModels = async () => {
-      try {
-        const script = document.createElement("script");
-        script.src =
-          "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js";
-        script.async = true;
-        script.onload = async () => {
-          console.log("Face-API loaded");
-          try {
-            const faceapi = window.faceapi;
-            const modelPath = "/models";
-
-            // Try loading from local /models first, fallback to CDN weights if missing
-            try {
-              await Promise.all([
-                faceapi.nets.ssdMobilenetv1.loadFromUri(modelPath),
-                faceapi.nets.faceLandmark68Net.loadFromUri(modelPath),
-                faceapi.nets.faceRecognitionNet.loadFromUri(modelPath),
-              ]);
-              console.log("Face-api models loaded from /models");
-            } catch (err) {
-              console.warn("Failed to load models from /models, falling back to CDN weights", err);
-              const cdnWeights =
-                "https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights";
-              await Promise.all([
-                faceapi.nets.ssdMobilenetv1.loadFromUri(cdnWeights),
-                faceapi.nets.faceLandmark68Net.loadFromUri(cdnWeights),
-                faceapi.nets.faceRecognitionNet.loadFromUri(cdnWeights),
-              ]);
-              console.log("Face-api models loaded from CDN");
-            }
-
-            setModelsLoaded(true);
-          } catch (err) {
-            console.error("Error initializing face-api models:", err);
-            setModelsLoaded(false);
-          }
-        };
-        document.body.appendChild(script);
-      } catch (err) {
-        console.error("Failed to load face-api:", err);
-      }
-    };
-    loadFaceModels();
-  }, []);
+    void loadFaceModels();
+  }, [loadFaceModels]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -134,8 +199,8 @@ const InClassLoginModern = () => {
       let embedding = [];
       try {
         const faceapi = window.faceapi;
-        if (!faceapi || !modelsLoaded) {
-          throw new Error("FaceAPI not available or models not loaded");
+        if (!faceapi || faceModelState !== "ready") {
+          throw new Error(faceModelMessage || "FaceAPI not available or models not loaded");
         }
 
         // Detect single face and compute descriptor
@@ -179,6 +244,11 @@ const InClassLoginModern = () => {
           response.data?.error?.message ||
           response.data?.message ||
           `Login failed with status ${response.status}`;
+        console.warn("Face login request rejected", {
+          status: response.status,
+          message,
+          payloadSize: embedding.length,
+        });
         setFaceError(message);
         setServerError(message);
         return;
@@ -508,12 +578,17 @@ const InClassLoginModern = () => {
                 type="button"
                 className={styles.captureButton}
                 onClick={captureAndVerifyFace}
-                disabled={capturingFace}
+                disabled={capturingFace || faceModelState !== "ready"}
               >
                 {capturingFace ? (
                   <>
                     <span className={styles.spinner}></span>
                     <span>Verifying...</span>
+                  </>
+                ) : faceModelState !== "ready" ? (
+                  <>
+                    <i className="bx bx-loader-alt"></i>
+                    <span>Loading Models...</span>
                   </>
                 ) : (
                   <>
@@ -524,9 +599,9 @@ const InClassLoginModern = () => {
               </button>
             </div>
 
-            {(faceError || !modelsLoaded) && (
+            {(faceError || faceModelState !== "ready") && (
               <div className={styles.faceStatus} role="status">
-                {faceError || "Loading face models... you can still click Verify Face after the camera is ready."}
+                {faceError || faceModelMessage}
               </div>
             )}
           </div>
