@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/apiClient";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import useDarkMode from "../../hooks/useDarkMode";
-import useStudentSocket from "../../hooks/useStudentSocket";
 import styles from "./InClassStudentModern.module.css";
 
 const InClassStudentModern = ({ previewMode = false }) => {
@@ -22,7 +21,6 @@ const InClassStudentModern = ({ previewMode = false }) => {
   const [attendanceHistory, setAttendanceHistory] = useState([]);
   const [filterDateRange, setFilterDateRange] = useState("all");
   const [sessionCode, setSessionCode] = useState("");
-  const [sessionMessage, setSessionMessage] = useState("");
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [toasts, setToasts] = useState([]);
 
@@ -130,8 +128,8 @@ const InClassStudentModern = ({ previewMode = false }) => {
     if (!sessionCode.trim()) return;
 
     try {
-      const response = await apiClient.post("/attendance/mark-attendance", {
-        session_code: sessionCode.trim().toUpperCase(),
+      const response = await apiClient.post("/attendance/mark", {
+        code: sessionCode.trim().toUpperCase(),
       });
 
       if (response.data?.success) {
