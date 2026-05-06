@@ -23,6 +23,7 @@ const InClassLoginModern = () => {
   const [faceVerificationRequired, setFaceVerificationRequired] =
     useState(false);
   const [modelsLoaded, setModelsLoaded] = useState(false);
+  const [faceError, setFaceError] = useState("");
 
   // Load face-api models
   useEffect(() => {
@@ -122,6 +123,7 @@ const InClassLoginModern = () => {
   const captureAndVerifyFace = async () => {
     if (!canvasRef.current || !videoRef.current) return;
     setCapturingFace(true);
+    setFaceError("");
     try {
       const ctx = canvasRef.current.getContext("2d");
       canvasRef.current.width = videoRef.current.videoWidth;
@@ -150,26 +152,48 @@ const InClassLoginModern = () => {
         embedding = Array.from(detection.descriptor);
       } catch (embedErr) {
         console.warn("Embedding extraction failed:", embedErr);
-        setServerError(embedErr.message || "Face embedding failed");
+        setFaceError(embedErr.message || "Face embedding failed");
         setCapturingFace(false);
         stopCamera();
-        setShowFaceCapture(false);
         return;
       }
 
       // Submit login with face embedding
-      const response = await apiClient.post("/auth/login", {
-        email: formData.email,
-        password: formData.password,
-        embedding: embedding,
-      });
+      const response = await apiClient.post(
+        "/auth/login",
+        {
+          email: formData.email,
+          password: formData.password,
+          embedding,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          validateStatus: (status) => status < 500,
+        },
+      );
+
+      if (response.status >= 400) {
+        const message =
+          response.data?.error?.message ||
+          response.data?.message ||
+          `Login failed with status ${response.status}`;
+        setFaceError(message);
+        setServerError(message);
+        return;
+      }
 
       localStorage.setItem("inclass_token", response.data.token);
       localStorage.setItem("user_role", response.data.role);
       navigate("/student/dashboard");
     } catch (err) {
       const errorMsg =
-        err.response?.data?.error?.message || "Face verification failed";
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        err.message ||
+        "Face verification failed";
+      setFaceError(errorMsg);
       setServerError(errorMsg);
     } finally {
       setCapturingFace(false);
@@ -209,7 +233,36 @@ const InClassLoginModern = () => {
         const loginRes = await apiClient.post("/auth/login", {
           email: formData.email,
           password: formData.password,
+        }, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          validateStatus: (status) => status < 500,
         });
+
+        if (loginRes.status >= 400) {
+          const message =
+            loginRes.data?.error?.message ||
+            loginRes.data?.message ||
+            `Login failed with status ${loginRes.status}`;
+
+          if (
+            loginRes.status === 400 &&
+            (loginRes.data?.requiresFaceVerification ||
+              loginRes.data?.requiresFaceEnrollment)
+          ) {
+            setPasswordVerified(true);
+            setFaceVerificationRequired(true);
+            setShowFaceCapture(true);
+            setFaceError("");
+            await startCamera();
+            setLoading(false);
+            return;
+          }
+
+          setServerError(message);
+          return;
+        }
 
         // Success path
         if (loginRes.data?.token) {
@@ -222,23 +275,12 @@ const InClassLoginModern = () => {
           return;
         }
       } catch (loginError) {
-        // If backend requires face verification it responds with 400 and a flag
-        const resp = loginError.response;
-        if (
-          resp &&
-          resp.status === 400 &&
-          (resp.data?.requiresFaceVerification || resp.data?.requiresFaceEnrollment)
-        ) {
-          setPasswordVerified(true);
-          setFaceVerificationRequired(true);
-          setShowFaceCapture(true);
-          await startCamera();
-          setLoading(false);
-          return;
-        }
-
-        // Otherwise rethrow to be handled by outer catch
-        throw loginError;
+        const errorMsg =
+          loginError.response?.data?.error?.message ||
+          loginError.response?.data?.message ||
+          loginError.message ||
+          "Login failed. Please try again.";
+        setServerError(errorMsg);
       }
     } catch (error) {
       const errorMsg =
@@ -466,7 +508,7 @@ const InClassLoginModern = () => {
                 type="button"
                 className={styles.captureButton}
                 onClick={captureAndVerifyFace}
-                disabled={capturingFace || !modelsLoaded}
+                disabled={capturingFace}
               >
                 {capturingFace ? (
                   <>
@@ -481,6 +523,12 @@ const InClassLoginModern = () => {
                 )}
               </button>
             </div>
+
+            {(faceError || !modelsLoaded) && (
+              <div className={styles.faceStatus} role="status">
+                {faceError || "Loading face models... you can still click Verify Face after the camera is ready."}
+              </div>
+            )}
           </div>
         </div>
       )}
