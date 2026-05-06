@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTheme } from "../contexts/ThemeContext";
 import fav from "../assets/favicon.png";
 import styles from "./Navigation.module.css";
 
@@ -19,13 +20,16 @@ const classNames = (...classes) => {
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { isDarkMode, toggleTheme } = useTheme();
 
-  // Check authentication status (token = logged in; re-run when route changes so nav updates right after login)
+  // Check if we're on login or register page
+  const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
+
+  // Check authentication status
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("inclass_token");
@@ -41,7 +45,6 @@ const Navigation = () => {
     };
 
     checkAuth();
-
     window.addEventListener("storage", checkAuth);
 
     return () => {
@@ -49,43 +52,29 @@ const Navigation = () => {
     };
   }, [location.pathname]);
 
-  // Dark mode initialization and persistence
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem("darkMode");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    ).matches;
-
-    const shouldBeDark =
-      savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
-
-    setIsDarkMode(shouldBeDark);
-    updateDarkMode(shouldBeDark);
-  }, []);
-
-  // Update dark mode class on body
-  const updateDarkMode = (dark) => {
-    if (dark) {
-      document.body.classList.add("darkMode");
-    } else {
-      document.body.classList.remove("darkMode");
-    }
-  };
-
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
-    localStorage.setItem("darkMode", newDarkMode.toString());
-    updateDarkMode(newDarkMode);
-  };
-
   const handleNavigation = (path) => (e) => {
     e.preventDefault();
     navigate(path);
     setIsMenuOpen(false);
   };
 
+  // On auth pages, show only floating dark mode toggle
+  if (isAuthPage) {
+    return (
+      <div className={styles.floatingThemeToggle}>
+        <button
+          className={styles.themeToggleBtn}
+          onClick={toggleTheme}
+          aria-label="Toggle dark mode"
+          title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          <i className={isDarkMode ? "fas fa-sun" : "fas fa-moon"} />
+        </button>
+      </div>
+    );
+  }
+
+  // Normal navbar for other pages
   return (
     <header>
       <nav className={styles.navBar}>
@@ -174,10 +163,10 @@ const Navigation = () => {
           </div>
         </div>
 
-        {/* Dark Mode Toggle - Always visible in nav bar */}
+        {/* Dark Mode Toggle */}
         <button
           className={styles.darkModeToggle}
-          onClick={toggleDarkMode}
+          onClick={toggleTheme}
           aria-label="Toggle dark mode"
           title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
@@ -302,7 +291,7 @@ const Navigation = () => {
             <span>Theme</span>
             <button
               className={styles.mobileDarkModeToggle}
-              onClick={toggleDarkMode}
+              onClick={toggleTheme}
               aria-label="Toggle dark mode"
             >
               <i className={isDarkMode ? "fas fa-sun" : "fas fa-moon"} />

@@ -72,6 +72,22 @@
   --dark-border: #475569;
 
   /* Typography */
+
+  /* THEME-AWARE COLOR VARIABLES (Light mode defaults) */
+  --bg-primary: #f0f4f8;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f9fafb;
+  --text-primary: #1a1a2e;
+  --text-secondary: #57606a;
+  --text-muted: #8b949e;
+  --card-bg: #ffffff;
+  --input-bg: #f6f8fa;
+  --input-border: #d1d5db;
+  --navbar-bg: #ffffff;
+  --border-color: #e5e7eb;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+
+  /* Typography */
   --font-sans:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
     Arial, sans-serif;
@@ -185,23 +201,53 @@ body:not(.darkMode) {
 }
 
 html {
-  scroll-behavior: smooth;
-  font-size: 16px;
+/* LIGHT MODE - Default */
+:root {
+  --bg-primary: #f0f4f8;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f9fafb;
+  --text-primary: #1a1a2e;
+  --text-secondary: #57606a;
+  --text-muted: #8b949e;
+  --card-bg: #ffffff;
+  --input-bg: #f6f8fa;
+  --input-border: #d1d5db;
+  --navbar-bg: #ffffff;
+  --border-color: #e5e7eb;
+  --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
-body {
-  font-family: var(--font-sans);
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  line-height: var(--line-height-normal);
-  transition:
-    background-color var(--duration-300) var(--easing-ease-in-out),
-    color var(--duration-300) var(--easing-ease-in-out);
+/* DARK MODE */
+html.dark {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --text-primary: #ffffff;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --card-bg: #1c2128;
+  --input-bg: #21262d;
+  --input-border: #30363d;
+  --navbar-bg: #161b22;
+  --border-color: #30363d;
+  --shadow-color: rgba(0, 0, 0, 0.3);
 }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
+/* Legacy support for darkMode class */
+body.darkMode {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --text-primary: #ffffff;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --card-bg: #1c2128;
+  --input-bg: #21262d;
+  --input-border: #30363d;
+  --navbar-bg: #161b22;
+  --border-color: #30363d;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+}
   height: 8px;
 }
 

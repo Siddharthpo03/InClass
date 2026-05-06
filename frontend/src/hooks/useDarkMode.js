@@ -6,10 +6,16 @@ import { useEffect } from "react";
  */
 export default function useDarkMode() {
   useEffect(() => {
-    const saved = localStorage.getItem("darkMode");
+    const saved = localStorage.getItem("inclass-theme") ?? localStorage.getItem("darkMode");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const shouldBeDark = saved !== null ? saved === "true" : prefersDark;
-    if (shouldBeDark) document.body.classList.add("darkMode");
-    else document.body.classList.remove("darkMode");
+    const shouldBeDark =
+      saved !== null ? saved === "dark" || saved === "true" : prefersDark;
+
+    document.documentElement.classList.toggle("dark", shouldBeDark);
+    document.documentElement.setAttribute(
+      "data-theme",
+      shouldBeDark ? "dark" : "light",
+    );
+    document.body.classList.toggle("darkMode", shouldBeDark);
   }, []);
 }

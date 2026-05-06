@@ -305,6 +305,16 @@ const InClassRegisterModern = () => {
     <div className={styles.wrapper}>
       <Navigation />
       <div className={styles.container}>
+        <button
+          type="button"
+          className={styles.backButton}
+          onClick={() => navigate("/")}
+          aria-label="Go back to homepage"
+          title="Back to homepage"
+        >
+          <i className="bx bx-arrow-back"></i>
+        </button>
+
         {/* Progress Bar */}
         <div className={styles.progressSection}>
           <div className={styles.stepsIndicator}>

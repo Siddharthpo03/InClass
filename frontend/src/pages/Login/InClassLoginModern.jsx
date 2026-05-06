@@ -353,11 +353,19 @@ const InClassLoginModern = () => {
     <div className={styles.wrapper}>
       <Navigation />
       <div className={styles.loginContainer}>
-        {/* Left Side - Form */}
         <div className={styles.formSection}>
           <div className={styles.formContent}>
+            <button
+              type="button"
+              className={styles.backButton}
+              onClick={() => navigate("/")}
+              aria-label="Go back to homepage"
+              title="Back to homepage"
+            >
+              <i className="bx bx-arrow-back"></i>
+            </button>
+
             <div className={styles.header}>
-              <h1 className={styles.title}>Welcome Back</h1>
               <p className={styles.subtitle}>Sign in to your InClass account</p>
             </div>
 
@@ -369,7 +377,6 @@ const InClassLoginModern = () => {
             )}
 
             <form onSubmit={handleSubmit} className={styles.form}>
-              {/* Email Field */}
               <div className={styles.formGroup}>
                 <label htmlFor="email" className={styles.label}>
                   Email Address
@@ -389,13 +396,10 @@ const InClassLoginModern = () => {
                   />
                 </div>
                 {validationErrors.email && (
-                  <span className={styles.errorText}>
-                    {validationErrors.email}
-                  </span>
+                  <span className={styles.errorText}>{validationErrors.email}</span>
                 )}
               </div>
 
-              {/* Password Field */}
               <div className={styles.formGroup}>
                 <div className={styles.labelWrapper}>
                   <label htmlFor="password" className={styles.label}>
@@ -418,9 +422,7 @@ const InClassLoginModern = () => {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className={
-                      validationErrors.password ? styles.inputError : ""
-                    }
+                    className={validationErrors.password ? styles.inputError : ""}
                     disabled={loading}
                     autoComplete="current-password"
                   />
@@ -428,24 +430,17 @@ const InClassLoginModern = () => {
                     type="button"
                     className={styles.passwordToggle}
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     disabled={loading}
                   >
-                    <i
-                      className={`bx ${showPassword ? "bx-hide-alt" : "bx-show-alt"}`}
-                    ></i>
+                    <i className={`bx ${showPassword ? "bx-hide-alt" : "bx-show-alt"}`}></i>
                   </button>
                 </div>
                 {validationErrors.password && (
-                  <span className={styles.errorText}>
-                    {validationErrors.password}
-                  </span>
+                  <span className={styles.errorText}>{validationErrors.password}</span>
                 )}
               </div>
 
-              {/* Remember Me */}
               <div className={styles.rememberWrapper}>
                 <label className={styles.checkboxLabel}>
                   <input
@@ -458,7 +453,6 @@ const InClassLoginModern = () => {
                 </label>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 className={styles.submitButton}
@@ -478,12 +472,10 @@ const InClassLoginModern = () => {
               </button>
             </form>
 
-            {/* Divider */}
             <div className={styles.divider}>
               <span>New here?</span>
             </div>
 
-            {/* Register Link */}
             <button
               className={styles.registerButton}
               onClick={() => navigate("/register")}
@@ -495,7 +487,6 @@ const InClassLoginModern = () => {
           </div>
         </div>
 
-        {/* Right Side - Illustration */}
         <div className={styles.illustrationSection}>
           <div className={styles.illustrationContent}>
             <div className={styles.illustrationIcon}>
@@ -503,8 +494,7 @@ const InClassLoginModern = () => {
             </div>
             <h2>Smart Attendance System</h2>
             <p>
-              Secure, efficient, and reliable attendance management for modern
-              education
+              Secure, efficient, and reliable attendance management for modern education
             </p>
             <ul className={styles.featureList}>
               <li>

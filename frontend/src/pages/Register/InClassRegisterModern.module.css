@@ -6,16 +6,6 @@
   flex-direction: column;
   background: var(--bg-primary);
 }
-.wrapper {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(to bottom, #f0f9ff 0%, #ffffff 50%, #ffffff 100%);
-}
-
-body.darkMode .wrapper {
-  background: linear-gradient(to bottom, #111827 0%, #1f2937 50%, #111827 100%);
-}
 .container {
   flex: 1;
   display: flex;
@@ -25,21 +15,40 @@ body.darkMode .wrapper {
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
-  .container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-    max-width: 550px;
-    margin: 0 auto;
-    width: 100%;
-    margin-top: 3rem;
-  }
+  margin-top: 3rem;
+  position: relative;
   @media (max-width: 768px) {
     padding: 1.5rem 1rem;
     align-items: flex-start;
   }
+}
+
+.backButton {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 10;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.backButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--shadow-color);
+}
+
+.backButton:active {
+  transform: translateY(0);
 }
 
 .progressSection {
@@ -108,7 +117,7 @@ body.darkMode .wrapper {
       var(--primary-600) 100%
     );
     border-color: var(--primary-600);
-    color: white;
+    color: var(--neutral-0);
     box-shadow: 0 3px 8px rgba(14, 165, 233, 0.22);
   }
 }
@@ -124,7 +133,7 @@ body.darkMode .wrapper {
   order: -1; /* place label above the circle */
 
   body.darkMode & {
-    color: #9ca3af;
+    color: var(--text-muted);
   }
 
   @media (max-width: 480px) {
@@ -138,9 +147,9 @@ body.darkMode .wrapper {
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 50%;
-  background: #f3f4f6;
-  border: 2px solid #e5e7eb;
-  color: #9ca3af;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  color: var(--text-secondary);
   font-size: 1rem;
   font-weight: 600;
   transition: all var(--duration-300) var(--easing-ease-out);
@@ -150,9 +159,9 @@ body.darkMode .wrapper {
 }
 
 body.darkMode .stepCircle {
-  background: #374151;
-  border-color: #4b5563;
-  color: #6b7280;
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: var(--text-muted);
 }
 .stepLine {
   /* legacy - replaced by .connector */

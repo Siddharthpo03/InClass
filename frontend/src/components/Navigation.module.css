@@ -628,3 +628,49 @@
     padding: 10px 15px;
   }
 }
+
+/* ===== Floating Theme Toggle (Login/Register Pages) ===== */
+.floatingThemeToggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.themeToggleBtn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.themeToggleBtn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px var(--shadow-color);
+}
+
+.themeToggleBtn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 640px) {
+  .floatingThemeToggle {
+    top: 15px;
+    right: 15px;
+  }
+
+  .themeToggleBtn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.2rem;
+  }
+}

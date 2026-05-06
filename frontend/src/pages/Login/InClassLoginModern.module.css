@@ -70,26 +70,18 @@ body.darkMode .title {
   font-weight: var(--font-normal);
 }
 .subtitle {
-  font-size: 0.95rem;
-  color: #6b7280;
-  font-weight: 400;
-  line-height: 1.5;
-}
-
-body.darkMode .subtitle {
-  color: #9ca3af;
-}
-/* Alert */
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 .alert {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  background: var(--danger-50);
-  border: 1px solid var(--danger-200);
-  border-radius: var(--radius-lg);
-  color: var(--danger-700);
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  font-weight: var(--font-normal);
+  line-height: 1.5;
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
   animation: slideDown 0.3s var(--easing-ease-out);
@@ -735,4 +727,34 @@ body.darkMode .featureList li i {
   to {
     opacity: 1;
   }
+}
+
+/* Back Button */
+.backButton {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+}
+
+.backButton:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.backButton:active {
+  transform: scale(0.95);
+}
+
+.header {
+  margin-bottom: 2.5rem;
+  text-align: left;
 }
