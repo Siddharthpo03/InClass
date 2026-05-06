@@ -32,9 +32,37 @@ const InClassLoginModern = () => {
         script.src =
           "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js";
         script.async = true;
-        script.onload = () => {
+        script.onload = async () => {
           console.log("Face-API loaded");
-          setModelsLoaded(true);
+          try {
+            const faceapi = window.faceapi;
+            const modelPath = "/models";
+
+            // Try loading from local /models first, fallback to CDN weights if missing
+            try {
+              await Promise.all([
+                faceapi.nets.ssdMobilenetv1.loadFromUri(modelPath),
+                faceapi.nets.faceLandmark68Net.loadFromUri(modelPath),
+                faceapi.nets.faceRecognitionNet.loadFromUri(modelPath),
+              ]);
+              console.log("Face-api models loaded from /models");
+            } catch (err) {
+              console.warn("Failed to load models from /models, falling back to CDN weights", err);
+              const cdnWeights =
+                "https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights";
+              await Promise.all([
+                faceapi.nets.ssdMobilenetv1.loadFromUri(cdnWeights),
+                faceapi.nets.faceLandmark68Net.loadFromUri(cdnWeights),
+                faceapi.nets.faceRecognitionNet.loadFromUri(cdnWeights),
+              ]);
+              console.log("Face-api models loaded from CDN");
+            }
+
+            setModelsLoaded(true);
+          } catch (err) {
+            console.error("Error initializing face-api models:", err);
+            setModelsLoaded(false);
+          }
         };
         document.body.appendChild(script);
       } catch (err) {
@@ -100,11 +128,36 @@ const InClassLoginModern = () => {
       canvasRef.current.height = videoRef.current.videoHeight;
       ctx.drawImage(videoRef.current, 0, 0);
 
-      const imageData = canvasRef.current.toDataURL("image/jpeg");
-      const base64 = imageData.split(",")[1];
-      const embedding = []; // Placeholder - would come from FaceAPI in production
+      // Compute embedding using face-api if available and models loaded
+      let embedding = [];
+      try {
+        const faceapi = window.faceapi;
+        if (!faceapi || !modelsLoaded) {
+          throw new Error("FaceAPI not available or models not loaded");
+        }
 
-      // Submit login with face
+        // Detect single face and compute descriptor
+        const detection = await faceapi
+          .detectSingleFace(canvasRef.current)
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+
+        if (!detection || !detection.descriptor) {
+          throw new Error("No face detected. Please try again.");
+        }
+
+        // descriptor is a Float32Array
+        embedding = Array.from(detection.descriptor);
+      } catch (embedErr) {
+        console.warn("Embedding extraction failed:", embedErr);
+        setServerError(embedErr.message || "Face embedding failed");
+        setCapturingFace(false);
+        stopCamera();
+        setShowFaceCapture(false);
+        return;
+      }
+
+      // Submit login with face embedding
       const response = await apiClient.post("/auth/login", {
         email: formData.email,
         password: formData.password,
