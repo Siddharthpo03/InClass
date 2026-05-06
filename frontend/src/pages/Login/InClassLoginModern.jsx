@@ -152,34 +152,46 @@ const InClassLoginModern = () => {
       }
 
       // Attempt login (password verification)
-      const loginRes = await apiClient.post("/auth/login", {
-        email: formData.email,
-        password: formData.password,
-      });
+      try {
+        const loginRes = await apiClient.post("/auth/login", {
+          email: formData.email,
+          password: formData.password,
+        });
 
-      // Check if face verification is required
-      if (loginRes.status === 400 && loginRes.data?.requiresFaceVerification) {
-        setPasswordVerified(true);
-        setFaceVerificationRequired(true);
-        setShowFaceCapture(true);
-        await startCamera();
-        setLoading(false);
-        return;
-      }
-
-      // Success
-      if (loginRes.data?.token) {
-        localStorage.setItem("inclass_token", loginRes.data.token);
-        localStorage.setItem("user_role", loginRes.data.role);
-        if (rememberMe) {
-          localStorage.setItem("rememberEmail", formData.email);
+        // Success path
+        if (loginRes.data?.token) {
+          localStorage.setItem("inclass_token", loginRes.data.token);
+          localStorage.setItem("user_role", loginRes.data.role);
+          if (rememberMe) {
+            localStorage.setItem("rememberEmail", formData.email);
+          }
+          navigate("/student/dashboard");
+          return;
         }
-        navigate("/student/dashboard");
+      } catch (loginError) {
+        // If backend requires face verification it responds with 400 and a flag
+        const resp = loginError.response;
+        if (
+          resp &&
+          resp.status === 400 &&
+          (resp.data?.requiresFaceVerification || resp.data?.requiresFaceEnrollment)
+        ) {
+          setPasswordVerified(true);
+          setFaceVerificationRequired(true);
+          setShowFaceCapture(true);
+          await startCamera();
+          setLoading(false);
+          return;
+        }
+
+        // Otherwise rethrow to be handled by outer catch
+        throw loginError;
       }
     } catch (error) {
       const errorMsg =
         error.response?.data?.error?.message ||
         error.response?.data?.message ||
+        error.message ||
         "Login failed. Please try again.";
       setServerError(errorMsg);
     } finally {
