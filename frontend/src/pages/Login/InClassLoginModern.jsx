@@ -189,6 +189,7 @@ const InClassLoginModern = () => {
     if (!canvasRef.current || !videoRef.current) return;
     setCapturingFace(true);
     setFaceError("");
+    setServerError("");
     try {
       const ctx = canvasRef.current.getContext("2d");
       canvasRef.current.width = videoRef.current.videoWidth;
@@ -215,15 +216,24 @@ const InClassLoginModern = () => {
 
         // descriptor is a Float32Array
         embedding = Array.from(detection.descriptor);
+        console.log("Face descriptor extracted successfully", {
+          descriptorLength: embedding.length,
+        });
       } catch (embedErr) {
-        console.warn("Embedding extraction failed:", embedErr);
+        console.error("Embedding extraction failed:", embedErr);
         setFaceError(embedErr.message || "Face embedding failed");
         setCapturingFace(false);
         stopCamera();
         return;
       }
 
-      // Submit login with face embedding
+      // SINGLE LOGIN API CALL with face descriptor
+      console.log("Sending login request with face descriptor", {
+        email: formData.email,
+        hasPassword: !!formData.password,
+        descriptorLength: embedding.length,
+      });
+
       const response = await apiClient.post(
         "/auth/login",
         {
@@ -239,25 +249,49 @@ const InClassLoginModern = () => {
         },
       );
 
+      console.log("Login response received", {
+        status: response.status,
+        hasToken: !!response.data?.token,
+        responseKeys: Object.keys(response.data || {}),
+      });
+
       if (response.status >= 400) {
+        const errorDetails = {
+          status: response.status,
+          errorMessage: response.data?.error?.message,
+          message: response.data?.message,
+          fullResponse: response.data,
+        };
+        console.error("Login failed with error response", errorDetails);
+
         const message =
           response.data?.error?.message ||
           response.data?.message ||
           `Login failed with status ${response.status}`;
-        console.warn("Face login request rejected", {
-          status: response.status,
-          message,
-          payloadSize: embedding.length,
-        });
         setFaceError(message);
         setServerError(message);
         return;
       }
 
-      localStorage.setItem("inclass_token", response.data.token);
-      localStorage.setItem("user_role", response.data.role);
-      navigate("/student/dashboard");
+      // Success: token received, log and navigate
+      if (response.data?.token) {
+        console.log("Login successful, storing token and navigating");
+        localStorage.setItem("inclass_token", response.data.token);
+        localStorage.setItem("user_role", response.data.role || "student");
+        if (rememberMe) {
+          localStorage.setItem("rememberEmail", formData.email);
+        }
+        stopCamera();
+        setShowFaceCapture(false);
+        navigate("/student/dashboard");
+        return;
+      }
+
+      // No token in response (unexpected)
+      console.warn("Login response received but no token present", response.data);
+      setFaceError("Login succeeded but token was not provided. Please try again.");
     } catch (err) {
+      console.error("Unexpected error during face verification", err);
       const errorMsg =
         err.response?.data?.error?.message ||
         err.response?.data?.message ||
@@ -267,8 +301,6 @@ const InClassLoginModern = () => {
       setServerError(errorMsg);
     } finally {
       setCapturingFace(false);
-      stopCamera();
-      setShowFaceCapture(false);
     }
   };
 
@@ -283,9 +315,10 @@ const InClassLoginModern = () => {
 
     setLoading(true);
     setServerError("");
+    setFaceError("");
 
     try {
-      // Check if email exists and get user role
+      // Check if email exists
       const checkRes = await apiClient.get("/auth/check-email", {
         params: { email: formData.email },
       });
@@ -298,66 +331,18 @@ const InClassLoginModern = () => {
         return;
       }
 
-      // Attempt login (password verification)
-      try {
-        const loginRes = await apiClient.post("/auth/login", {
-          email: formData.email,
-          password: formData.password,
-        }, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          validateStatus: (status) => status < 500,
-        });
-
-        if (loginRes.status >= 400) {
-          const message =
-            loginRes.data?.error?.message ||
-            loginRes.data?.message ||
-            `Login failed with status ${loginRes.status}`;
-
-          if (
-            loginRes.status === 400 &&
-            (loginRes.data?.requiresFaceVerification ||
-              loginRes.data?.requiresFaceEnrollment)
-          ) {
-            setPasswordVerified(true);
-            setFaceVerificationRequired(true);
-            setShowFaceCapture(true);
-            setFaceError("");
-            await startCamera();
-            setLoading(false);
-            return;
-          }
-
-          setServerError(message);
-          return;
-        }
-
-        // Success path
-        if (loginRes.data?.token) {
-          localStorage.setItem("inclass_token", loginRes.data.token);
-          localStorage.setItem("user_role", loginRes.data.role);
-          if (rememberMe) {
-            localStorage.setItem("rememberEmail", formData.email);
-          }
-          navigate("/student/dashboard");
-          return;
-        }
-      } catch (loginError) {
-        const errorMsg =
-          loginError.response?.data?.error?.message ||
-          loginError.response?.data?.message ||
-          loginError.message ||
-          "Login failed. Please try again.";
-        setServerError(errorMsg);
-      }
+      // Email exists; open face verification modal
+      // NO LOGIN API CALL HERE — face verification is required
+      setPasswordVerified(true);
+      setFaceVerificationRequired(true);
+      setShowFaceCapture(true);
+      await startCamera();
     } catch (error) {
       const errorMsg =
         error.response?.data?.error?.message ||
         error.response?.data?.message ||
         error.message ||
-        "Login failed. Please try again.";
+        "Email verification failed. Please try again.";
       setServerError(errorMsg);
     } finally {
       setLoading(false);
