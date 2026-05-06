@@ -28,10 +28,12 @@ const OnboardBiometricsModern = () => {
   const [sendingOtp, setSendingOtp] = useState(false);
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
+  const cooldownTimerRef = useRef(null);
 
   // Get userId from params or token
   useEffect(() => {
@@ -46,12 +48,14 @@ const OnboardBiometricsModern = () => {
     }
   }, [searchParams, navigate]);
 
-  // Auto-send OTP when consent is checked
-  useEffect(() => {
-    if (consentChecked && !otpVerified && !otpSent && !sendingOtp && userId) {
-      handleSendOtp();
-    }
-  }, [consentChecked, otpVerified, otpSent, sendingOtp, userId]);
+  useEffect(
+    () => () => {
+      if (cooldownTimerRef.current) {
+        clearTimeout(cooldownTimerRef.current);
+      }
+    },
+    [],
+  );
 
   // OTP Handlers
   const handleSendOtp = async () => {
@@ -60,10 +64,9 @@ const OnboardBiometricsModern = () => {
       return;
     }
 
-    // Mark OTP as sent immediately to prevent rapid retry loops
-    setOtpSent(true);
-    // Cooldown: allow resend after 60s
-    setTimeout(() => setOtpSent(false), 60000);
+    if (sendingOtp || resendCooldown > 0) {
+      return;
+    }
 
     setSendingOtp(true);
     setErrorMessage(null);
@@ -71,6 +74,14 @@ const OnboardBiometricsModern = () => {
 
     try {
       const response = await apiClient.post("/auth/send-otp", { userId });
+      setOtpSent(true);
+      setResendCooldown(60);
+      if (cooldownTimerRef.current) {
+        clearTimeout(cooldownTimerRef.current);
+      }
+      cooldownTimerRef.current = setTimeout(() => {
+        setResendCooldown(0);
+      }, 60000);
       const deliveryAddress =
         response.data?.maskedEmail ||
         response.data?.email ||
@@ -298,7 +309,7 @@ const OnboardBiometricsModern = () => {
                 <i className="bx bx-lock-alt"></i>
               </div>
               <h1>Verify Your Identity</h1>
-              <p>Enter the OTP code sent to your mobile number</p>
+              <p>Enter the OTP code sent to your college email</p>
             </div>
 
             <div className={styles.content}>
@@ -319,9 +330,18 @@ const OnboardBiometricsModern = () => {
               <div className={styles.otpBox}>
                 <p className={styles.otpLabel}>
                   {otpSent
-                    ? "A 6-digit OTP has been sent to your registered mobile number."
-                    : "Sending OTP..."}
+                    ? "A 6-digit OTP has been sent to your registered email address."
+                    : "Send an OTP to continue."}
                 </p>
+                {!otpSent ? (
+                  <button
+                    className={styles.primaryButton}
+                    onClick={handleSendOtp}
+                    disabled={sendingOtp || resendCooldown > 0}
+                  >
+                    {sendingOtp ? "Sending..." : "Send OTP"}
+                  </button>
+                ) : null}
                 <input
                   type="text"
                   inputMode="numeric"
@@ -341,9 +361,13 @@ const OnboardBiometricsModern = () => {
                       <button
                         className={styles.resendButton}
                         onClick={handleSendOtp}
-                        disabled={sendingOtp}
+                        disabled={sendingOtp || resendCooldown > 0}
                       >
-                        {sendingOtp ? "Sending..." : "Resend OTP"}
+                        {sendingOtp
+                          ? "Sending..."
+                          : resendCooldown > 0
+                            ? `Resend in ${resendCooldown}s`
+                            : "Resend OTP"}
                       </button>
                     </>
                   )}
