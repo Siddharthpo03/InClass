@@ -7,8 +7,8 @@ import Sidebar from "../../components/faculty/Sidebar";
 import LoadingSpinner from "../../components/shared/LoadingSpinner";
 import ToastContainer from "../../components/shared/ToastContainer";
 import Modal from "../../components/shared/Modal";
-import { enrollFace, recognizeFace } from "../../services/faceRecognitionApi";
 import useDeviceChecks from "../../hooks/useDeviceChecks";
+import { registerFace } from "../../services/biometricsApi";
 import styles from "./BiometricOnboard.module.css";
 
 const BiometricOnboard = () => {
@@ -87,7 +87,7 @@ const BiometricOnboard = () => {
       }
     };
     fetchProfile();
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when userId/profile available
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when userId/profile available
   }, [navigate, showToast]);
 
   // FaceNet is handled on the backend; no client-side model loading needed.
@@ -96,7 +96,9 @@ const BiometricOnboard = () => {
   const checkBiometricStatus = async () => {
     if (!userId) return;
     try {
-      const response = await apiClient.get(`/biometrics/status?userId=${userId}`);
+      const response = await apiClient.get(
+        `/biometrics/status?userId=${userId}`,
+      );
       if (response.data) {
         setEnrollmentStatus({
           webauthn: response.data.webauthn || false,
@@ -139,7 +141,7 @@ const BiometricOnboard = () => {
     } catch (error) {
       showToast(
         error.response?.data?.message || "Failed to submit consent.",
-        "error"
+        "error",
       );
     }
   };
@@ -158,7 +160,7 @@ const BiometricOnboard = () => {
     } catch (error) {
       showToast(
         error.response?.data?.message || "Failed to send OTP.",
-        "error"
+        "error",
       );
     } finally {
       setSendingOtp(false);
@@ -179,7 +181,7 @@ const BiometricOnboard = () => {
     } catch (error) {
       showToast(
         error.response?.data?.message || "Invalid OTP. Please try again.",
-        "error"
+        "error",
       );
       setOtpCode("");
     } finally {
@@ -191,7 +193,11 @@ const BiometricOnboard = () => {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: "user",
+        },
       });
       streamRef.current = stream;
       if (videoRef.current) {
@@ -246,10 +252,7 @@ const BiometricOnboard = () => {
     setIsEnrolling(true);
     setEnrollmentProgress("Sending to server...");
     try {
-      const resp = await fetch(capturedImage);
-      const blob = await resp.blob();
-
-      await enrollFace({ userId, imageBlob: blob });
+      await registerFace({ userId, image: capturedImage });
 
       setEnrollmentStatus((prev) => ({ ...prev, face: true }));
       setShowFaceCapture(false);
@@ -261,7 +264,7 @@ const BiometricOnboard = () => {
     } catch (error) {
       showToast(
         error.response?.data?.message || "Failed to enroll face.",
-        "error"
+        "error",
       );
     } finally {
       setIsEnrolling(false);
@@ -279,7 +282,7 @@ const BiometricOnboard = () => {
     try {
       const optionsResponse = await apiClient.post(
         "/biometrics/webauthn/register/options",
-        { userId }
+        { userId },
       );
       const options = optionsResponse.data;
       const registrationResponse = await startRegistration(options);
@@ -288,7 +291,7 @@ const BiometricOnboard = () => {
         {
           userId,
           registrationResponse,
-        }
+        },
       );
       if (completeResponse.data?.verified) {
         setEnrollmentStatus((prev) => ({ ...prev, webauthn: true }));
@@ -298,7 +301,7 @@ const BiometricOnboard = () => {
     } catch (error) {
       showToast(
         error.response?.data?.message || "Failed to enroll device biometric.",
-        "error"
+        "error",
       );
     } finally {
       setIsEnrolling(false);
@@ -339,7 +342,8 @@ const BiometricOnboard = () => {
           <div className={styles.header}>
             <h1 className={styles.title}>Biometric Onboarding</h1>
             <p className={styles.subtitle}>
-              Complete all steps to secure your account with biometric authentication.
+              Complete all steps to secure your account with biometric
+              authentication.
             </p>
           </div>
 
@@ -512,13 +516,12 @@ const BiometricOnboard = () => {
                 Step 4: Device Biometric (Required)
               </h2>
               <p className={styles.stepDescription}>
-                Enroll your face for secure
-                authentication.
+                Enroll your face for secure authentication.
               </p>
               {!deviceChecks.platformAuthenticatorAvailable ? (
                 <div className={styles.errorBox}>
-                  Device biometric is not available on this device. Please use
-                  a device with a camera for face recognition.
+                  Device biometric is not available on this device. Please use a
+                  device with a camera for face recognition.
                 </div>
               ) : enrollmentStatus.webauthn ? (
                 <div className={styles.successBox}>
@@ -550,10 +553,7 @@ const BiometricOnboard = () => {
                 You have successfully completed biometric onboarding. You can
                 now use biometric authentication for login and attendance.
               </p>
-              <button
-                className={styles.primaryButton}
-                onClick={handleComplete}
-              >
+              <button className={styles.primaryButton} onClick={handleComplete}>
                 Go to Dashboard
               </button>
             </div>
@@ -567,6 +567,3 @@ const BiometricOnboard = () => {
 };
 
 export default React.memo(BiometricOnboard);
-
-
-

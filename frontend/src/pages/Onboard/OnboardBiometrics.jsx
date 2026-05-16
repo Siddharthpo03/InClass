@@ -5,7 +5,7 @@ import {
   startAuthentication,
 } from "@simplewebauthn/browser";
 import apiClient from "../../utils/apiClient";
-import { enrollFace, recognizeFace } from "../../services/faceRecognitionApi";
+import { registerFace, recognizeFace } from "../../services/biometricsApi";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import useDeviceChecks from "../../hooks/useDeviceChecks";
@@ -102,7 +102,7 @@ const OnboardBiometrics = () => {
   const checkBiometricStatus = async () => {
     try {
       const response = await apiClient.get(
-        `/biometrics/status?userId=${userId}`
+        `/biometrics/status?userId=${userId}`,
       );
       if (response.data) {
         setEnrollmentStatus({
@@ -142,7 +142,7 @@ const OnboardBiometrics = () => {
       console.error("Consent submission error:", error);
       setErrorMessage(
         error.response?.data?.message ||
-          "Failed to submit consent. Please try again."
+          "Failed to submit consent. Please try again.",
       );
     }
   };
@@ -197,13 +197,13 @@ const OnboardBiometrics = () => {
       // Step 1: Get registration options
       console.log(
         "[WebAuthn] Requesting registration options for userId:",
-        userId
+        userId,
       );
       const optionsResponse = await apiClient.post(
         "/biometrics/webauthn/register/options",
         {
           userId: userId,
-        }
+        },
       );
 
       if (!optionsResponse.data) {
@@ -245,7 +245,7 @@ const OnboardBiometrics = () => {
       const registrationResponse = await startRegistration(options);
 
       console.log(
-        "[WebAuthn] Browser registration successful, sending to server..."
+        "[WebAuthn] Browser registration successful, sending to server...",
       );
 
       // Convert ArrayBuffers to base64url for transmission
@@ -255,10 +255,10 @@ const OnboardBiometrics = () => {
         type: registrationResponse.type,
         response: {
           clientDataJSON: arrayBufferToBase64URL(
-            registrationResponse.response.clientDataJSON
+            registrationResponse.response.clientDataJSON,
           ),
           attestationObject: arrayBufferToBase64URL(
-            registrationResponse.response.attestationObject
+            registrationResponse.response.attestationObject,
           ),
         },
       };
@@ -270,7 +270,7 @@ const OnboardBiometrics = () => {
           userId: userId,
           registrationResponse: responseToSend,
           deviceName: navigator.userAgent,
-        }
+        },
       );
 
       if (completeResponse.data?.success) {
@@ -281,7 +281,7 @@ const OnboardBiometrics = () => {
         throw new Error(
           completeResponse.data?.error ||
             completeResponse.data?.message ||
-            "Enrollment failed"
+            "Enrollment failed",
         );
       }
     } catch (error) {
@@ -299,7 +299,7 @@ const OnboardBiometrics = () => {
           error.response?.data?.error ||
           "Server error";
         setErrorMessage(
-          `Server error (500): ${serverMessage}. Check backend console logs for detailed stack trace. Common issues: missing userId, rpID mismatch, or database table not created.`
+          `Server error (500): ${serverMessage}. Check backend console logs for detailed stack trace. Common issues: missing userId, rpID mismatch, or database table not created.`,
         );
       } else if (error.name === "NotSupportedError") {
         setErrorMessage("Device biometric is not supported on this device.");
@@ -310,7 +310,7 @@ const OnboardBiometrics = () => {
           error.response?.data?.message ||
             error.response?.data?.error ||
             error.message ||
-            "Failed to enroll device biometric. Please try again."
+            "Failed to enroll device biometric. Please try again.",
         );
       }
     } finally {
@@ -334,12 +334,13 @@ const OnboardBiometrics = () => {
       setOtpSent(true);
       const phoneNumber = response.data?.phoneNumber || "your mobile number";
       setSuccessMessage(
-        `✅ OTP sent to ${phoneNumber}. Please check your SMS.`
+        `✅ OTP sent to ${phoneNumber}. Please check your SMS.`,
       );
     } catch (error) {
       console.error("Send OTP error:", error);
       setErrorMessage(
-        error.response?.data?.message || "Failed to send OTP. Please try again."
+        error.response?.data?.message ||
+          "Failed to send OTP. Please try again.",
       );
     } finally {
       setSendingOtp(false);
@@ -392,12 +393,12 @@ const OnboardBiometrics = () => {
       await apiClient.post("/auth/verify-otp", { userId, otp: otpCode });
       setOtpVerified(true);
       setSuccessMessage(
-        "✅ OTP verified successfully! You can now enroll your face."
+        "✅ OTP verified successfully! You can now enroll your face.",
       );
     } catch (error) {
       console.error("Verify OTP error:", error);
       setErrorMessage(
-        error.response?.data?.message || "Invalid OTP. Please try again."
+        error.response?.data?.message || "Invalid OTP. Please try again.",
       );
       setOtpCode("");
     } finally {
@@ -420,7 +421,7 @@ const OnboardBiometrics = () => {
 
     if (!modelsLoaded) {
       setErrorMessage(
-        "Face recognition models are still loading. Please wait."
+        "Face recognition models are still loading. Please wait.",
       );
       return;
     }
@@ -552,10 +553,7 @@ const OnboardBiometrics = () => {
     setEnrollmentProgress("Sending to server...");
 
     try {
-      const response = await fetch(capturedImage);
-      const blob = await response.blob();
-
-      const result = await enrollFace({ userId, imageBlob: blob });
+      const result = await registerFace({ userId, image: capturedImage });
 
       setEnrollmentProgress("Finalizing...");
       setSuccessMessage("✅ Face enrolled successfully!");
@@ -595,7 +593,7 @@ const OnboardBiometrics = () => {
         "/biometrics/webauthn/auth/options",
         {
           userId: userId,
-        }
+        },
       );
 
       const options = optionsResponse.data;
@@ -609,7 +607,7 @@ const OnboardBiometrics = () => {
         {
           userId: userId,
           authenticationResponse: authenticationResponse,
-        }
+        },
       );
 
       if (completeResponse.data?.verified) {
@@ -622,7 +620,7 @@ const OnboardBiometrics = () => {
       setErrorMessage(
         error.response?.data?.message ||
           error.message ||
-          "Biometric test failed. Please try again."
+          "Biometric test failed. Please try again.",
       );
     } finally {
       setIsTesting((prev) => ({ ...prev, webauthn: false }));
@@ -649,18 +647,16 @@ const OnboardBiometrics = () => {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-      const resp = await fetch(dataUrl);
-      const blob = await resp.blob();
 
-      const result = await recognizeFace({ imageBlob: blob });
+      const result = await recognizeFace({ image: dataUrl });
 
       if (result.match) {
         setSuccessMessage(
-          `✅ Face test successful! (Distance: ${result.distance.toFixed(3)})`
+          `✅ Face test successful! (Distance: ${result.distance.toFixed(3)})`,
         );
       } else {
         throw new Error(
-          `Verification failed (Best distance: ${result.distance.toFixed(3)})`
+          `Verification failed (Best distance: ${result.distance.toFixed(3)})`,
         );
       }
     } catch (error) {
@@ -668,7 +664,7 @@ const OnboardBiometrics = () => {
       setErrorMessage(
         error.response?.data?.message ||
           error.message ||
-          "Face test failed. Please try again."
+          "Face test failed. Please try again.",
       );
     } finally {
       setIsTesting((prev) => ({ ...prev, face: false }));
@@ -692,7 +688,7 @@ const OnboardBiometrics = () => {
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
     const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
+      "(prefers-color-scheme: dark)",
     ).matches;
     const shouldBeDark =
       savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
@@ -727,24 +723,24 @@ const OnboardBiometrics = () => {
   const deviceBiometricStatus = !deviceChecks.checksDone
     ? "Checking..."
     : !deviceChecks.platformAuthenticatorAvailable
-    ? "❌ Device biometric unavailable"
-    : enrollmentStatus.webauthn
-    ? "✅ Enrolled"
-    : "❌ Not Enrolled";
+      ? "❌ Device biometric unavailable"
+      : enrollmentStatus.webauthn
+        ? "✅ Enrolled"
+        : "❌ Not Enrolled";
 
   const faceRecognitionStatus = !deviceChecks.checksDone
     ? "Checking..."
     : !deviceChecks.cameraAvailable
-    ? "⚠️ Camera unavailable"
-    : modelsLoading
-    ? "⏳ Loading models..."
-    : modelError
-    ? "⚠️ Models failed to load"
-    : !modelsLoaded
-    ? "⏳ Models loading..."
-    : enrollmentStatus.face
-    ? "✅ Models loaded & Enrolled"
-    : "❌ Not Enrolled";
+      ? "⚠️ Camera unavailable"
+      : modelsLoading
+        ? "⏳ Loading models..."
+        : modelError
+          ? "⚠️ Models failed to load"
+          : !modelsLoaded
+            ? "⏳ Models loading..."
+            : enrollmentStatus.face
+              ? "✅ Models loaded & Enrolled"
+              : "❌ Not Enrolled";
 
   return (
     <div className={styles.onboardPageWrapper}>
@@ -755,8 +751,8 @@ const OnboardBiometrics = () => {
           <div className={styles.header}>
             <h1 className={styles.title}>Biometric Onboarding</h1>
             <p className={styles.subtitle}>
-              Secure your account with biometric authentication. Both
-              face enrollment is required for attendance.
+              Secure your account with biometric authentication. Both face
+              enrollment is required for attendance.
             </p>
           </div>
 
@@ -806,11 +802,11 @@ const OnboardBiometrics = () => {
             <div className={styles.consentText}>
               <p>
                 I consent to the collection and use of my biometric data (face
-                for identity verification and attendance
-                marking by InClass (Variance Technologies). I understand raw
-                biometric images will not be stored; only encrypted templates or
-                device-managed credentials will be used. I can revoke this
-                consent and delete biometric data anytime from my profile.
+                for identity verification and attendance marking by InClass
+                (Variance Technologies). I understand raw biometric images will
+                not be stored; only encrypted templates or device-managed
+                credentials will be used. I can revoke this consent and delete
+                biometric data anytime from my profile.
               </p>
             </div>
             <label className={styles.checkboxLabel}>
@@ -838,15 +834,15 @@ const OnboardBiometrics = () => {
                     enrollmentStatus.webauthn
                       ? "bx-check-circle"
                       : deviceChecks.platformAuthenticatorAvailable
-                      ? "bx-x-circle"
-                      : "bx-error-circle"
+                        ? "bx-x-circle"
+                        : "bx-error-circle"
                   }`}
                   style={{
                     color: enrollmentStatus.webauthn
                       ? "#10b981"
                       : deviceChecks.platformAuthenticatorAvailable
-                      ? "#ef4444"
-                      : "#f59e0b",
+                        ? "#ef4444"
+                        : "#f59e0b",
                   }}
                 ></i>
                 <span>Device Biometric: {deviceBiometricStatus}</span>
@@ -858,15 +854,15 @@ const OnboardBiometrics = () => {
                   enrollmentStatus.face
                     ? "bx-check-circle"
                     : modelsLoaded && deviceChecks.cameraAvailable
-                    ? "bx-x-circle"
-                    : "bx-error-circle"
+                      ? "bx-x-circle"
+                      : "bx-error-circle"
                 }`}
                 style={{
                   color: enrollmentStatus.face
                     ? "#10b981"
                     : modelsLoaded && deviceChecks.cameraAvailable
-                    ? "#ef4444"
-                    : "#f59e0b",
+                      ? "#ef4444"
+                      : "#f59e0b",
                 }}
               ></i>
               <span>Face Recognition: {faceRecognitionStatus}</span>
@@ -881,8 +877,8 @@ const OnboardBiometrics = () => {
                 {sendingOtp
                   ? "Sending OTP to your mobile number..."
                   : otpSent
-                  ? "Please enter the OTP code sent to your mobile number via SMS."
-                  : "Please check the consent checkbox above to receive OTP."}
+                    ? "Please enter the OTP code sent to your mobile number via SMS."
+                    : "Please check the consent checkbox above to receive OTP."}
               </p>
 
               {sendingOtp && (
@@ -1002,8 +998,8 @@ const OnboardBiometrics = () => {
                                 !consentChecked
                                   ? "Please check consent checkbox first"
                                   : !deviceChecks.checksDone
-                                  ? "Checking device capabilities..."
-                                  : ""
+                                    ? "Checking device capabilities..."
+                                    : ""
                               }
                             >
                               {isEnrolling ? (
@@ -1101,7 +1097,7 @@ const OnboardBiometrics = () => {
                   ) : !modelsLoaded ? (
                     <p className={styles.statusText}>
                       Face recognition models failed to load. Please ensure
-                      models are in /public/models directory.
+                      models are loaded by the backend AI service.
                     </p>
                   ) : (
                     <>
@@ -1144,12 +1140,12 @@ const OnboardBiometrics = () => {
                                   !consentChecked
                                     ? "Please check consent checkbox first"
                                     : (isStudent || isFaculty) && !otpVerified
-                                    ? "Please verify OTP first"
-                                    : !deviceChecks.checksDone
-                                    ? "Checking device capabilities..."
-                                    : !modelsLoaded
-                                    ? "Models still loading..."
-                                    : ""
+                                      ? "Please verify OTP first"
+                                      : !deviceChecks.checksDone
+                                        ? "Checking device capabilities..."
+                                        : !modelsLoaded
+                                          ? "Models still loading..."
+                                          : ""
                                 }
                               >
                                 <i className="bx bx-camera"></i>

@@ -27,7 +27,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 30px;
-  background-color: var(--bg-nav);
+  background-color: var(--navbar-bg);
   box-shadow: var(--shadow-nav);
   position: fixed;
   top: 0;
@@ -292,7 +292,7 @@
   width: 85%;
   max-width: 320px;
   height: 100%;
-  background: var(--bg-card);
+  background: var(--navbar-bg);
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
   transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;

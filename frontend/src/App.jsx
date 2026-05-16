@@ -9,14 +9,22 @@ import ScrollToTop from "./components/ScrollToTop";
 
 const Homepage = lazy(() => import("./pages/Homepage"));
 const InClassLogin = lazy(() => import("./pages/Login/InClassLoginModern"));
-const InClassRegister = lazy(() => import("./pages/Register/InClassRegisterModern"));
-const OnboardBiometrics = lazy(() => import("./pages/Onboard/OnboardBiometricsModern"));
-const InClassStudent = lazy(() => import("./pages/Student/InClassStudentModern"));
+const InClassRegister = lazy(
+  () => import("./pages/Register/InClassRegisterModern"),
+);
+const OnboardBiometrics = lazy(
+  () => import("./pages/Onboard/OnboardBiometricsModern"),
+);
+const InClassStudent = lazy(
+  () => import("./pages/Student/InClassStudentModern"),
+);
 const InClassFaculty = lazy(() => import("./pages/Faculty/InClassFaculty"));
 const InClassAdmin = lazy(() => import("./pages/Admin/InClassAdmin"));
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const AdminLogin = lazy(() => import("./pages/Admin/AdminLogin"));
-const InClassForgotPass = lazy(() => import("./pages/ForgotPass/InClassForgotPass"));
+const InClassForgotPass = lazy(
+  () => import("./pages/ForgotPass/InClassForgotPass"),
+);
 const About = lazy(() => import("./pages/About"));
 const Features = lazy(() => import("./pages/Features"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -42,7 +50,9 @@ const SessionsList = lazy(() => import("./pages/Faculty/SessionsList"));
 const SessionMonitor = lazy(() => import("./pages/Faculty/SessionMonitor"));
 const ProfileEdit = lazy(() => import("./pages/Faculty/ProfileEdit"));
 const BiometricOnboard = lazy(() => import("./pages/Faculty/BiometricOnboard"));
-const CourseRegistration = lazy(() => import("./pages/Student/CourseRegistration"));
+const CourseRegistration = lazy(
+  () => import("./pages/Student/CourseRegistration"),
+);
 
 function App() {
   return (
@@ -50,7 +60,9 @@ function App() {
       <ErrorBoundary showDetails={import.meta.env.DEV}>
         <div className="app-main-content">
           <ScrollToTop />
-          <Suspense fallback={<LoadingSpinner fullScreen message="Loading..." />}>
+          <Suspense
+            fallback={<LoadingSpinner fullScreen message="Loading..." />}
+          >
             <Routes>
               <Route path="/" element={<Homepage />} />
               <Route
@@ -80,16 +92,25 @@ function App() {
                   </ErrorBoundary>
                 }
               />
-              <Route path="/onboard-biometrics" element={<Navigate to="/onboard/biometrics" replace />} />
+              <Route
+                path="/onboard-biometrics"
+                element={<Navigate to="/onboard/biometrics" replace />}
+              />
               <Route
                 path="/student/dashboard"
                 element={
-                  <ErrorBoundary fallbackMessage="Something went wrong. Please refresh the page." homeUrl="/student/dashboard">
+                  <ErrorBoundary
+                    fallbackMessage="Something went wrong. Please refresh the page."
+                    homeUrl="/student/dashboard"
+                  >
                     <InClassStudent />
                   </ErrorBoundary>
                 }
               />
-              <Route path="/preview/student" element={<InClassStudent previewMode />} />
+              <Route
+                path="/preview/student"
+                element={<InClassStudent previewMode />}
+              />
               <Route
                 path="/student/register-courses"
                 element={
@@ -99,7 +120,10 @@ function App() {
                 }
               />
               <Route path="/faculty/dashboard" element={<InClassFaculty />} />
-              <Route path="/preview/faculty" element={<InClassFaculty previewMode />} />
+              <Route
+                path="/preview/faculty"
+                element={<InClassFaculty previewMode />}
+              />
               <Route
                 path="/faculty/onboard"
                 element={
@@ -112,7 +136,10 @@ function App() {
                 }
               />
               <Route path="/faculty/courses" element={<FacultyCourses />} />
-              <Route path="/faculty/courses/:courseId" element={<CourseDetail />} />
+              <Route
+                path="/faculty/courses/:courseId"
+                element={<CourseDetail />}
+              />
               <Route path="/faculty/sessions" element={<SessionsList />} />
               <Route
                 path="/faculty/sessions/:sessionId"
@@ -126,12 +153,18 @@ function App() {
               <Route
                 path="/admin/dashboard"
                 element={
-                  <ErrorBoundary fallbackMessage="Something went wrong. Please refresh the page." homeUrl="/admin/dashboard">
+                  <ErrorBoundary
+                    fallbackMessage="Something went wrong. Please refresh the page."
+                    homeUrl="/admin/dashboard"
+                  >
                     <AdminDashboard />
                   </ErrorBoundary>
                 }
               />
-              <Route path="/preview/admin" element={<AdminDashboard previewMode />} />
+              <Route
+                path="/preview/admin"
+                element={<AdminDashboard previewMode />}
+              />
               <Route
                 path="/inclass/admin/login"
                 element={

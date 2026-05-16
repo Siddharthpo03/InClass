@@ -4,8 +4,18 @@ import apiClient from "../../utils/apiClient";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import useDarkMode from "../../hooks/useDarkMode";
-import { enrollFace } from "../../services/faceRecognitionApi";
+import { registerFace } from "../../services/biometricsApi";
 import styles from "./OnboardBiometricsModern.module.css";
+
+const FACE_POSES = [
+  "front",
+  "slight left",
+  "full left",
+  "slight right",
+  "full right",
+  "up",
+  "down",
+];
 
 const OnboardBiometricsModern = () => {
   useDarkMode();
@@ -29,6 +39,7 @@ const OnboardBiometricsModern = () => {
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [capturedImages, setCapturedImages] = useState([]);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -122,6 +133,7 @@ const OnboardBiometricsModern = () => {
       // Move to face capture step after 1 second
       setTimeout(() => {
         setStep("face");
+        setCapturedImages([]);
         setTimeout(startCamera, 100);
       }, 1000);
     } catch (error) {
@@ -182,17 +194,17 @@ const OnboardBiometricsModern = () => {
           0.92,
         );
       });
+      const imageDataUrl = canvasRef.current.toDataURL("image/jpeg", 0.92);
+      const nextImages = [...capturedImages, imageDataUrl];
+      setCapturedImages(nextImages);
 
-      // Call face enrollment API with a real file upload
-      const response = await enrollFace({ userId, imageBlob });
-
-      if (response?.message || response?.success !== false) {
-        setEnrolledMethods((prev) => ({ ...prev, face: true }));
-        setSuccessMessage("Face enrolled successfully!");
+      if (nextImages.length >= FACE_POSES.length) {
         stopCamera();
-        setStep("complete");
+        setSuccessMessage("All face views captured. Enroll when ready.");
       } else {
-        throw new Error("Face enrollment did not return a success response.");
+        setSuccessMessage(
+          `Captured ${nextImages.length}/${FACE_POSES.length}. Next pose: ${FACE_POSES[nextImages.length]}.`,
+        );
       }
     } catch (err) {
       const msg =
@@ -205,6 +217,37 @@ const OnboardBiometricsModern = () => {
 
   const handleSkip = () => {
     setStep("complete");
+  };
+
+  const handleEnrollFace = async () => {
+    if (!userId || capturedImages.length === 0) {
+      setErrorMessage("Capture at least one face image first.");
+      return;
+    }
+
+    setIsEnrolling(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await registerFace({ userId, images: capturedImages });
+      if (response?.success || response?.message) {
+        setEnrolledMethods((prev) => ({ ...prev, face: true }));
+        setSuccessMessage("Face enrolled successfully!");
+        stopCamera();
+        setStep("complete");
+      } else {
+        throw new Error(response?.message || "Face enrollment failed.");
+      }
+    } catch (error) {
+      console.error("Face enrollment error:", error);
+      setErrorMessage(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to enroll face.",
+      );
+    } finally {
+      setIsEnrolling(false);
+    }
   };
 
   const handleContinueToDashboard = () => {
@@ -245,7 +288,9 @@ const OnboardBiometricsModern = () => {
                   <ul>
                     <li>
                       <i className="bx bx-check"></i>
-                      <span>Encrypted and stored locally on your device</span>
+                      <span>
+                        Processed temporarily and stored only as an embedding
+                      </span>
                     </li>
                     <li>
                       <i className="bx bx-check"></i>
@@ -462,7 +507,7 @@ const OnboardBiometricsModern = () => {
                   </li>
                   <li>
                     <i className="bx bx-check"></i>
-                    <span>Look directly at the camera</span>
+                    <span>Capture front, left, right, up, and down poses</span>
                   </li>
                   <li>
                     <i className="bx bx-check"></i>
@@ -497,10 +542,32 @@ const OnboardBiometricsModern = () => {
                 ) : (
                   <>
                     <i className="bx bx-check"></i>
-                    <span>Capture & Continue</span>
+                    <span>
+                      {capturedImages.length >= FACE_POSES.length
+                        ? "Capture Complete"
+                        : `Capture ${FACE_POSES[capturedImages.length] || "face"}`}
+                    </span>
                   </>
                 )}
               </button>
+              {capturedImages.length >= 1 && (
+                <button
+                  className={styles.secondaryButton}
+                  onClick={handleEnrollFace}
+                  disabled={isEnrolling}
+                >
+                  Enroll Face
+                </button>
+              )}
+            </div>
+            <div className={styles.previewStrip}>
+              {capturedImages.map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`Captured pose ${index + 1}`}
+                />
+              ))}
             </div>
           </div>
         )}

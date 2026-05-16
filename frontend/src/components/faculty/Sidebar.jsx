@@ -46,9 +46,9 @@ const Sidebar = ({ isOpen = true, onClose }) => {
         aria-label="Faculty navigation"
       >
         <div className={styles.sidebarHeader}>
-          <img 
-            src="/favicon.png" 
-            alt="InClass Logo" 
+          <img
+            src="/favicon.jpg"
+            alt="InClass Logo"
             className={styles.sidebarLogo}
           />
           <span className={styles.sidebarTitle}>InClass</span>
@@ -78,4 +78,3 @@ const Sidebar = ({ isOpen = true, onClose }) => {
 };
 
 export default React.memo(Sidebar);
-

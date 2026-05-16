@@ -18,7 +18,7 @@ export const ThemeProvider = ({ children }) => {
 
     const savedTheme = localStorage.getItem("inclass-theme");
     const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
+      "(prefers-color-scheme: dark)",
     ).matches;
 
     return savedTheme !== null ? savedTheme === "dark" : prefersDark;
@@ -32,12 +32,15 @@ export const ThemeProvider = ({ children }) => {
 
   const applyTheme = (dark) => {
     const htmlElement = document.documentElement;
+    const bodyElement = document.body;
     if (dark) {
       htmlElement.classList.add("dark");
       htmlElement.setAttribute("data-theme", "dark");
+      bodyElement?.classList.add("darkMode");
     } else {
       htmlElement.classList.remove("dark");
       htmlElement.setAttribute("data-theme", "light");
+      bodyElement?.classList.remove("darkMode");
     }
   };
 

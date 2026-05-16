@@ -77,214 +77,220 @@ const Footer = () => {
       <div className={styles.footerContainer}>
         {/* Main Footer Content - only when not logged in */}
         {!isLoggedIn && (
-        <div className={styles.footerMain}>
-          {/* Logo Section */}
-          <div className={styles.footerLogo}>
-            <div className={styles.logoContainer}>
-              <img
-                src="/favicon.png"
-                alt="InClass Logo"
-                className={styles.logoImage}
-              />
-              <span className={styles.logoText}>InClass</span>
+          <div className={styles.footerMain}>
+            {/* Logo Section */}
+            <div className={styles.footerLogo}>
+              <div className={styles.logoContainer}>
+                <img
+                  src="/favicon.jpg"
+                  alt="InClass Logo"
+                  className={styles.logoImage}
+                />
+                <span className={styles.logoText}>InClass</span>
+              </div>
+            </div>
+
+            {/* Footer Links Grid */}
+            <div className={styles.footerLinksGrid}>
+              {/* For Students Section */}
+              <div className={styles.footerColumn}>
+                <h4 className={styles.columnTitle}>For Students</h4>
+                <ul className={styles.linkList}>
+                  <li>
+                    <a
+                      href="#"
+                      onClick={handleNavigation("/student/dashboard")}
+                    >
+                      Student Dashboard
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/help")}>
+                      How to Mark Attendance
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/docs")}>
+                      Student Guide
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/support")}>
+                      Get Help
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/features")}>
+                      Features
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* For Faculty Section */}
+              <div className={styles.footerColumn}>
+                <h4 className={styles.columnTitle}>For Faculty</h4>
+                <ul className={styles.linkList}>
+                  <li>
+                    <a
+                      href="#"
+                      onClick={handleNavigation("/faculty/dashboard")}
+                    >
+                      Faculty Dashboard
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/docs")}>
+                      Faculty Guide
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/help")}>
+                      How to Take Attendance
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/support")}>
+                      Support
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/features")}>
+                      System Features
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* For Administrators Section */}
+              <div className={styles.footerColumn}>
+                <h4 className={styles.columnTitle}>For Administrators</h4>
+                <ul className={styles.linkList}>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/admin/dashboard")}>
+                      Admin Dashboard
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/docs")}>
+                      Admin Guide
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/developers")}>
+                      API Documentation
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/support")}>
+                      Technical Support
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/report")}>
+                      Report Issue
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Resources Section */}
+              <div className={styles.footerColumn}>
+                <h4 className={styles.columnTitle}>Resources</h4>
+                <ul className={styles.linkList}>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/help")}>
+                      Help Center
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/docs")}>
+                      Documentation
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/blog")}>
+                      Blog & Updates
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/developers")}>
+                      Developer Resources
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/newsletter")}>
+                      Newsletter
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Legal Section */}
+              <div className={styles.footerColumn}>
+                <h4 className={styles.columnTitle}>Legal</h4>
+                <ul className={styles.linkList}>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/terms")}>
+                      Terms of Use
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/privacy")}>
+                      Privacy Policy
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/cookies")}>
+                      Cookie Policy
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/accessibility")}>
+                      Accessibility
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/guidelines")}>
+                      Community Guidelines
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Company Section */}
+              <div className={styles.footerColumn}>
+                <h4 className={styles.columnTitle}>Company</h4>
+                <ul className={styles.linkList}>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/about")}>
+                      About Us
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/contact")}>
+                      Contact
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/careers")}>
+                      Careers
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/social")}>
+                      Social Media
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleNavigation("/")}>
+                      Home
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
-
-          {/* Footer Links Grid */}
-          <div className={styles.footerLinksGrid}>
-            {/* For Students Section */}
-            <div className={styles.footerColumn}>
-              <h4 className={styles.columnTitle}>For Students</h4>
-              <ul className={styles.linkList}>
-                <li>
-                  <a href="#" onClick={handleNavigation("/student/dashboard")}>
-                    Student Dashboard
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/help")}>
-                    How to Mark Attendance
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/docs")}>
-                    Student Guide
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/support")}>
-                    Get Help
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/features")}>
-                    Features
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* For Faculty Section */}
-            <div className={styles.footerColumn}>
-              <h4 className={styles.columnTitle}>For Faculty</h4>
-              <ul className={styles.linkList}>
-                <li>
-                  <a href="#" onClick={handleNavigation("/faculty/dashboard")}>
-                    Faculty Dashboard
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/docs")}>
-                    Faculty Guide
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/help")}>
-                    How to Take Attendance
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/support")}>
-                    Support
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/features")}>
-                    System Features
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* For Administrators Section */}
-            <div className={styles.footerColumn}>
-              <h4 className={styles.columnTitle}>For Administrators</h4>
-              <ul className={styles.linkList}>
-                <li>
-                  <a href="#" onClick={handleNavigation("/admin/dashboard")}>
-                    Admin Dashboard
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/docs")}>
-                    Admin Guide
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/developers")}>
-                    API Documentation
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/support")}>
-                    Technical Support
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/report")}>
-                    Report Issue
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Resources Section */}
-            <div className={styles.footerColumn}>
-              <h4 className={styles.columnTitle}>Resources</h4>
-              <ul className={styles.linkList}>
-                <li>
-                  <a href="#" onClick={handleNavigation("/help")}>
-                    Help Center
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/docs")}>
-                    Documentation
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/blog")}>
-                    Blog & Updates
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/developers")}>
-                    Developer Resources
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/newsletter")}>
-                    Newsletter
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Legal Section */}
-            <div className={styles.footerColumn}>
-              <h4 className={styles.columnTitle}>Legal</h4>
-              <ul className={styles.linkList}>
-                <li>
-                  <a href="#" onClick={handleNavigation("/terms")}>
-                    Terms of Use
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/privacy")}>
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/cookies")}>
-                    Cookie Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/accessibility")}>
-                    Accessibility
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/guidelines")}>
-                    Community Guidelines
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Company Section */}
-            <div className={styles.footerColumn}>
-              <h4 className={styles.columnTitle}>Company</h4>
-              <ul className={styles.linkList}>
-                <li>
-                  <a href="#" onClick={handleNavigation("/about")}>
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/contact")}>
-                    Contact
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/careers")}>
-                    Careers
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/social")}>
-                    Social Media
-                  </a>
-                </li>
-                <li>
-                  <a href="#" onClick={handleNavigation("/")}>
-                    Home
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
         )}
 
         {/* Bottom Footer Bar - always shown */}
@@ -292,7 +298,7 @@ const Footer = () => {
           <div className={styles.footerBottomContent}>
             <div className={styles.footerBottomLeft}>
               <img
-                src="/favicon.png"
+                src="/favicon.jpg"
                 alt="InClass"
                 className={styles.bottomLogo}
               />
@@ -318,10 +324,7 @@ const Footer = () => {
                 {t("communityGuidelines")}
               </a>
             </div>
-            <div
-              className={styles.languageWrapper}
-              ref={languageRef}
-            >
+            <div className={styles.languageWrapper} ref={languageRef}>
               <button
                 type="button"
                 className={styles.languageSelector}
@@ -331,7 +334,9 @@ const Footer = () => {
                 aria-label={t("language")}
               >
                 <span>{currentLanguage.nameNative}</span>
-                <i className={`bx bx-chevron-down ${languageOpen ? styles.chevronOpen : ""}`}></i>
+                <i
+                  className={`bx bx-chevron-down ${languageOpen ? styles.chevronOpen : ""}`}
+                ></i>
               </button>
               {languageOpen &&
                 createPortal(
@@ -354,13 +359,17 @@ const Footer = () => {
                             setLanguageOpen(false);
                           }}
                         >
-                          <span className={styles.languageNameNative}>{lang.nameNative}</span>
-                          <span className={styles.languageName}>{lang.name}</span>
+                          <span className={styles.languageNameNative}>
+                            {lang.nameNative}
+                          </span>
+                          <span className={styles.languageName}>
+                            {lang.name}
+                          </span>
                         </button>
                       </li>
                     ))}
                   </ul>,
-                  document.body
+                  document.body,
                 )}
             </div>
           </div>

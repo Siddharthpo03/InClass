@@ -6,8 +6,11 @@ import { useEffect } from "react";
  */
 export default function useDarkMode() {
   useEffect(() => {
-    const saved = localStorage.getItem("inclass-theme") ?? localStorage.getItem("darkMode");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const saved =
+      localStorage.getItem("inclass-theme") ?? localStorage.getItem("darkMode");
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
     const shouldBeDark =
       saved !== null ? saved === "dark" || saved === "true" : prefersDark;
 

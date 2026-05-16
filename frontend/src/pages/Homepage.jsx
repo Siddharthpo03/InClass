@@ -5,7 +5,7 @@ import Footer from "../components/Footer";
 import useDarkMode from "../hooks/useDarkMode";
 import apiClient from "../utils/apiClient";
 import logo from "../assets/Logo1.jpg";
-import darkLogo from "../assets/darK_logo.png";
+import darkLogo from "../assets/darK_logo.webp";
 import styles from "./Homepage.module.css";
 
 const Homepage = () => {
@@ -20,8 +20,11 @@ const Homepage = () => {
   // Sync dark mode state for toggle display
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const shouldBeDark = savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    const shouldBeDark =
+      savedDarkMode !== null ? savedDarkMode === "true" : prefersDark;
     setIsDarkMode(shouldBeDark);
   }, []);
 
@@ -30,11 +33,11 @@ const Homepage = () => {
     const checkAuth = async () => {
       const token = localStorage.getItem("inclass_token");
       const role = localStorage.getItem("user_role");
-      
+
       if (token && role) {
         setIsLoggedIn(true);
         setUserRole(role);
-        
+
         try {
           const response = await apiClient.get("/auth/profile");
           setUserProfile(response.data);
@@ -49,7 +52,7 @@ const Homepage = () => {
       }
       setLoading(false);
     };
-    
+
     checkAuth();
   }, []);
 
@@ -62,7 +65,10 @@ const Homepage = () => {
     checkDarkMode();
 
     const observer = new MutationObserver(() => checkDarkMode());
-    observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
     return () => observer.disconnect();
   }, []);
@@ -78,10 +84,14 @@ const Homepage = () => {
       <div className={styles.heroSection}>
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
-            Welcome back, <span className={styles.highlight}>{userProfile?.name || "Student"}!</span>
+            Welcome back,{" "}
+            <span className={styles.highlight}>
+              {userProfile?.name || "Student"}!
+            </span>
           </h1>
           <p className={styles.heroSubtitle}>
-            Your attendance dashboard is ready. Mark your presence and track your progress.
+            Your attendance dashboard is ready. Mark your presence and track
+            your progress.
           </p>
           <div className={styles.quickStats}>
             <div className={styles.statCard}>
@@ -106,7 +116,7 @@ const Homepage = () => {
               </div>
             </div>
           </div>
-          <button 
+          <button
             className={styles.ctaButton}
             onClick={handleNavigation("/student/dashboard")}
           >
@@ -138,10 +148,14 @@ const Homepage = () => {
       <div className={styles.heroSection}>
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
-            Welcome, <span className={styles.highlight}>{userProfile?.name || "Professor"}!</span>
+            Welcome,{" "}
+            <span className={styles.highlight}>
+              {userProfile?.name || "Professor"}!
+            </span>
           </h1>
           <p className={styles.heroSubtitle}>
-            Manage your courses, generate attendance sessions, and track student presence efficiently.
+            Manage your courses, generate attendance sessions, and track student
+            presence efficiently.
           </p>
           <div className={styles.quickStats}>
             <div className={styles.statCard}>
@@ -166,7 +180,7 @@ const Homepage = () => {
               </div>
             </div>
           </div>
-          <button 
+          <button
             className={styles.ctaButton}
             onClick={handleNavigation("/faculty/dashboard")}
           >
@@ -198,10 +212,14 @@ const Homepage = () => {
       <div className={styles.heroSection}>
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
-            Welcome, <span className={styles.highlight}>{userProfile?.name || "Administrator"}!</span>
+            Welcome,{" "}
+            <span className={styles.highlight}>
+              {userProfile?.name || "Administrator"}!
+            </span>
           </h1>
           <p className={styles.heroSubtitle}>
-            System overview and management. Monitor all activities, manage users, and ensure system integrity.
+            System overview and management. Monitor all activities, manage
+            users, and ensure system integrity.
           </p>
           <div className={styles.quickStats}>
             <div className={styles.statCard}>
@@ -226,7 +244,7 @@ const Homepage = () => {
               </div>
             </div>
           </div>
-          <button 
+          <button
             className={styles.ctaButton}
             onClick={handleNavigation("/admin/dashboard")}
           >
@@ -256,10 +274,10 @@ const Homepage = () => {
   const renderDefaultHomepage = () => (
     <>
       <div className={styles.container}>
-        <img 
-          src={isDarkMode ? darkLogo : logo} 
-          alt="InClass" 
-          className={styles.logo} 
+        <img
+          src={isDarkMode ? darkLogo : logo}
+          alt="InClass"
+          className={styles.logo}
         />
         <h1>
           Welcome to <br /> InClass
@@ -269,9 +287,9 @@ const Homepage = () => {
           system using time-restricted session codes. <br />
           No proxy, just presence.
         </p>
-        <a 
-          href="#" 
-          className={styles.loginBtn} 
+        <a
+          href="#"
+          className={styles.loginBtn}
           onClick={handleNavigation("/login")}
         >
           Login / Register
@@ -282,7 +300,8 @@ const Homepage = () => {
       <section className={styles.featuresSection}>
         <h2 className={styles.sectionTitle}>Why teams choose InClass</h2>
         <p className={styles.sectionSubtitle}>
-          Designed for real classrooms, labs, and exams – not just generic forms.
+          Designed for real classrooms, labs, and exams – not just generic
+          forms.
         </p>
         <div className={styles.featuresGrid}>
           <div className={styles.featureCard}>
@@ -297,8 +316,8 @@ const Homepage = () => {
             <i className="bx bx-badge-check" />
             <h3>One-tap experience</h3>
             <p>
-              Students join with a single code. Faculty see live presence and can
-              export clean, structured reports.
+              Students join with a single code. Faculty see live presence and
+              can export clean, structured reports.
             </p>
           </div>
           <div className={styles.featureCard}>
@@ -375,15 +394,16 @@ const Homepage = () => {
   return (
     <div className={styles.wrapper}>
       <Navigation />
-      
-      {isLoggedIn && userRole ? (
-        userRole === "student" ? renderStudentHomepage() :
-        userRole === "faculty" ? renderFacultyHomepage() :
-        userRole === "admin" ? renderAdminHomepage() :
-        renderDefaultHomepage()
-      ) : (
-        renderDefaultHomepage()
-      )}
+
+      {isLoggedIn && userRole
+        ? userRole === "student"
+          ? renderStudentHomepage()
+          : userRole === "faculty"
+            ? renderFacultyHomepage()
+            : userRole === "admin"
+              ? renderAdminHomepage()
+              : renderDefaultHomepage()
+        : renderDefaultHomepage()}
 
       <Footer />
     </div>

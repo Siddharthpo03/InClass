@@ -6,9 +6,8 @@ import React, {
   useMemo,
 } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../../contexts/ThemeContext";
 import apiClient from "../../utils/apiClient";
-import Navigation from "../../components/Navigation";
-import Footer from "../../components/Footer";
 import useDarkMode from "../../hooks/useDarkMode";
 import CountryCodeSelector from "../../components/CountryCodeSelector";
 import styles from "./InClassRegisterModern.module.css";
@@ -59,6 +58,7 @@ const getPasswordStrength = (pwd) => {
 
 const InClassRegisterModern = () => {
   useDarkMode();
+  const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -302,8 +302,15 @@ const InClassRegisterModern = () => {
   };
 
   return (
-    <div className={styles.wrapper}>
-      <Navigation />
+    <div className={`${styles.wrapper} ${styles.registerPage}`}>
+      <button
+        className={styles.themeToggle}
+        onClick={toggleTheme}
+        aria-label="Toggle theme"
+        title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+      >
+        <i className={`bx ${isDarkMode ? "bx-sun" : "bx-moon"}`}></i>
+      </button>
       <div className={styles.container}>
         <button
           type="button"
@@ -747,7 +754,6 @@ const InClassRegisterModern = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

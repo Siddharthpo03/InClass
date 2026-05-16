@@ -14,13 +14,13 @@
 
   /* Backgrounds */
   --bg-page: #ffffff;
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
   --bg-hover: #f3f4f6;
   --bg-active: #eff6ff;
   --bg-card: #ffffff;
-  --bg-nav: #f9f9f9;
-  --bg-input: #ffffff;
+  --bg-nav: #ffffff;
+  --bg-input: #f8fafc;
   --bg-surface: #ffffff;
   --bg-surface-hover: #f3f4f6;
   --bg-icon: #f3f4f6;
@@ -29,11 +29,11 @@
   --bg-danger-hover: #fecaca;
 
   /* Text */
-  --text-primary: #111827;
+  --text-primary: #1a1a2e;
   --text-heading: #111827;
   --text-body: #374151;
   --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
+  --text-muted: #64748b;
   --text-placeholder: #9ca3af;
   --text-danger: #991b1b;
   --text-link: #667eea;
@@ -46,7 +46,7 @@
   --border-danger: #fecaca;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
   --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.1);
@@ -105,13 +105,13 @@ body.darkMode,
 .darkMode {
   /* Page + surfaces */
   --bg-page: #020617; /* almost black */
-  --bg-primary: #020617;
-  --bg-secondary: #020617;
-  --bg-card: #0b1220;
-  --bg-nav: rgba(15, 23, 42, 0.95);
-  --bg-input: #020617;
-  --bg-surface: #0b1220;
-  --bg-surface-hover: #020617;
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-card: #1c2128;
+  --bg-nav: #161b22;
+  --bg-input: #21262d;
+  --bg-surface: #1c2128;
+  --bg-surface-hover: #161b22;
 
   /* Hovers / active */
   --bg-hover: #1e293b;
@@ -119,24 +119,24 @@ body.darkMode,
   --bg-icon: #1e293b;
 
   /* Text */
-  --text-primary: #e5e7eb;
+  --text-primary: #e6edf3;
   --text-heading: #f9fafb;
   --text-body: #cbd5e1;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-placeholder: #64748b;
+  --text-secondary: #8b949e;
+  --text-muted: #8b949e;
+  --text-placeholder: #8b949e;
   --text-danger: #fca5a5;
   --text-link: #60a5fa;
   --text-link-hover: #93c5fd;
 
   /* Borders */
-  --border-color: #1f2937;
-  --border-input: #1f2937;
+  --border-color: #30363d;
+  --border-input: #30363d;
   --border-subtle: rgba(148, 163, 184, 0.25);
   --border-danger: rgba(220, 38, 38, 0.4);
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.6);
@@ -172,6 +172,19 @@ body.darkMode,
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
@@ -191,6 +204,8 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;

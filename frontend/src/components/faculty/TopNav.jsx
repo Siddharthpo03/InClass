@@ -24,9 +24,9 @@ const TopNav = ({ profile, onLogout }) => {
             onClick={() => navigate("/faculty/dashboard")}
             aria-label="Go to dashboard"
           >
-            <img 
-              src="/favicon.png" 
-              alt="InClass Logo" 
+            <img
+              src="/favicon.jpg"
+              alt="InClass Logo"
               className={styles.logoImage}
             />
             <span className={styles.logoText}>InClass</span>
@@ -58,4 +58,3 @@ const TopNav = ({ profile, onLogout }) => {
 };
 
 export default React.memo(TopNav);
-

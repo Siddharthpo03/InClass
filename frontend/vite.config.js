@@ -1,21 +1,21 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { visualizer } from 'rollup-plugin-visualizer'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig(({ command, mode }) => {
-  const isBuild = command === 'build'
+  const isBuild = command === "build";
 
   return {
     plugins: [
       react({
-        jsxRuntime: 'automatic',
+        jsxRuntime: "automatic",
       }),
       // Bundle analyzer: only in build mode so dev server stays fast
       ...(isBuild
         ? [
             visualizer({
               open: false,
-              filename: 'dist/bundle-analysis.html',
+              filename: "dist/bundle-analysis.html",
               gzipSize: true,
               brotliSize: true,
             }),
@@ -25,21 +25,48 @@ export default defineConfig(({ command, mode }) => {
 
     resolve: {
       alias: {
-        '@': '/src',
+        "@": "/src",
       },
     },
 
     build: {
-      target: 'es2019',
+      target: "es2019",
       cssCodeSplit: true,
       sourcemap: false,
-      minify: 'terser',
+      minify: "terser",
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes("node_modules/@tensorflow/tfjs")) {
+              return "tensorflow";
+            }
+            if (id.includes("node_modules/@simplewebauthn/browser")) {
+              return "webauthn";
+            }
+            if (id.includes("node_modules/react-window")) {
+              return "windowing";
+            }
+            if (id.includes("node_modules/react-router-dom")) {
+              return "router";
+            }
+            if (id.includes("node_modules/socket.io-client")) {
+              return "socket";
+            }
+            if (
+              id.includes("src/utils/faceModels.js") ||
+              id.includes("src/services/faceRecognitionApi.js")
+            ) {
+              return "biometrics";
+            }
+          },
+        },
+      },
       terserOptions: {
         compress: {
           drop_console: true,
           drop_debugger: true,
           passes: 2,
-          pure_funcs: ['console.log', 'console.debug'],
+          pure_funcs: ["console.log", "console.debug"],
         },
         mangle: true,
         format: {
@@ -52,19 +79,20 @@ export default defineConfig(({ command, mode }) => {
 
     optimizeDeps: {
       include: [
-        'react',
-        'react-dom',
-        'react-router-dom',
-        'socket.io-client',
-        '@simplewebauthn/browser',
+        "react",
+        "react-dom",
+        "react-router-dom",
+        "socket.io-client",
+        "@simplewebauthn/browser",
       ],
     },
 
     define: {
       __BUILD_MODE__: JSON.stringify(mode),
-      __DEV_SESSION_ID__: JSON.stringify(isBuild ? '' : String(Date.now())),
-      'process.env.NODE_ENV': JSON.stringify(isBuild ? 'production' : 'development'),
+      __DEV_SESSION_ID__: JSON.stringify(isBuild ? "" : String(Date.now())),
+      "process.env.NODE_ENV": JSON.stringify(
+        isBuild ? "production" : "development",
+      ),
     },
-  }
-})
-
+  };
+});

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
-import fav from "../assets/favicon.png";
+import fav from "../assets/favicon.jpg";
 import styles from "./Navigation.module.css";
 
 // Helper function for classNames
@@ -25,9 +25,6 @@ const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDarkMode, toggleTheme } = useTheme();
-
-  // Check if we're on login or register page
-  const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
   // Check authentication status
   useEffect(() => {
@@ -58,20 +55,8 @@ const Navigation = () => {
     setIsMenuOpen(false);
   };
 
-  // On auth pages, show only floating dark mode toggle
-  if (isAuthPage) {
-    return (
-      <div className={styles.floatingThemeToggle}>
-        <button
-          className={styles.themeToggleBtn}
-          onClick={toggleTheme}
-          aria-label="Toggle dark mode"
-          title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          <i className={isDarkMode ? "fas fa-sun" : "fas fa-moon"} />
-        </button>
-      </div>
-    );
+  if (location.pathname === "/login" || location.pathname === "/register") {
+    return null;
   }
 
   // Normal navbar for other pages
@@ -112,7 +97,9 @@ const Navigation = () => {
                 <a
                   href="#"
                   onClick={handleNavigation("/about")}
-                  className={location.pathname === "/about" ? styles.active : ""}
+                  className={
+                    location.pathname === "/about" ? styles.active : ""
+                  }
                 >
                   About
                 </a>
@@ -226,7 +213,9 @@ const Navigation = () => {
               <a
                 href="#"
                 onClick={handleNavigation("/features")}
-                className={location.pathname === "/features" ? styles.active : ""}
+                className={
+                  location.pathname === "/features" ? styles.active : ""
+                }
               >
                 <i className="fas fa-sitemap" />
                 <span>Features</span>
@@ -246,7 +235,9 @@ const Navigation = () => {
               <a
                 href="#"
                 onClick={handleNavigation("/contact")}
-                className={location.pathname === "/contact" ? styles.active : ""}
+                className={
+                  location.pathname === "/contact" ? styles.active : ""
+                }
               >
                 <i className="fas fa-comments" />
                 <span>Contact</span>

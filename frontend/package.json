@@ -12,7 +12,6 @@
     "depcheck:json": "depcheck --json"
   },
   "dependencies": {
-    "@sentry/node": "^10.42.0",
     "@simplewebauthn/browser": "^13.2.2",
     "axios": "^1.12.2",
     "react": "^19.1.1",

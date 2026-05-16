@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import useDarkMode from "../../hooks/useDarkMode";
-import Favicon from "../../assets/favicon.png";
+import Favicon from "../../assets/favicon.jpg";
 import styles from "./InClassForgotPass.module.css";
 
 const InClassForgotPass = () => {

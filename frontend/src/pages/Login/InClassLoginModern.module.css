@@ -1,6 +1,7 @@
 /* Modern InClass Login - Theme-aware */
 
-.wrapper {
+.wrapper,
+.loginPage {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -12,6 +13,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   min-height: 100vh;
+  background-color: var(--bg-primary);
 }
 
 .formSection {
@@ -19,7 +21,7 @@
   align-items: center;
   justify-content: center;
   padding: 3rem 2rem;
-  background: var(--bg-primary);
+  background: var(--card-bg);
 }
 
 .formContent {
@@ -40,7 +42,9 @@
   justify-content: center;
   margin-bottom: 1.25rem;
   box-shadow: 0 4px 12px var(--shadow-color);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .backButton:hover {
@@ -210,7 +214,10 @@ input::placeholder {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .submitButton {
@@ -269,6 +276,41 @@ input::placeholder {
   justify-content: center;
   padding: 3rem 2rem;
   background: var(--bg-secondary);
+}
+
+.illustrationSection h2 {
+  color: var(--text-primary);
+}
+
+.illustrationSection p,
+.illustrationSection .featureList li span {
+  color: var(--text-muted);
+}
+
+.themeToggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: var(--shadow-sm);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.themeToggle:hover {
+  background-color: var(--bg-secondary);
 }
 
 .illustrationContent {

@@ -1,13 +1,12 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import apiClient from "../../utils/apiClient";
-import { recognizeFace } from "../../services/faceRecognitionApi";
 import LoadingSpinner from "../shared/LoadingSpinner";
 import ToastContainer from "../shared/ToastContainer";
 import styles from "./AttendanceMarking.module.css";
 
 /**
  * AttendanceMarking - Component for students to mark attendance
- * 
+ *
  * Handles:
  * - Face verification
  * - Code submission
@@ -24,7 +23,7 @@ const AttendanceMarking = ({
   const [error, setError] = useState("");
   const [step, setStep] = useState("code"); // 'code', 'face', 'submitting'
   const [toasts, setToasts] = useState([]);
-  
+
   // Face verification state
   const [modelsLoaded] = useState(true);
   const [showFaceCapture, setShowFaceCapture] = useState(false);
@@ -91,23 +90,7 @@ const AttendanceMarking = ({
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-      const resp = await fetch(dataUrl);
-      const blob = await resp.blob();
-
-      const result = await recognizeFace({ imageBlob: blob });
-
-      if (!result.match) {
-        setError(
-          `Face verification failed. (Best distance: ${result.distance.toFixed(
-            3
-          )})`
-        );
-        return null;
-      }
-
-      // For attendance, we only need to know that face matches the logged-in user.
-      // Backend will re-validate using pgvector; here we pass embedding as opaque signal.
-      return result;
+      return dataUrl;
     } catch (err) {
       console.error("Face capture error:", err);
       setError("Failed to capture face. Please try again.");
@@ -118,75 +101,71 @@ const AttendanceMarking = ({
   }, []);
 
   // Handle form submission
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault();
-    
-    if (!code || code.length !== 6) {
-      setError("Please enter a valid 6-character code.");
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
 
-    setSubmitting(true);
-    setError("");
-
-    try {
-      // Face verification
-      setStep("face");
-      setShowFaceCapture(true);
-      await startCamera();
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const recognitionResult = await captureAndVerifyFace();
-      stopCamera();
-      setShowFaceCapture(false);
-
-      if (!recognitionResult) {
-        throw new Error("Face verification failed. Please try again.");
+      if (!code || code.length !== 6) {
+        setError("Please enter a valid 6-character code.");
+        return;
       }
 
-      setStep("submitting");
-      
-      const response = await apiClient.post("/attendance/mark", {
-        code,
-        faceEmbedding: recognitionResult.embedding,
-      });
+      setSubmitting(true);
+      setError("");
 
-      if (response.data?.message) {
-        showToast("Attendance recorded.", "success");
-        onSuccess?.(response.data);
-      } else {
-        throw new Error("Attendance submission failed.");
+      try {
+        // Face verification
+        setStep("face");
+        setShowFaceCapture(true);
+        await startCamera();
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        const recognitionResult = await captureAndVerifyFace();
+        stopCamera();
+        setShowFaceCapture(false);
+
+        if (!recognitionResult) {
+          throw new Error("Face verification failed. Please try again.");
+        }
+
+        setStep("submitting");
+
+        const response = await apiClient.post("/attendance/mark", {
+          code,
+          faceImage: recognitionResult,
+        });
+
+        if (response.data?.message) {
+          showToast("Attendance recorded.", "success");
+          onSuccess?.(response.data);
+        } else {
+          throw new Error("Attendance submission failed.");
+        }
+      } catch (err) {
+        console.error("Attendance marking error:", err);
+
+        if (err.response?.data?.message) {
+          setError(err.response.data.message);
+          showToast(err.response.data.message, "error");
+        } else if (err.message) {
+          setError(err.message);
+          showToast(err.message, "error");
+        } else {
+          setError("Failed to mark attendance. Please try again.");
+          showToast("Failed to mark attendance", "error");
+        }
+
+        // Reset to code step on error
+        setStep("code");
+      } finally {
+        setSubmitting(false);
+        stopCamera();
+        setShowFaceCapture(false);
       }
-    } catch (err) {
-      console.error("Attendance marking error:", err);
-      
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-        showToast(err.response.data.message, "error");
-      } else if (err.message) {
-        setError(err.message);
-        showToast(err.message, "error");
-      } else {
-        setError("Failed to mark attendance. Please try again.");
-        showToast("Failed to mark attendance", "error");
-      }
-      
-      // Reset to code step on error
-      setStep("code");
-    } finally {
-      setSubmitting(false);
-      stopCamera();
-      setShowFaceCapture(false);
-    }
-  }, [
-    code,
-    startCamera,
-    captureAndVerifyFace,
-    stopCamera,
-    showToast,
-    onSuccess,
-  ]);
+    },
+    [code, startCamera, captureAndVerifyFace, stopCamera, showToast, onSuccess],
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -198,13 +177,15 @@ const AttendanceMarking = ({
   return (
     <div className={styles.attendanceMarking}>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
-      
+
       <div className={styles.header}>
         <h2>Mark Attendance</h2>
         {session && (
           <div className={styles.sessionInfo}>
             <p className={styles.courseName}>{session.courseName}</p>
-            <p className={styles.facultyName}>Professor: {session.facultyName}</p>
+            <p className={styles.facultyName}>
+              Professor: {session.facultyName}
+            </p>
           </div>
         )}
       </div>
@@ -224,7 +205,9 @@ const AttendanceMarking = ({
               type="text"
               value={code}
               onChange={(e) => {
-                const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+                const value = e.target.value
+                  .toUpperCase()
+                  .replace(/[^A-Z0-9]/g, "");
                 setCode(value.slice(0, 6));
                 setError("");
               }}
@@ -294,4 +277,3 @@ const AttendanceMarking = ({
 };
 
 export default React.memo(AttendanceMarking);
-
