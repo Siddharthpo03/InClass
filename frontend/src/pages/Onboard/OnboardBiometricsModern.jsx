@@ -39,6 +39,7 @@ const OnboardBiometricsModern = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [capturedImages, setCapturedImages] = useState([]);
+  const [faceDetected, setFaceDetected] = useState(false);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -66,6 +67,30 @@ const OnboardBiometricsModern = () => {
     },
     [],
   );
+
+  useEffect(() => {
+    if (step !== "face") {
+      setFaceDetected(false);
+      return undefined;
+    }
+
+    const checkFace = setInterval(async () => {
+      if (!videoRef.current) return;
+
+      try {
+        if ("FaceDetector" in window) {
+          const FaceDetectorCtor = /** @type {any} */ (window.FaceDetector);
+          const detector = new FaceDetectorCtor();
+          const faces = await detector.detect(videoRef.current);
+          setFaceDetected(faces.length > 0);
+        }
+      } catch (e) {
+        // FaceDetector not supported, keep default
+      }
+    }, 500);
+
+    return () => clearInterval(checkFace);
+  }, [step]);
 
   // OTP Handlers
   const handleSendOtp = async () => {
@@ -484,18 +509,15 @@ const OnboardBiometricsModern = () => {
                   className={styles.video}
                 />
                 <canvas ref={canvasRef} style={{ display: "none" }} />
-                <div className={styles.frameGuide}>
-                  <div className={styles.corner} style={{ top: 0, left: 0 }} />
-                  <div className={styles.corner} style={{ top: 0, right: 0 }} />
-                  <div
-                    className={styles.corner}
-                    style={{ bottom: 0, left: 0 }}
-                  />
-                  <div
-                    className={styles.corner}
-                    style={{ bottom: 0, right: 0 }}
-                  />
-                </div>
+                <div
+                  className={`${styles.faceCircle} ${faceDetected ? styles.faceDetectedCircle : styles.faceNotDetectedCircle}`}
+                />
+              </div>
+
+              <div className={styles.previewStrip}>
+                {capturedImages.map((image, index) => (
+                  <img key={index} src={image} alt={`Pose ${index + 1}`} />
+                ))}
               </div>
 
               <div className={styles.instructions}>
@@ -563,15 +585,6 @@ const OnboardBiometricsModern = () => {
                   Enroll Face
                 </button>
               )}
-            </div>
-            <div className={styles.previewStrip}>
-              {capturedImages.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`Captured pose ${index + 1}`}
-                />
-              ))}
             </div>
           </div>
         )}
