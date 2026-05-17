@@ -7,15 +7,14 @@ import useDarkMode from "../../hooks/useDarkMode";
 import { registerFace } from "../../services/biometricsApi";
 import styles from "./OnboardBiometricsModern.module.css";
 
-const FACE_POSES = [
-  "front",
-  "slight left",
-  "full left",
-  "slight right",
-  "full right",
-  "up",
-  "down",
-];
+const FACE_POSES = ["front", "left", "right", "up"];
+
+const POSE_INSTRUCTIONS = {
+  front: "Look straight at the camera",
+  left: "Turn your face to the LEFT",
+  right: "Turn your face to the RIGHT",
+  up: "Tilt your face UP",
+};
 
 const OnboardBiometricsModern = () => {
   useDarkMode();
@@ -40,11 +39,13 @@ const OnboardBiometricsModern = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [capturedImages, setCapturedImages] = useState([]);
+  const [countdown, setCountdown] = useState(null);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const cooldownTimerRef = useRef(null);
+  const countdownIntervalRef = useRef(null);
 
   // Get userId from params or token
   useEffect(() => {
@@ -67,6 +68,14 @@ const OnboardBiometricsModern = () => {
     },
     [],
   );
+
+  useEffect(() => {
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, []);
 
   // OTP Handlers
   const handleSendOtp = async () => {
@@ -200,11 +209,15 @@ const OnboardBiometricsModern = () => {
 
       if (nextImages.length >= FACE_POSES.length) {
         stopCamera();
-        setSuccessMessage("All face views captured. Enroll when ready.");
+        setSuccessMessage("All poses captured. Click Enroll Face to continue.");
       } else {
         setSuccessMessage(
           `Captured ${nextImages.length}/${FACE_POSES.length}. Next pose: ${FACE_POSES[nextImages.length]}.`,
         );
+        // after a short delay, start the next countdown automatically
+        setTimeout(() => {
+          startPoseCapture();
+        }, 1000);
       }
     } catch (err) {
       const msg =
@@ -213,6 +226,31 @@ const OnboardBiometricsModern = () => {
     } finally {
       setIsEnrolling(false);
     }
+  };
+
+  const startPoseCapture = () => {
+    // If already counting down or finished, do nothing
+    if (countdown !== null) return;
+    if (capturedImages.length >= FACE_POSES.length) return;
+
+    // Start a 3 second countdown
+    setCountdown(3);
+    let current = 3;
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
+    countdownIntervalRef.current = setInterval(() => {
+      current -= 1;
+      if (current <= 0) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+        setCountdown(null);
+        // Trigger capture
+        captureFaceImage();
+      } else {
+        setCountdown(current);
+      }
+    }, 1000);
   };
 
   const handleSkip = () => {
@@ -484,6 +522,19 @@ const OnboardBiometricsModern = () => {
                   className={styles.video}
                 />
                 <canvas ref={canvasRef} style={{ display: "none" }} />
+                <div className={styles.videoOverlay}>
+                  <div className={styles.poseInstruction}>
+                    {POSE_INSTRUCTIONS[FACE_POSES[capturedImages.length]] || "Position your face"}
+                  </div>
+                  <div className={styles.progressIndicator}>
+                    Pose {Math.min(capturedImages.length + 1, FACE_POSES.length)}/{FACE_POSES.length}
+                  </div>
+                  {countdown !== null && (
+                    <div className={styles.countdownOverlay}>
+                      <span className={styles.countdownNumber}>{countdown}</span>
+                    </div>
+                  )}
+                </div>
                 <div className={styles.frameGuide}>
                   <div className={styles.corner} style={{ top: 0, left: 0 }} />
                   <div className={styles.corner} style={{ top: 0, right: 0 }} />
@@ -507,7 +558,7 @@ const OnboardBiometricsModern = () => {
                   </li>
                   <li>
                     <i className="bx bx-check"></i>
-                    <span>Capture front, left, right, up, and down poses</span>
+                    <span>Capture front, left, right, and up poses</span>
                   </li>
                   <li>
                     <i className="bx bx-check"></i>
@@ -531,26 +582,19 @@ const OnboardBiometricsModern = () => {
               </button>
               <button
                 className={styles.primaryButton}
-                onClick={captureFaceImage}
-                disabled={isEnrolling}
+                onClick={startPoseCapture}
+                disabled={countdown !== null || capturedImages.length >= FACE_POSES.length}
               >
-                {isEnrolling ? (
-                  <>
-                    <span className={styles.spinner}></span>
-                    <span>Processing...</span>
-                  </>
+                {countdown !== null ? (
+                  `Capturing in ${countdown}...`
                 ) : (
                   <>
                     <i className="bx bx-check"></i>
-                    <span>
-                      {capturedImages.length >= FACE_POSES.length
-                        ? "Capture Complete"
-                        : `Capture ${FACE_POSES[capturedImages.length] || "face"}`}
-                    </span>
+                    <span>Start Capture</span>
                   </>
                 )}
               </button>
-              {capturedImages.length >= 1 && (
+              {capturedImages.length >= FACE_POSES.length && (
                 <button
                   className={styles.secondaryButton}
                   onClick={handleEnrollFace}
