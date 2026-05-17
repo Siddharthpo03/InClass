@@ -39,19 +39,11 @@ const OnboardBiometricsModern = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [capturedImages, setCapturedImages] = useState([]);
-  const [countdown, setCountdown] = useState(null);
-  const [isGetReady, setIsGetReady] = useState(false);
-  const [nextPose, setNextPose] = useState(null);
-  const [hasStartedCaptureSequence, setHasStartedCaptureSequence] =
-    useState(false);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const cooldownTimerRef = useRef(null);
-  const countdownIntervalRef = useRef(null);
-  const captureTimerRef = useRef(null);
-  const isCaptureInProgress = useRef(false);
 
   // Get userId from params or token
   useEffect(() => {
@@ -74,33 +66,6 @@ const OnboardBiometricsModern = () => {
     },
     [],
   );
-
-  useEffect(() => {
-    return () => {
-      if (countdownIntervalRef.current) {
-        clearInterval(countdownIntervalRef.current);
-      }
-      if (captureTimerRef.current) {
-        clearInterval(captureTimerRef.current);
-      }
-      isCaptureInProgress.current = false;
-    };
-  }, []);
-
-  const clearCaptureTimers = () => {
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-      countdownIntervalRef.current = null;
-    }
-    if (captureTimerRef.current) {
-      clearInterval(captureTimerRef.current);
-      captureTimerRef.current = null;
-    }
-    if (cooldownTimerRef.current) {
-      clearTimeout(cooldownTimerRef.current);
-      cooldownTimerRef.current = null;
-    }
-  };
 
   // OTP Handlers
   const handleSendOtp = async () => {
@@ -168,11 +133,6 @@ const OnboardBiometricsModern = () => {
       setTimeout(() => {
         setStep("face");
         setCapturedImages([]);
-        setCountdown(null);
-        setIsGetReady(false);
-        setNextPose(null);
-        setHasStartedCaptureSequence(false);
-        isCaptureInProgress.current = false;
         setTimeout(startCamera, 100);
       }, 1000);
     } catch (error) {
@@ -214,11 +174,7 @@ const OnboardBiometricsModern = () => {
   };
 
   const captureFaceImage = async () => {
-    if (!isCaptureInProgress.current) return;
-    if (!canvasRef.current || !videoRef.current) {
-      isCaptureInProgress.current = false;
-      return;
-    }
+    if (!canvasRef.current || !videoRef.current) return;
     setIsEnrolling(true);
 
     try {
@@ -238,79 +194,12 @@ const OnboardBiometricsModern = () => {
         );
       });
       const imageDataUrl = canvasRef.current.toDataURL("image/jpeg", 0.92);
-      const nextImages = [...capturedImages, imageDataUrl];
-      setCapturedImages(nextImages);
-
-      if (nextImages.length >= FACE_POSES.length) {
-        clearCaptureTimers();
-        setCountdown(null);
-        setIsGetReady(false);
-        setNextPose(null);
-        setHasStartedCaptureSequence(false);
-        isCaptureInProgress.current = false;
-        stopCamera();
-        setSuccessMessage("All poses captured. Click Enroll Face to continue.");
-      } else {
-        setSuccessMessage(
-          `Captured ${nextImages.length}/${FACE_POSES.length}. Next pose: ${FACE_POSES[nextImages.length]}.`,
-        );
-        isCaptureInProgress.current = false;
-        setIsGetReady(true);
-        setNextPose(FACE_POSES[nextImages.length]);
-        // after a short get-ready transition, start the next countdown automatically
-        clearCaptureTimers();
-        captureTimerRef.current = setTimeout(() => {
-          setIsGetReady(false);
-          setNextPose(null);
-          startPoseCapture(nextImages.length);
-        }, 2000);
-      }
+      setCapturedImages((prev) => [...prev, imageDataUrl]);
     } catch (err) {
-      const msg =
-        err.response?.data?.error?.message || "Face enrollment failed";
-      setErrorMessage(msg);
-      setIsGetReady(false);
-      setNextPose(null);
-      setHasStartedCaptureSequence(false);
-      isCaptureInProgress.current = false;
+      console.error("Capture error:", err);
     } finally {
       setIsEnrolling(false);
     }
-  };
-
-  const startPoseCapture = (poseIndex = capturedImages.length) => {
-    if (isCaptureInProgress.current) return;
-    // If already counting down or finished, do nothing
-    if (countdown !== null) return;
-    if (isGetReady) return;
-    if (poseIndex >= FACE_POSES.length) return;
-
-    isCaptureInProgress.current = true;
-
-    // Start a 3 second countdown
-    clearCaptureTimers();
-    setCountdown(3);
-    let current = 3;
-    countdownIntervalRef.current = setInterval(() => {
-      current -= 1;
-      if (current <= 0) {
-        clearInterval(countdownIntervalRef.current);
-        countdownIntervalRef.current = null;
-        setCountdown(null);
-        // Trigger capture
-        captureFaceImage();
-      } else {
-        setCountdown(current);
-      }
-    }, 1000);
-  };
-
-  const handleStartCapture = () => {
-    if (hasStartedCaptureSequence) return;
-    setHasStartedCaptureSequence(true);
-    setIsGetReady(false);
-    setNextPose(null);
-    startPoseCapture(capturedImages.length);
   };
 
   const handleSkip = () => {
@@ -573,6 +462,19 @@ const OnboardBiometricsModern = () => {
                 </div>
               )}
 
+              <div className={styles.poseInstruction}>
+                <p className={styles.poseText}>
+                  {capturedImages.length >= FACE_POSES.length
+                    ? "All poses captured! Click Enroll Face."
+                    : POSE_INSTRUCTIONS[FACE_POSES[capturedImages.length]]}
+                </p>
+                <p className={styles.poseProgress}>
+                  {capturedImages.length >= FACE_POSES.length
+                    ? "4 of 4 complete"
+                    : `Step ${capturedImages.length + 1} of ${FACE_POSES.length}`}
+                </p>
+              </div>
+
               <div className={styles.videoContainer}>
                 <video
                   ref={videoRef}
@@ -582,30 +484,6 @@ const OnboardBiometricsModern = () => {
                   className={styles.video}
                 />
                 <canvas ref={canvasRef} style={{ display: "none" }} />
-                <div className={styles.videoOverlay}>
-                  {isGetReady ? (
-                    <>
-                      <div className={styles.countdownOverlay}>
-                        <span className={styles.countdownNumber}>GET READY</span>
-                      </div>
-                      <div className={styles.poseInstruction}>
-                        {`Now ${POSE_INSTRUCTIONS[nextPose] || "prepare for the next pose"} - Get Ready...`}
-                      </div>
-                    </>
-                  ) : (
-                    <div className={styles.poseInstruction}>
-                      {POSE_INSTRUCTIONS[FACE_POSES[capturedImages.length]] || "Position your face"}
-                    </div>
-                  )}
-                  <div className={styles.progressIndicator}>
-                    Pose {Math.min(capturedImages.length + 1, FACE_POSES.length)}/{FACE_POSES.length}
-                  </div>
-                  {countdown !== null && !isGetReady && (
-                    <div className={styles.countdownOverlay}>
-                      <span className={styles.countdownNumber}>{countdown}</span>
-                    </div>
-                  )}
-                </div>
                 <div className={styles.frameGuide}>
                   <div className={styles.corner} style={{ top: 0, left: 0 }} />
                   <div className={styles.corner} style={{ top: 0, right: 0 }} />
@@ -647,35 +525,31 @@ const OnboardBiometricsModern = () => {
               <button
                 className={styles.secondaryButton}
                 onClick={() => {
-                  clearCaptureTimers();
-                  setCountdown(null);
-                  setIsGetReady(false);
-                  setNextPose(null);
-                  setHasStartedCaptureSequence(false);
-                  isCaptureInProgress.current = false;
                   setStep("otp");
                 }}
               >
                 <i className="bx bx-arrow-back"></i>
                 Back
               </button>
-              {!hasStartedCaptureSequence && capturedImages.length < FACE_POSES.length && (
+              {capturedImages.length < FACE_POSES.length && (
                 <button
                   className={styles.primaryButton}
-                  onClick={handleStartCapture}
-                  disabled={
-                    countdown !== null ||
-                    isEnrolling ||
-                    capturedImages.length >= FACE_POSES.length ||
-                    isCaptureInProgress.current
-                  }
+                  onClick={captureFaceImage}
+                  disabled={isEnrolling}
                 >
-                  {countdown !== null ? (
-                    `Capturing in ${countdown}...`
+                  {isEnrolling ? (
+                    <>
+                      <span className={styles.spinner}></span>
+                      <span>Processing...</span>
+                    </>
                   ) : (
                     <>
                       <i className="bx bx-check"></i>
-                      <span>Start Capture</span>
+                      <span>
+                        {capturedImages.length >= FACE_POSES.length
+                          ? "Capture Complete"
+                          : `Capture - ${POSE_INSTRUCTIONS[FACE_POSES[capturedImages.length]]}`}
+                      </span>
                     </>
                   )}
                 </button>
