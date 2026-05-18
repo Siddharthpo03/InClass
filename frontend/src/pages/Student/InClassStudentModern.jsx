@@ -161,14 +161,12 @@ const InClassStudentModern = ({ previewMode = false }) => {
     }, 3000);
   };
 
-  const handleLogout = async () => {
-    try {
-      await apiClient.post("/auth/logout");
-      localStorage.removeItem("inclass_token");
-      navigate("/login");
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
+  const handleLogout = () => {
+    localStorage.removeItem("inclass_token");
+    localStorage.removeItem("inclass_user");
+    localStorage.removeItem("inclass_role");
+    sessionStorage.clear();
+    navigate("/login");
   };
 
   if (loading) {
@@ -188,89 +186,100 @@ const InClassStudentModern = ({ previewMode = false }) => {
     <div className={styles.wrapper}>
       <Navigation />
       <div className={styles.container}>
-        {/* Welcome Header */}
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <div>
-              <h1 className={styles.title}>
-                Welcome, {userData?.name?.split(" ")[0]}!
-              </h1>
-              <p className={styles.subtitle}>Here's your attendance overview</p>
+        {/* Hero Header */}
+        <header className={styles.hero}>
+          <div className={styles.heroInner}>
+            <div className={styles.heroLeft}>
+              <div className={styles.avatar} aria-hidden>
+                {userData?.name ? userData.name.charAt(0).toUpperCase() : "S"}
+              </div>
+              <div>
+                <h1 className={styles.heroTitle}>{userData?.name}</h1>
+                <p className={styles.heroSubtitle}>{userData?.email}</p>
+                <p className={styles.heroMeta}>
+                  {userData?.college && <span>{userData.college}</span>}
+                  {userData?.department && (
+                    <span className={styles.metaSeparator}>{userData.department}</span>
+                  )}
+                </p>
+              </div>
             </div>
-            <button className={styles.logoutButton} onClick={handleLogout}>
-              <i className="bx bx-log-out"></i>
-              Sign Out
-            </button>
+            <div className={styles.heroRight}>
+              <button className={styles.signoutGhost} onClick={handleLogout}>
+                <i className="bx bx-log-out"></i>
+                Sign Out
+              </button>
+            </div>
           </div>
-        </div>
+        </header>
 
         {/* Stats Cards */}
         <div className={styles.statsGrid}>
-          <div className={styles.statCard}>
-            <div
-              className={styles.statIcon}
-              style={{ background: "rgba(14, 165, 233, 0.1)" }}
-            >
-              <i
-                className="bx bx-pie-chart"
-                style={{ color: "var(--primary-500)" }}
-              ></i>
+          <div className={`${styles.statCard} ${styles.attendance}`}> 
+            <div className={styles.statContent}>
+              <div>
+                <p className={styles.statLabel}>Attendance</p>
+                <h3 className={styles.statValue}>{attendanceStats.percentage}%</h3>
+              </div>
+              <div className={styles.statIconLarge}>
+                <i className="bx bx-pie-chart"></i>
+              </div>
             </div>
-            <div>
-              <p className={styles.statLabel}>Attendance</p>
-              <h3 className={styles.statValue}>
-                {attendanceStats.percentage}%
-              </h3>
-            </div>
+            <div className={styles.cardWave} />
           </div>
 
-          <div className={styles.statCard}>
-            <div
-              className={styles.statIcon}
-              style={{ background: "rgba(34, 197, 94, 0.1)" }}
-            >
-              <i
-                className="bx bx-check-circle"
-                style={{ color: "var(--success-500)" }}
-              ></i>
+          <div className={`${styles.statCard} ${styles.present}`}>
+            <div className={styles.statContent}>
+              <div>
+                <p className={styles.statLabel}>Present</p>
+                <h3 className={styles.statValue}>{attendanceStats.present}</h3>
+              </div>
+              <div className={styles.statIconLarge}>
+                <i className="bx bx-check-circle"></i>
+              </div>
             </div>
-            <div>
-              <p className={styles.statLabel}>Present</p>
-              <h3 className={styles.statValue}>{attendanceStats.present}</h3>
-            </div>
+            <div className={styles.cardWave} />
           </div>
 
-          <div className={styles.statCard}>
-            <div
-              className={styles.statIcon}
-              style={{ background: "rgba(239, 68, 68, 0.1)" }}
-            >
-              <i
-                className="bx bx-x-circle"
-                style={{ color: "var(--danger-500)" }}
-              ></i>
+          <div className={`${styles.statCard} ${styles.absent}`}>
+            <div className={styles.statContent}>
+              <div>
+                <p className={styles.statLabel}>Absent</p>
+                <h3 className={styles.statValue}>{attendanceStats.absent}</h3>
+              </div>
+              <div className={styles.statIconLarge}>
+                <i className="bx bx-x-circle"></i>
+              </div>
             </div>
-            <div>
-              <p className={styles.statLabel}>Absent</p>
-              <h3 className={styles.statValue}>{attendanceStats.absent}</h3>
-            </div>
+            <div className={styles.cardWave} />
           </div>
 
-          <div className={styles.statCard}>
-            <div
-              className={styles.statIcon}
-              style={{ background: "rgba(245, 158, 11, 0.1)" }}
-            >
-              <i
-                className="bx bx-book"
-                style={{ color: "var(--warning-500)" }}
-              ></i>
+          <div className={`${styles.statCard} ${styles.total}`}>
+            <div className={styles.statContent}>
+              <div>
+                <p className={styles.statLabel}>Total Classes</p>
+                <h3 className={styles.statValue}>{attendanceStats.totalClasses}</h3>
+              </div>
+              <div className={styles.statIconLarge}>
+                <i className="bx bx-book"></i>
+              </div>
             </div>
-            <div>
-              <p className={styles.statLabel}>Total Classes</p>
-              <h3 className={styles.statValue}>
-                {attendanceStats.totalClasses}
-              </h3>
+            <div className={styles.cardWave} />
+          </div>
+        </div>
+
+        {/* Quick Action - Mark Attendance */}
+        <div className={styles.quickActions}
+             onClick={() => setIsSessionActive(true)}
+             role="button"
+        >
+          <div className={styles.quickCard}>
+            <div className={styles.quickLeft}>
+              <h3>Mark Your Attendance</h3>
+              <p>Enter session code to mark attendance</p>
+            </div>
+            <div className={styles.quickIcon}>
+              <i className="bx bx-qr"></i>
             </div>
           </div>
         </div>
@@ -408,14 +417,21 @@ const InClassStudentModern = ({ previewMode = false }) => {
         {/* Empty State */}
         {activeSessions.length === 0 && attendanceHistory.length === 0 && (
           <section className={styles.emptyState}>
-            <div className={styles.emptyIcon}>
-              <i className="bx bx-inbox"></i>
-            </div>
-            <h3>No Active Sessions</h3>
-            <p>
-              Check back later for active sessions or view your attendance
-              history.
-            </p>
+            <svg
+              className={styles.emptyIllustration}
+              viewBox="0 0 120 120"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden
+            >
+              <rect x="8" y="20" width="104" height="84" rx="8" fill="#f3f4f6" />
+              <rect x="18" y="30" width="20" height="8" rx="2" fill="#e5e7eb" />
+              <rect x="18" y="44" width="80" height="6" rx="2" fill="#e5e7eb" />
+              <circle cx="90" cy="70" r="18" fill="#eff6ff" />
+              <path d="M85 70a5 5 0 1 1 10 0v6a5 5 0 0 1-10 0v-6z" fill="#bfdbfe" />
+              <path d="M88 74h8v2h-8z" fill="#93c5fd" />
+            </svg>
+            <h3>You're all caught up!</h3>
+            <p>No active sessions right now. We'll notify you when a new session starts.</p>
           </section>
         )}
       </div>
