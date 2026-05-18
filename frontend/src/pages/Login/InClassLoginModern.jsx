@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import * as faceapi from "face-api.js";
 import { useTheme } from "../../contexts/ThemeContext";
 import apiClient from "../../utils/apiClient";
 import useDarkMode from "../../hooks/useDarkMode";
@@ -9,6 +10,7 @@ const InClassLoginModern = () => {
   useDarkMode();
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [validationErrors, setValidationErrors] = useState(
     /** @type {{ [key: string]: string }} */ ({}),
@@ -16,12 +18,63 @@ const InClassLoginModern = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const modelsLoaded = useRef(false);
   const [showFaceCapture, setShowFaceCapture] = useState(false);
   const [capturingFace, setCapturingFace] = useState(false);
   const [faceError, setFaceError] = useState("");
+  const [faceDetected, setFaceDetected] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("registered") === "true") {
+      setSuccessMessage("Registration complete! Please login to continue.");
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!showFaceCapture) return;
+
+    const loadModels = async () => {
+      if (modelsLoaded.current) return;
+
+      try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+        modelsLoaded.current = true;
+      } catch (e) {
+        console.error("Failed to load face models:", e);
+      }
+    };
+
+    loadModels();
+  }, [showFaceCapture]);
+
+  useEffect(() => {
+    if (!showFaceCapture) return;
+
+    setFaceDetected(false);
+    const checkFace = setInterval(async () => {
+      if (!videoRef.current || !modelsLoaded.current) return;
+      if (videoRef.current.readyState !== 4) return;
+
+      try {
+        const detection = await faceapi.detectSingleFace(
+          videoRef.current,
+          new faceapi.TinyFaceDetectorOptions({
+            scoreThreshold: 0.1,
+            inputSize: 160,
+          }),
+        );
+        setFaceDetected(!!detection);
+      } catch (e) {
+        setFaceDetected(false);
+      }
+    }, 500);
+
+    return () => clearInterval(checkFace);
+  }, [showFaceCapture]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -139,7 +192,15 @@ const InClassLoginModern = () => {
         }
         stopCamera();
         setShowFaceCapture(false);
-        navigate("/student/dashboard");
+        const userRole = response.data?.role || response.data?.user?.role;
+        localStorage.setItem("user_role", userRole);
+        if (userRole === "faculty") {
+          navigate("/faculty/dashboard");
+        } else if (userRole === "admin") {
+          navigate("/inclass/admin/dashboard");
+        } else {
+          navigate("/student/dashboard");
+        }
         return;
       }
 
@@ -241,6 +302,13 @@ const InClassLoginModern = () => {
               <div className={styles.alert} role="alert">
                 <i className="bx bx-exclamation-circle"></i>
                 <span>{serverError}</span>
+              </div>
+            )}
+
+            {successMessage && (
+              <div className={styles.successAlert} role="status">
+                <i className="bx bx-check-circle"></i>
+                <span>{successMessage}</span>
               </div>
             )}
 
@@ -402,13 +470,19 @@ const InClassLoginModern = () => {
               Look at the camera to verify your identity
             </p>
 
-            <div className={styles.videoContainer}>
+            <div
+              className={styles.videoContainer}
+              style={{ position: "relative" }}
+            >
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
                 muted
                 className={styles.videoPreview}
+              />
+              <div
+                className={`${styles.faceCircle} ${faceDetected ? styles.faceDetectedCircle : styles.faceNotDetectedCircle}`}
               />
               <canvas ref={canvasRef} style={{ display: "none" }} />
             </div>
