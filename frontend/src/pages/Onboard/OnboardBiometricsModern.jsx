@@ -6,6 +6,7 @@ import Footer from "../../components/Footer";
 import useDarkMode from "../../hooks/useDarkMode";
 import { registerFace } from "../../services/biometricsApi";
 import styles from "./OnboardBiometricsModern.module.css";
+import * as faceapi from "face-api.js";
 
 const FACE_POSES = ["front", "left", "right", "up"];
 
@@ -45,6 +46,7 @@ const OnboardBiometricsModern = () => {
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const cooldownTimerRef = useRef(null);
+  const modelsLoaded = useRef(false);
 
   // Get userId from params or token
   useEffect(() => {
@@ -68,27 +70,43 @@ const OnboardBiometricsModern = () => {
     [],
   );
 
+  // Load face-api models when face step starts
   useEffect(() => {
-    if (step !== "face") {
-      setFaceDetected(false);
-      return undefined;
-    }
-
-    const checkFace = setInterval(async () => {
-      if (!videoRef.current) return;
-
+    if (step !== "face") return;
+    const loadModels = async () => {
+      if (modelsLoaded.current) return;
       try {
-        if ("FaceDetector" in window) {
-          const FaceDetectorCtor = /** @type {any} */ (window.FaceDetector);
-          const detector = new FaceDetectorCtor();
-          const faces = await detector.detect(videoRef.current);
-          setFaceDetected(faces.length > 0);
-        }
+        await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+        modelsLoaded.current = true;
+        console.log("Face models loaded successfully");
       } catch (e) {
-        // FaceDetector not supported, keep default
+        console.error("Failed to load face models:", e);
+      }
+    };
+    loadModels();
+  }, [step]);
+
+  // Real-time face detection
+  useEffect(() => {
+    if (step !== "face") return;
+    const checkFace = setInterval(async () => {
+      if (!videoRef.current || !modelsLoaded.current) return;
+      if (videoRef.current.readyState !== 4) return;
+      try {
+        const detection = await faceapi.detectSingleFace(
+          videoRef.current,
+          new faceapi.TinyFaceDetectorOptions({
+            scoreThreshold: 0.1,
+            inputSize: 160,
+          }),
+        );
+        console.log("Face detection result:", detection);
+        setFaceDetected(!!detection);
+      } catch (e) {
+        console.error("Detection error:", e);
+        setFaceDetected(false);
       }
     }, 500);
-
     return () => clearInterval(checkFace);
   }, [step]);
 
@@ -206,7 +224,10 @@ const OnboardBiometricsModern = () => {
       const ctx = canvasRef.current.getContext("2d");
       canvasRef.current.width = videoRef.current.videoWidth;
       canvasRef.current.height = videoRef.current.videoHeight;
-      ctx.drawImage(videoRef.current, 0, 0);
+      ctx.save();
+      ctx.scale(-1, 1);
+      ctx.drawImage(videoRef.current, -canvasRef.current.width, 0);
+      ctx.restore();
 
       const imageBlob = await new Promise((resolve, reject) => {
         canvasRef.current.toBlob(
@@ -244,9 +265,12 @@ const OnboardBiometricsModern = () => {
       const response = await registerFace({ userId, images: capturedImages });
       if (response?.success || response?.message) {
         setEnrolledMethods((prev) => ({ ...prev, face: true }));
-        setSuccessMessage("Face enrolled successfully!");
         stopCamera();
         setStep("complete");
+        setSuccessMessage("Face enrolled! Redirecting to login...");
+        setTimeout(() => {
+          handleContinueToDashboard();
+        }, 2000);
       } else {
         throw new Error(response?.message || "Face enrollment failed.");
       }
@@ -263,7 +287,19 @@ const OnboardBiometricsModern = () => {
   };
 
   const handleContinueToDashboard = () => {
-    navigate("/student/dashboard");
+    // Clear all registration related data from localStorage
+    localStorage.removeItem("inclass_token");
+    localStorage.removeItem("inclass_user");
+    localStorage.removeItem("inclass_role");
+    localStorage.removeItem("registrationData");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("pendingUserId");
+
+    // Clear sessionStorage too
+    sessionStorage.clear();
+
+    // Redirect to login with a success message
+    navigate("/login?registered=true");
   };
 
   return (
@@ -507,6 +543,7 @@ const OnboardBiometricsModern = () => {
                   playsInline
                   muted
                   className={styles.video}
+                  style={{ transform: 'scaleX(-1)' }}
                 />
                 <canvas ref={canvasRef} style={{ display: "none" }} />
                 <div
@@ -648,8 +685,8 @@ const OnboardBiometricsModern = () => {
                 className={styles.primaryButton}
                 onClick={handleContinueToDashboard}
               >
-                <i className="bx bx-arrow-right"></i>
-                Go to Dashboard
+                <i className="bx bx-log-in"></i>
+                Proceed to Login
               </button>
             </div>
           </div>

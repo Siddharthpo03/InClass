@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import io from "socket.io-client";
-import { getSocketUrl } from "../utils/apiConfig";
+import { getSocketTransports, getSocketUrl } from "../utils/apiConfig";
 
 /**
  * useStudentSocket - Hook for managing Socket.io connection for students
@@ -51,7 +51,7 @@ const useStudentSocket = (
     // Initialize socket connection
     const socket = io(getSocketUrl(), {
       auth: { token },
-      transports: ["websocket", "polling"],
+      transports: getSocketTransports(),
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,

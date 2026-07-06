@@ -16,12 +16,11 @@
 
 .statCard.clickable:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-surface-hover);
 }
 
 .statCard.clickable:focus {
-  outline: 2px solid var(--primary-color, #3b82f6);
+  outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
 
@@ -43,23 +42,23 @@
 }
 
 .statCard.success .iconContainer {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
+  background: var(--accent-success-soft);
+  color: var(--accent-success);
 }
 
 .statCard.warning .iconContainer {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  background: var(--accent-warning-soft);
+  color: var(--accent-warning);
 }
 
 .statCard.error .iconContainer {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: var(--accent-danger-soft);
+  color: var(--accent-danger);
 }
 
 .statCard.info .iconContainer {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: var(--accent-primary-soft);
+  color: var(--accent-primary);
 }
 
 .iconContainer i {

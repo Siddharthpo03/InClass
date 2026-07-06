@@ -16,6 +16,20 @@ export function getSocketUrl() {
   return getBackendOrigin();
 }
 
+export function getSocketTransports() {
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    const isLocalHost =
+      hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+
+    if (!isLocalHost) {
+      return ["polling"];
+    }
+  }
+
+  return ["websocket", "polling"];
+}
+
 export function getAdminBaseUrl() {
   return getBackendOrigin();
 }

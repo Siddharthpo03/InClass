@@ -98,6 +98,69 @@
   --transition-fast: 0.15s ease;
   --transition-base: 0.2s ease;
   --transition-slow: 0.3s ease;
+
+  /* Dashboard theme tokens */
+  --text-on-accent: #f8fafc;
+  --bg-overlay-soft: rgba(15, 23, 42, 0.5);
+  --bg-overlay-strong: rgba(15, 23, 42, 0.72);
+  --bg-glass-soft: rgba(248, 250, 252, 0.1);
+  --bg-glass-strong: rgba(248, 250, 252, 0.16);
+  --border-glass-soft: rgba(248, 250, 252, 0.16);
+  --border-glass-strong: rgba(248, 250, 252, 0.24);
+
+  --accent-primary: #6366f1;
+  --accent-secondary: #8b5cf6;
+  --accent-success: #10b981;
+  --accent-warning: #f59e0b;
+  --accent-danger: #ef4444;
+
+  --accent-primary-soft: rgba(99, 102, 241, 0.12);
+  --accent-primary-subtle: rgba(99, 102, 241, 0.08);
+  --accent-primary-border: rgba(99, 102, 241, 0.22);
+  --accent-secondary-soft: rgba(139, 92, 246, 0.1);
+  --accent-success-soft: rgba(16, 185, 129, 0.12);
+  --accent-danger-soft: rgba(239, 68, 68, 0.12);
+
+  --status-warning-bg: #fffbeb;
+  --status-warning-border: #fcd34d;
+  --status-warning-text: #92400e;
+  --status-danger-bg: #fef2f2;
+  --status-danger-border: #fca5a5;
+  --status-danger-text: #dc2626;
+
+  --hero-gradient-start: #0f172a;
+  --hero-gradient-end: #1e293b;
+  --hero-avatar-start: #6366f1;
+  --hero-avatar-end: #8b5cf6;
+
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--accent-primary) 0%,
+    var(--accent-secondary) 100%
+  );
+  --gradient-warning: linear-gradient(
+    135deg,
+    var(--accent-warning) 0%,
+    var(--warning-text) 100%
+  );
+  --gradient-success: linear-gradient(
+    135deg,
+    var(--success-border) 0%,
+    var(--success-text) 100%
+  );
+  --gradient-danger: linear-gradient(
+    135deg,
+    var(--error-border) 0%,
+    var(--error-text) 100%
+  );
+
+  --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --shadow-surface: 0 1px 3px rgba(15, 23, 42, 0.1);
+  --shadow-surface-hover: 0 10px 24px rgba(15, 23, 42, 0.16);
+  --shadow-accent-warning: 0 8px 24px color-mix(in srgb, var(--accent-warning) 28%, transparent);
+  --shadow-accent-success: 0 8px 24px color-mix(in srgb, var(--accent-success) 28%, transparent);
+  --shadow-accent-danger: 0 8px 24px color-mix(in srgb, var(--accent-danger) 28%, transparent);
+  --shadow-accent-primary: 0 8px 24px color-mix(in srgb, var(--accent-primary) 28%, transparent);
 }
 
 /* ===== Dark Mode ===== */
@@ -158,6 +221,43 @@ body.darkMode,
   /* Scrollbar */
   --scrollbar-track: #020617;
   --scrollbar-thumb: #475569;
+
+  /* Dashboard theme tokens */
+  --bg-page: #020617;
+  --bg-card: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-on-accent: #f8fafc;
+  --bg-overlay-soft: rgba(2, 6, 23, 0.6);
+  --bg-overlay-strong: rgba(2, 6, 23, 0.82);
+  --bg-glass-soft: rgba(148, 163, 184, 0.1);
+  --bg-glass-strong: rgba(148, 163, 184, 0.16);
+  --border-glass-soft: rgba(148, 163, 184, 0.24);
+  --border-glass-strong: rgba(148, 163, 184, 0.36);
+
+  --accent-primary-soft: rgba(99, 102, 241, 0.2);
+  --accent-primary-subtle: rgba(99, 102, 241, 0.14);
+  --accent-primary-border: rgba(99, 102, 241, 0.32);
+  --accent-secondary-soft: rgba(139, 92, 246, 0.16);
+  --accent-success-soft: rgba(16, 185, 129, 0.2);
+  --accent-danger-soft: rgba(239, 68, 68, 0.2);
+
+  --status-warning-bg: #78350f;
+  --status-warning-border: #f59e0b;
+  --status-warning-text: #fde68a;
+  --status-danger-bg: #7f1d1d;
+  --status-danger-border: #dc2626;
+  --status-danger-text: #fca5a5;
+
+  --hero-gradient-start: #0f172a;
+  --hero-gradient-end: #1e293b;
+
+  --shadow-soft: 0 1px 2px rgba(2, 6, 23, 0.5);
+  --shadow-surface: 0 1px 3px rgba(2, 6, 23, 0.6);
+  --shadow-surface-hover: 0 14px 30px rgba(2, 6, 23, 0.5);
+  --shadow-accent-warning: 0 10px 30px color-mix(in srgb, var(--accent-warning) 35%, transparent);
+  --shadow-accent-success: 0 10px 30px color-mix(in srgb, var(--accent-success) 35%, transparent);
+  --shadow-accent-danger: 0 10px 30px color-mix(in srgb, var(--accent-danger) 35%, transparent);
+  --shadow-accent-primary: 0 10px 30px color-mix(in srgb, var(--accent-primary) 35%, transparent);
 }
 
 /* ===== Base Reset & Mobile Optimizations ===== */

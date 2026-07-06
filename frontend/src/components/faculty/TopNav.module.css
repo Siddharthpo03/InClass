@@ -1,5 +1,6 @@
 .topNav {
-  background: var(--bg-card);
+  background: var(--bg-nav);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color);
   padding: 0 1.5rem;
   height: 4rem;
@@ -13,8 +14,15 @@
   right: 0;
   width: 100%;
   z-index: 100;
-  box-shadow: var(--shadow-sm);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
   will-change: auto;
+}
+
+:global(body.darkMode) .topNav {
+  background: var(--bg-nav);
+  border-bottom-color: var(--border-color);
 }
 
 .navContent {
@@ -45,11 +53,11 @@
 }
 
 .logoButton:hover {
-  background-color: var(--bg-surface);
+  background-color: var(--accent-primary-soft);
 }
 
 .logoButton:focus {
-  outline: 2px solid var(--primary-color, #3b82f6);
+  outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
 
@@ -60,10 +68,11 @@
   min-height: 2rem;
   max-width: 2rem;
   max-height: 2rem;
-  object-fit: contain;
-  border-radius: 0.375rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
   display: block;
   flex-shrink: 0;
+  box-shadow: var(--shadow-accent-primary);
 }
 
 .logoButton i {
@@ -86,9 +95,13 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  background: var(--bg-surface);
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: var(--accent-primary-soft);
+}
+
+:global(body.darkMode) .profileSection {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .profileInfo {
@@ -113,33 +126,33 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: var(--bg-danger, #fee2e2);
-  color: var(--text-danger, #991b1b);
-  border: 1px solid var(--border-danger, #fecaca);
-  border-radius: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: var(--gradient-primary);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-accent-primary);
 }
 
 .darkMode .logoutButton {
-  background: rgba(153, 27, 27, 0.2);
-  color: #fca5a5;
-  border-color: rgba(153, 27, 27, 0.3);
+  background: var(--gradient-primary);
+  color: var(--text-on-accent);
 }
 
 .logoutButton:hover {
-  background: var(--bg-danger-hover, #fecaca);
+  transform: translateY(-2px);
 }
 
 .darkMode .logoutButton:hover {
-  background: rgba(153, 27, 27, 0.3);
+  transform: translateY(-2px);
 }
 
 .logoutButton:focus {
-  outline: 2px solid var(--primary-color, #3b82f6);
+  outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
 
@@ -172,4 +185,3 @@
     justify-content: center;
   }
 }
-

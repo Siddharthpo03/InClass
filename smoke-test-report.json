@@ -1,0 +1,54 @@
+{
+  "timestamp": "2026-05-19T14:26:16.170Z",
+  "baseUrl": "https://api.inclass.siddharthp.com/api",
+  "summary": {
+    "total": 9,
+    "passed": 8,
+    "failed": 1,
+    "skipped": 0
+  },
+  "results": {
+    "passed": [
+      {
+        "name": "GET /api/auth/check-email",
+        "status": 200
+      },
+      {
+        "name": "GET /api/auth/colleges",
+        "status": 200
+      },
+      {
+        "name": "GET /api/faculty/my-courses",
+        "status": 401
+      },
+      {
+        "name": "GET /api/faculty/sessions",
+        "status": 401
+      },
+      {
+        "name": "GET /api/registrations/pending",
+        "status": 401
+      },
+      {
+        "name": "GET /api/registrations/my-registrations",
+        "status": 401
+      },
+      {
+        "name": "GET /api/biometrics/assist",
+        "status": 404
+      },
+      {
+        "name": "GET /api/biometrics/status",
+        "status": 200
+      }
+    ],
+    "failed": [
+      {
+        "name": "GET /api/faculty/list",
+        "expected": 200,
+        "actual": 401
+      }
+    ],
+    "skipped": []
+  }
+}

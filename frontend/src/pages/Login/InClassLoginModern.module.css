@@ -82,6 +82,20 @@
   font-weight: var(--font-medium);
 }
 
+.successAlert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background: var(--success-50);
+  border: 1px solid var(--success-200);
+  border-radius: var(--radius-lg);
+  color: var(--success-700);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
 .form {
   display: flex;
   flex-direction: column;
@@ -398,6 +412,36 @@ input::placeholder {
   background: var(--bg-secondary);
 }
 
+.faceCircle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 65%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid var(--primary-500);
+  pointer-events: none;
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.3);
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.faceDetectedCircle {
+  border-color: #22c55e;
+  box-shadow:
+    0 0 0 2000px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(34, 197, 94, 0.5);
+}
+
+.faceNotDetectedCircle {
+  border-color: #ef4444;
+  box-shadow:
+    0 0 0 2000px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(239, 68, 68, 0.3);
+}
+
 .modalFooter {
   display: flex;
   gap: 0.75rem;
@@ -453,14 +497,96 @@ input::placeholder {
 @media (max-width: 768px) {
   .loginContainer {
     grid-template-columns: 1fr;
+    min-height: 100vh;
+  }
+
+  .formSection {
+    padding: 1.5rem 1.25rem;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .formContent {
+    max-width: 100%;
+    width: 100%;
   }
 
   .illustrationSection {
     display: none;
   }
 
-  .formSection {
-    padding: 2rem 1.25rem;
+  /* Input fields full width and prevent iOS zoom */
+  .inputWrapper {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  input[type="email"],
+  input[type="password"],
+  input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+
+  /* Buttons full width */
+  .submitButton,
+  .registerButton {
+    width: 100%;
+    min-height: 52px;
+    font-size: 1rem;
+  }
+
+  /* Mobile logo shown only on small screens */
+  .mobileLogo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .mobileLogoIcon {
+    background: var(--primary-500);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+  }
+  .mobileLogoText {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .themeToggle {
+    top: 12px;
+    right: 12px;
+  }
+
+  /* Modal adjustments for bottom sheet style */
+  .modalOverlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .modalContent {
+    width: 100%;
+    border-radius: 24px 24px 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* Header text sizes */
+  .header h1 {
+    font-size: 1.5rem;
+  }
+  .subtitle {
+    font-size: 0.875rem;
   }
 }
 

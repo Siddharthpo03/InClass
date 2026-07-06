@@ -41,15 +41,15 @@
 .heroBadge {
   display: inline-block;
   padding: 8px 20px;
-  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
-  color: white;
+  background: var(--gradient-success);
+  color: var(--text-on-accent);
   border-radius: 50px;
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-bottom: 25px;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  box-shadow: var(--shadow-accent-success);
   animation: fadeInUp 0.6s ease;
 }
 
@@ -57,7 +57,7 @@
   font-size: 3.5rem;
   font-weight: 800;
   margin-bottom: 25px;
-  background: linear-gradient(135deg, #111827 0%, #374151 100%);
+  background: linear-gradient(135deg, var(--text-heading) 0%, var(--text-body) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -67,7 +67,7 @@
 }
 
 :global(body.darkMode) .heroSection h1 {
-  background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-muted) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -105,7 +105,7 @@
   background: var(--bg-card);
   border-radius: 20px;
   box-shadow: var(--shadow-card);
-  border: 1px solid rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--accent-success-soft);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -118,7 +118,7 @@
   top: 0;
   bottom: 0;
   width: 4px;
-  background: linear-gradient(to top, #10b981 0%, #3b82f6 100%);
+  background: var(--gradient-success);
   transform: scaleY(0);
   transform-origin: bottom;
   transition: transform 0.4s ease;
@@ -126,8 +126,8 @@
 
 .termsSection:hover {
   transform: translateX(5px);
-  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: var(--shadow-surface-hover);
+  border-color: var(--accent-success);
 }
 
 .termsSection:hover::before {
@@ -135,17 +135,17 @@
 }
 
 :global(body.darkMode) .termsSection {
-  border-color: rgba(16, 185, 129, 0.2);
+  border-color: var(--accent-success-soft);
 }
 
 :global(body.darkMode) .termsSection:hover {
-  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.25);
+  box-shadow: var(--shadow-surface-hover);
 }
 
 .sectionNumber {
   font-size: 3rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  background: var(--gradient-success);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

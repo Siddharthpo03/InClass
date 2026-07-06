@@ -5,8 +5,7 @@
   gap: 1rem;
   padding: 1rem 1.25rem;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-surface-hover);
   min-width: 300px;
   max-width: 500px;
   animation: slideIn 0.3s ease-out;
@@ -42,66 +41,66 @@
 
 /* Success Toast */
 .toast.success {
-  background-color: #f0fdf4;
-  border-left: 4px solid #22c55e;
-  color: #166534;
+  background-color: var(--success-bg);
+  border-left: 4px solid var(--success-border);
+  color: var(--success-text);
 }
 
 .darkMode .toast.success {
-  background-color: rgba(22, 101, 52, 0.2);
-  color: #86efac;
+  background-color: var(--success-bg);
+  color: var(--success-text);
 }
 
 .toast.success .toastContent i {
-  color: #22c55e;
+  color: var(--success-border);
 }
 
 /* Error Toast */
 .toast.error {
-  background-color: #fef2f2;
-  border-left: 4px solid #ef4444;
-  color: #991b1b;
+  background-color: var(--error-bg);
+  border-left: 4px solid var(--error-border);
+  color: var(--error-text);
 }
 
 .darkMode .toast.error {
-  background-color: rgba(153, 27, 27, 0.2);
-  color: #fca5a5;
+  background-color: var(--error-bg);
+  color: var(--error-text);
 }
 
 .toast.error .toastContent i {
-  color: #ef4444;
+  color: var(--error-border);
 }
 
 /* Warning Toast */
 .toast.warning {
-  background-color: #fffbeb;
-  border-left: 4px solid #f59e0b;
-  color: #92400e;
+  background-color: var(--warning-bg);
+  border-left: 4px solid var(--warning-border);
+  color: var(--warning-text);
 }
 
 .darkMode .toast.warning {
-  background-color: rgba(146, 64, 14, 0.2);
-  color: #fcd34d;
+  background-color: var(--warning-bg);
+  color: var(--warning-text);
 }
 
 .toast.warning .toastContent i {
-  color: #f59e0b;
+  color: var(--warning-border);
 }
 
 /* Info Toast */
 .toast.info {
-  background-color: #eff6ff;
-  border-left: 4px solid #3b82f6;
-  color: #1e40af;
+  background-color: var(--accent-primary-subtle);
+  border-left: 4px solid var(--accent-primary);
+  color: var(--accent-primary);
 }
 
 .darkMode .toast.info {
-  background-color: rgba(30, 64, 175, 0.2);
-  color: #93c5fd;
+  background-color: var(--accent-primary-subtle);
+  color: var(--accent-primary);
 }
 
 .toast.info .toastContent i {
-  color: #3b82f6;
+  color: var(--accent-primary);
 }
 
 .closeButton {
@@ -121,11 +120,11 @@
 
 .closeButton:hover {
   opacity: 1;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--bg-hover);
 }
 
 .darkMode .closeButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-hover);
 }
 
 .closeButton:focus {

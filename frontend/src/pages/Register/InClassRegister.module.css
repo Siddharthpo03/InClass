@@ -83,8 +83,8 @@
   border-radius: 50%;
   background: linear-gradient(
     135deg,
-    rgba(16, 185, 129, 0.1) 0%,
-    rgba(59, 130, 246, 0.1) 100%
+    var(--accent-success-soft) 0%,
+    var(--accent-primary-soft) 100%
   );
 }
 
@@ -102,8 +102,8 @@
   right: 20px;
   background: linear-gradient(
     135deg,
-    rgba(102, 126, 234, 0.1) 0%,
-    rgba(118, 75, 162, 0.1) 100%
+    var(--accent-primary-soft) 0%,
+    var(--accent-secondary-soft) 100%
   );
 }
 
@@ -139,12 +139,12 @@
 }
 
 .stepperActive .stepperDot {
-  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
-  color: white;
+  background: var(--gradient-success);
+  color: var(--text-on-accent);
 }
 
 .stepperCurrent .stepperDot {
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 0 4px var(--accent-success-soft);
 }
 
 .stepperTitle {
@@ -161,10 +161,10 @@
     max-width: 70px;
   }
   .stepperActive .stepperTitle {
-    color: #10b981;
+    color: var(--accent-success);
   }
   .stepperCurrent .stepperTitle {
-    color: #059669;
+    color: var(--accent-success);
   }
 }
 
@@ -177,7 +177,7 @@
 
 .stepperActive + .stepperItem .stepperLine,
 .stepperItem:has(+ .stepperActive) .stepperLine {
-  background: linear-gradient(90deg, #10b981, #3b82f6);
+  background: linear-gradient(90deg, var(--accent-success), var(--accent-primary));
   opacity: 0.5;
 }
 
@@ -206,9 +206,9 @@
 }
 
 .backButton:hover:not(:disabled) {
-  border-color: #10b981;
-  color: #059669;
-  background: rgba(16, 185, 129, 0.06);
+  border-color: var(--accent-success);
+  color: var(--accent-success);
+  background: var(--accent-success-soft);
 }
 
 .backButton:disabled {
@@ -221,7 +221,7 @@
   align-items: center;
   gap: 8px;
   padding: 14px 24px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: var(--gradient-success);
   border: none;
   border-radius: 14px;
   color: white;
@@ -229,12 +229,12 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: var(--shadow-accent-success);
 }
 
 .nextButton:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  box-shadow: var(--shadow-accent-success);
 }
 
 .nextButton:disabled {

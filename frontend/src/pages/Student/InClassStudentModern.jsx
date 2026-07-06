@@ -22,7 +22,50 @@ const InClassStudentModern = ({ previewMode = false }) => {
   const [filterDateRange, setFilterDateRange] = useState("all");
   const [sessionCode, setSessionCode] = useState("");
   const [isSessionActive, setIsSessionActive] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fullscreenWarning, setFullscreenWarning] = useState(false);
+  const [sessionTimer, setSessionTimer] = useState(null);
+  const [timeRemaining, setTimeRemaining] = useState(0);
   const [toasts, setToasts] = useState([]);
+  const timerRef = useRef(null);
+  const fullscreenRef = useRef(null);
+  const firstName = userData?.name?.split(" ")?.[0] || "Student";
+  const currentDate = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const sidebarLinks = [
+    { label: "Dashboard", icon: "bx-grid-alt" },
+    { label: "Register Courses", icon: "bx-book-add", path: "/student/register-courses" },
+    { label: "Mark Attendance", icon: "bx-qr" },
+    { label: "History", icon: "bx-history" },
+    { label: "Profile", icon: "bx-user" },
+  ];
+
+  const handleSidebarAction = (item) => {
+    if (item.path) {
+      navigate(item.path);
+      return;
+    }
+
+    if (item.label === "Mark Attendance") {
+      void handleJoinSession({ duration: 300 });
+      return;
+    }
+
+    if (item.label === "History") {
+      document.getElementById("student-attendance-history")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      return;
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Fetch user profile
   useEffect(() => {
@@ -105,6 +148,46 @@ const InClassStudentModern = ({ previewMode = false }) => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen = Boolean(
+        document.fullscreenElement ||
+          document.webkitFullscreenElement ||
+          document.mozFullScreenElement,
+      );
+
+      setIsFullscreen(isCurrentlyFullscreen);
+
+      if (!isCurrentlyFullscreen && isSessionActive) {
+        setFullscreenWarning(true);
+        setIsSessionActive(false);
+        setSessionCode("");
+        setSessionTimer(null);
+        if (timerRef.current) clearInterval(timerRef.current);
+        addToast("⚠️ You exited fullscreen! Attendance cancelled.", "error");
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange,
+      );
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+    };
+  }, [isSessionActive]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
   // Fetch attendance history
   useEffect(() => {
     const fetchHistory = async () => {
@@ -135,7 +218,10 @@ const InClassStudentModern = ({ previewMode = false }) => {
       if (response.data?.success) {
         addToast("Attendance marked successfully!", "success");
         setSessionCode("");
+        setSessionTimer(null);
         setIsSessionActive(false);
+        if (document.exitFullscreen) document.exitFullscreen();
+        if (timerRef.current) clearInterval(timerRef.current);
         // Refetch sessions and history
         const sessionsRes = await apiClient.get("/student/active-sessions");
         setActiveSessions(sessionsRes.data.sessions || []);
@@ -149,8 +235,54 @@ const InClassStudentModern = ({ previewMode = false }) => {
     }
   };
 
-  const handleJoinSession = (session) => {
+  const enterFullscreen = async () => {
+    try {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        await elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        await elem.webkitRequestFullscreen();
+      } else if (elem.mozRequestFullScreen) {
+        await elem.mozRequestFullScreen();
+      }
+      setIsFullscreen(true);
+    } catch (err) {
+      console.error("Fullscreen error:", err);
+    }
+  };
+
+  async function handleJoinSession(session) {
+    await enterFullscreen();
     setIsSessionActive(true);
+    setFullscreenWarning(false);
+
+    const duration = session.duration || 300;
+    setSessionTimer(duration);
+    setTimeRemaining(duration);
+
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          setSessionTimer(null);
+          setIsSessionActive(false);
+          setSessionCode("");
+          if (document.exitFullscreen) document.exitFullscreen();
+          addToast("⏰ Time's up! Attendance window closed.", "error");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const addToast = (message, type) => {
@@ -183,147 +315,230 @@ const InClassStudentModern = ({ previewMode = false }) => {
   }
 
   return (
-    <div className={styles.wrapper}>
-      <Navigation />
-      <div className={styles.container}>
-        {/* Hero Header */}
-        <header className={styles.hero}>
-          <div className={styles.heroInner}>
-            <div className={styles.heroLeft}>
-              <div className={styles.avatar} aria-hidden>
-                {userData?.name ? userData.name.charAt(0).toUpperCase() : "S"}
-              </div>
-              <div>
-                <h1 className={styles.heroTitle}>{userData?.name}</h1>
-                <p className={styles.heroSubtitle}>{userData?.email}</p>
-                <p className={styles.heroMeta}>
-                  {userData?.college && <span>{userData.college}</span>}
-                  {userData?.department && (
-                    <span className={styles.metaSeparator}>{userData.department}</span>
-                  )}
-                </p>
-              </div>
-            </div>
-            <div className={styles.heroRight}>
-              <button className={styles.signoutGhost} onClick={handleLogout}>
-                <i className="bx bx-log-out"></i>
-                Sign Out
-              </button>
-            </div>
+    <div className={styles.dashboardLayout}>
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarBrand}>
+          <div className={styles.sidebarLogo}>
+            <img src="/favicon.jpg" alt="InClass" />
           </div>
-        </header>
-
-        {/* Stats Cards */}
-        <div className={styles.statsGrid}>
-          <div className={`${styles.statCard} ${styles.attendance}`}> 
-            <div className={styles.statContent}>
-              <div>
-                <p className={styles.statLabel}>Attendance</p>
-                <h3 className={styles.statValue}>{attendanceStats.percentage}%</h3>
-              </div>
-              <div className={styles.statIconLarge}>
-                <i className="bx bx-pie-chart"></i>
-              </div>
-            </div>
-            <div className={styles.cardWave} />
-          </div>
-
-          <div className={`${styles.statCard} ${styles.present}`}>
-            <div className={styles.statContent}>
-              <div>
-                <p className={styles.statLabel}>Present</p>
-                <h3 className={styles.statValue}>{attendanceStats.present}</h3>
-              </div>
-              <div className={styles.statIconLarge}>
-                <i className="bx bx-check-circle"></i>
-              </div>
-            </div>
-            <div className={styles.cardWave} />
-          </div>
-
-          <div className={`${styles.statCard} ${styles.absent}`}>
-            <div className={styles.statContent}>
-              <div>
-                <p className={styles.statLabel}>Absent</p>
-                <h3 className={styles.statValue}>{attendanceStats.absent}</h3>
-              </div>
-              <div className={styles.statIconLarge}>
-                <i className="bx bx-x-circle"></i>
-              </div>
-            </div>
-            <div className={styles.cardWave} />
-          </div>
-
-          <div className={`${styles.statCard} ${styles.total}`}>
-            <div className={styles.statContent}>
-              <div>
-                <p className={styles.statLabel}>Total Classes</p>
-                <h3 className={styles.statValue}>{attendanceStats.totalClasses}</h3>
-              </div>
-              <div className={styles.statIconLarge}>
-                <i className="bx bx-book"></i>
-              </div>
-            </div>
-            <div className={styles.cardWave} />
+          <div>
+            <strong>InClass</strong>
+            <span>Student Portal</span>
           </div>
         </div>
 
-        {/* Quick Action - Mark Attendance */}
-        <div className={styles.quickActions}
-             onClick={() => setIsSessionActive(true)}
-             role="button"
-        >
-          <div className={styles.quickCard}>
-            <div className={styles.quickLeft}>
-              <h3>Mark Your Attendance</h3>
-              <p>Enter session code to mark attendance</p>
+        <nav className={styles.sidebarNav} aria-label="Student navigation">
+          {sidebarLinks.map((item, index) => (
+            <button
+              key={item.label}
+              type="button"
+              className={`${styles.sidebarLink} ${index === 0 ? styles.sidebarLinkActive : ""}`}
+              onClick={() => handleSidebarAction(item)}
+            >
+              <i className={`bx ${item.icon}`} aria-hidden="true"></i>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          <div className={styles.sidebarUser}>
+            <div className={styles.avatar}>
+              {firstName.charAt(0).toUpperCase()}
             </div>
-            <div className={styles.quickIcon}>
+            <div>
+              <strong>{userData?.name}</strong>
+              <span>{userData?.role || "student"}</span>
+            </div>
+          </div>
+          <button className={styles.sidebarLogout} onClick={handleLogout}>
+            <i className="bx bx-log-out"></i>
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      <main className={styles.mainContent}>
+        <div className={styles.topBar}>
+          <div>
+            <p className={styles.kicker}>Student Dashboard</p>
+            <h1>Overview</h1>
+          </div>
+          <div className={styles.topBarMeta}>{currentDate}</div>
+        </div>
+
+        <section className={styles.heroCard}>
+          <div className={styles.heroCopy}>
+            <span className={styles.heroEyebrow}>Attendance overview</span>
+            <h2>Good Morning, {firstName}! 👋</h2>
+            <p>Here's what's happening with your attendance today</p>
+            <div className={styles.badgeRow}>
+              {userData?.college && <span>{userData.college}</span>}
+              {userData?.department && <span>{userData.department}</span>}
+            </div>
+          </div>
+          <div className={styles.heroAvatar} aria-hidden>
+            {firstName.charAt(0).toUpperCase()}
+          </div>
+        </section>
+
+        <section className={styles.statsGrid}>
+          <article className={`${styles.statCard} ${styles.statAttendance}`}>
+            <span className={styles.statLabel}>Attendance</span>
+            <strong className={styles.statValue}>
+              {attendanceStats.percentage}%
+            </strong>
+            <span className={styles.statTrend}>
+              <i className="bx bx-trending-up"></i> +4%
+            </span>
+          </article>
+          <article className={`${styles.statCard} ${styles.statPresent}`}>
+            <span className={styles.statLabel}>Present</span>
+            <strong className={styles.statValue}>
+              {attendanceStats.present}
+            </strong>
+            <span className={styles.statTrend}>
+              <i className="bx bx-trending-up"></i> +2
+            </span>
+          </article>
+          <article className={`${styles.statCard} ${styles.statAbsent}`}>
+            <span className={styles.statLabel}>Absent</span>
+            <strong className={styles.statValue}>
+              {attendanceStats.absent}
+            </strong>
+            <span className={styles.statTrend}>
+              <i className="bx bx-trending-down"></i> -1
+            </span>
+          </article>
+          <article className={`${styles.statCard} ${styles.statTotal}`}>
+            <span className={styles.statLabel}>Total Classes</span>
+            <strong className={styles.statValue}>
+              {attendanceStats.totalClasses}
+            </strong>
+            <span className={styles.statTrend}>
+              <i className="bx bx-trending-up"></i> +3
+            </span>
+          </article>
+        </section>
+
+        <section className={styles.quickActionSection}>
+          <div
+            className={styles.quickActionCard}
+            onClick={() => void handleJoinSession({ duration: 300 })}
+            role="button"
+            tabIndex={0}
+          >
+            <div className={styles.quickActionIcon}>
               <i className="bx bx-qr"></i>
             </div>
-          </div>
-        </div>
-
-        {/* Active Sessions */}
-        {activeSessions.length > 0 && (
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <h2>Active Sessions</h2>
-              <span className={styles.badge}>{activeSessions.length}</span>
+            <div className={styles.quickActionBody}>
+              <h3>Mark Attendance</h3>
+              <p>Enter session code to mark attendance</p>
+              <form
+                onSubmit={handleMarkAttendance}
+                className={styles.quickActionForm}
+              >
+                <input
+                  type="text"
+                  placeholder="Enter code"
+                  value={sessionCode}
+                  onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
+                  maxLength="6"
+                />
+                <button type="submit">
+                  <i className="bx bx-check"></i>
+                  Submit
+                </button>
+              </form>
             </div>
-            <div className={styles.sessionsGrid}>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2>My Courses</h2>
+            <span className={styles.sectionPill}>
+              {activeSessions.length} live
+            </span>
+          </div>
+          {activeSessions.length > 0 ? (
+            <div className={styles.courseGrid}>
               {activeSessions.map((session) => (
-                <div key={session.id} className={styles.sessionCard}>
-                  <div className={styles.sessionIcon}>
-                    <i className="bx bx-book-open"></i>
+                <article key={session.id} className={styles.courseCard}>
+                  <div className={styles.courseTop}>
+                    <div>
+                      <span className={styles.courseStatus}>enrolled</span>
+                      <h3>{session.name}</h3>
+                    </div>
+                    <button
+                      className={styles.courseAction}
+                      onClick={() => handleJoinSession(session)}
+                      type="button"
+                    >
+                      Join
+                    </button>
                   </div>
-                  <h3>{session.name}</h3>
-                  <p className={styles.sessionDetail}>
-                    <i className="bx bx-user"></i>
-                    <span>{session.faculty}</span>
-                  </p>
-                  <p className={styles.sessionDetail}>
-                    <i className="bx bx-map"></i>
-                    <span>{session.room}</span>
-                  </p>
-                  <p className={styles.sessionTime}>
-                    <i className="bx bx-time"></i>
-                    <span>{session.time}</span>
-                  </p>
-                  <button
-                    className={styles.joinButton}
-                    onClick={() => handleJoinSession(session)}
-                  >
-                    <i className="bx bx-log-in-circle"></i>
-                    Join Session
-                  </button>
-                </div>
+                  <div className={styles.courseMeta}>
+                    Faculty: {session.faculty}
+                  </div>
+                  <div className={styles.courseMeta}>Room: {session.room}</div>
+                  <div className={styles.courseMeta}>Time: {session.time}</div>
+                  <div className={styles.courseMeta}>
+                    Department: {userData?.department || "General"}
+                  </div>
+                </article>
               ))}
             </div>
-          </section>
-        )}
+          ) : (
+            <div className={styles.emptyState}>
+              <svg
+                className={styles.emptyIllustration}
+                viewBox="0 0 120 120"
+                aria-hidden="true"
+              >
+                <rect
+                  x="20"
+                  y="24"
+                  width="80"
+                  height="72"
+                  rx="16"
+                  fill="currentColor"
+                  opacity="0.08"
+                />
+                <rect
+                  x="28"
+                  y="34"
+                  width="64"
+                  height="48"
+                  rx="12"
+                  fill="currentColor"
+                  opacity="0.14"
+                />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="16"
+                  fill="currentColor"
+                  opacity="0.22"
+                />
+                <path
+                  d="M60 50v12l8 5"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+              </svg>
+              <h3>You're all caught up!</h3>
+              <p>
+                No active sessions right now. We'll notify you when a new
+                session starts.
+              </p>
+            </div>
+          )}
+        </section>
 
-        {/* Mark Attendance */}
         {isSessionActive && (
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
@@ -355,6 +570,9 @@ const InClassStudentModern = ({ previewMode = false }) => {
                   onClick={() => {
                     setIsSessionActive(false);
                     setSessionCode("");
+                    setSessionTimer(null);
+                    if (timerRef.current) clearInterval(timerRef.current);
+                    if (document.exitFullscreen) document.exitFullscreen();
                   }}
                 >
                   Cancel
@@ -368,25 +586,37 @@ const InClassStudentModern = ({ previewMode = false }) => {
           </section>
         )}
 
-        {/* Attendance History */}
         {attendanceHistory.length > 0 && (
-          <section className={styles.section}>
+          <section className={styles.section} id="student-attendance-history">
             <div className={styles.sectionHeader}>
-              <h2>Attendance History</h2>
-              <div className={styles.filterButtons}>
-                {["all", "week", "month"].map((range) => (
-                  <button
-                    key={range}
-                    className={`${styles.filterButton} ${
-                      filterDateRange === range ? styles.active : ""
-                    }`}
-                    onClick={() => setFilterDateRange(range)}
-                  >
-                    {range === "all"
-                      ? "All Time"
-                      : range.charAt(0).toUpperCase() + range.slice(1)}
-                  </button>
-                ))}
+              <div>
+                <h2>Attendance History</h2>
+                <p className={styles.sectionSubtext}>
+                  Track your recent attendance activity
+                </p>
+              </div>
+              <div className={styles.historyTools}>
+                <input
+                  className={styles.historySearch}
+                  type="search"
+                  placeholder="Search history"
+                />
+                <div className={styles.filterButtons}>
+                  {["all", "week", "month"].map((range) => (
+                    <button
+                      key={range}
+                      type="button"
+                      className={`${styles.filterButton} ${filterDateRange === range ? styles.filterActive : ""}`}
+                      onClick={() => setFilterDateRange(range)}
+                    >
+                      {range === "all"
+                        ? "All"
+                        : range === "week"
+                          ? "This Week"
+                          : "This Month"}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             <div className={styles.historyTable}>
@@ -397,7 +627,10 @@ const InClassStudentModern = ({ previewMode = false }) => {
                 <div>Status</div>
               </div>
               {attendanceHistory.map((record, idx) => (
-                <div key={idx} className={styles.tableRow}>
+                <div
+                  key={idx}
+                  className={`${styles.tableRow} ${idx % 2 === 0 ? styles.tableRowAlt : ""}`}
+                >
                   <div>{new Date(record.date).toLocaleDateString()}</div>
                   <div className={styles.cellEllipsis}>{record.subject}</div>
                   <div className={styles.cellEllipsis}>{record.faculty}</div>
@@ -414,50 +647,66 @@ const InClassStudentModern = ({ previewMode = false }) => {
           </section>
         )}
 
-        {/* Empty State */}
-        {activeSessions.length === 0 && attendanceHistory.length === 0 && (
-          <section className={styles.emptyState}>
-            <svg
-              className={styles.emptyIllustration}
-              viewBox="0 0 120 120"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden
+        <Footer />
+        <div className={styles.toastContainer}>
+          {toasts.map((toast) => (
+            <div
+              key={toast.id}
+              className={`${styles.toast} ${toast.type === "success" ? styles.toastSuccess : styles.toastError}`}
             >
-              <rect x="8" y="20" width="104" height="84" rx="8" fill="#f3f4f6" />
-              <rect x="18" y="30" width="20" height="8" rx="2" fill="#e5e7eb" />
-              <rect x="18" y="44" width="80" height="6" rx="2" fill="#e5e7eb" />
-              <circle cx="90" cy="70" r="18" fill="#eff6ff" />
-              <path d="M85 70a5 5 0 1 1 10 0v6a5 5 0 0 1-10 0v-6z" fill="#bfdbfe" />
-              <path d="M88 74h8v2h-8z" fill="#93c5fd" />
-            </svg>
-            <h3>You're all caught up!</h3>
-            <p>No active sessions right now. We'll notify you when a new session starts.</p>
-          </section>
-        )}
-      </div>
+              <i
+                className={`bx ${toast.type === "success" ? "bx-check-circle" : "bx-error"}`}
+              ></i>
+              <span>{toast.message}</span>
+            </div>
+          ))}
+        </div>
 
-      {/* Toast Notifications */}
-      <div className={styles.toastContainer}>
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={`${styles.toast} ${styles[`toast${toast.type}`]}`}
-          >
-            <i
-              className={`bx ${
-                toast.type === "success"
-                  ? "bx-check-circle"
-                  : "bx-exclamation-circle"
-              }`}
-            ></i>
-            <span>{toast.message}</span>
+        {isSessionActive && (
+          <div ref={fullscreenRef} className={styles.fullscreenOverlay}>
+            <div className={styles.fullscreenContent}>
+              <div className={styles.timerCircle}>
+                <span className={styles.timerText}>{formatTime(timeRemaining)}</span>
+                <span className={styles.timerLabel}>remaining</span>
+              </div>
+
+              <h2 className={styles.fullscreenTitle}>Mark Your Attendance</h2>
+              <p className={styles.fullscreenSubtitle}>
+                Enter the session code provided by your faculty
+              </p>
+
+              {fullscreenWarning && (
+                <div className={styles.warningBanner}>
+                  <i className="bx bx-error"></i>
+                  Do NOT exit fullscreen or your attendance will be cancelled!
+                </div>
+              )}
+
+              <form onSubmit={handleMarkAttendance} className={styles.fullscreenForm}>
+                <input
+                  type="text"
+                  placeholder="Enter session code (e.g. ABC123)"
+                  value={sessionCode}
+                  onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
+                  maxLength="6"
+                  className={styles.fullscreenInput}
+                  autoFocus
+                />
+                <button type="submit" className={styles.fullscreenSubmit}>
+                  <i className="bx bx-check-circle"></i>
+                  Mark Attendance
+                </button>
+              </form>
+
+              <p className={styles.fullscreenWarning}>
+                <i className="bx bx-info-circle"></i>
+                Exiting fullscreen will cancel your attendance
+              </p>
+            </div>
           </div>
-        ))}
-      </div>
-
-      <Footer />
+        )}
+      </main>
     </div>
   );
 };
-
 export default InClassStudentModern;

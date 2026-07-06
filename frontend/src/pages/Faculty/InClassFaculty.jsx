@@ -634,6 +634,11 @@ const InClassFaculty = ({ previewMode = false }) => {
     [registeredCourses, selectedCourseId],
   );
 
+  const totalStudents = stats.studentsInRoster;
+  const attendanceRate = totalStudents
+    ? Math.round((stats.presentCount / totalStudents) * 100)
+    : 0;
+
   if (loading) {
     return <LoadingSpinner fullScreen message="Loading your dashboard..." />;
   }
@@ -677,16 +682,54 @@ const InClassFaculty = ({ previewMode = false }) => {
           <i className="bx bx-menu"></i>
         </button>
 
-        {/* Welcome Section */}
-        <header className={styles.welcomeSection}>
-          <h1 className={styles.welcomeTitle}>
-            Welcome, {facultyProfile.name}!
-          </h1>
-          <p className={styles.welcomeSubtitle}>
-            {facultyProfile.role} • {facultyProfile.department || "N/A"} •{" "}
-            {facultyProfile.college || "Tech University"}
-          </p>
-        </header>
+        <section className={styles.heroSection}>
+          <div className={styles.heroCopy}>
+            <span className={styles.heroEyebrow}>Faculty Dashboard</span>
+            <h1 className={styles.heroTitle}>Welcome, {facultyProfile.name}</h1>
+            <p className={styles.heroSubtitle}>
+              Track live attendance, manage course access, and review student
+              activity in one place.
+            </p>
+            <div className={styles.heroMeta}>
+              <span>{facultyProfile.department || "N/A"}</span>
+              <span>{facultyProfile.college || "Tech University"}</span>
+              <span>{registeredCourses.length} courses</span>
+              <span>{totalStudents} students</span>
+            </div>
+          </div>
+          <div className={styles.heroPanel}>
+            <div className={styles.heroAvatar}>
+              {facultyProfile.name?.charAt(0)?.toUpperCase()}
+            </div>
+            <div className={styles.heroPanelMeta}>
+              <strong>{facultyProfile.role}</strong>
+              <span>Live attendance command center</span>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.quickStatsSection}>
+          <div className={styles.quickStatCard}>
+            <span>Total Courses</span>
+            <strong>{registeredCourses.length}</strong>
+            <i className="bx bx-book"></i>
+          </div>
+          <div className={styles.quickStatCard}>
+            <span>Active Sessions</span>
+            <strong>{activeSession ? 1 : 0}</strong>
+            <i className="bx bx-calendar-check"></i>
+          </div>
+          <div className={styles.quickStatCard}>
+            <span>Total Students</span>
+            <strong>{totalStudents}</strong>
+            <i className="bx bx-group"></i>
+          </div>
+          <div className={styles.quickStatCard}>
+            <span>Attendance Rate</span>
+            <strong>{attendanceRate}%</strong>
+            <i className="bx bx-line-chart"></i>
+          </div>
+        </section>
 
         {/* Pending Students Section */}
         {pendingStudents.length > 0 && (
@@ -807,37 +850,6 @@ const InClassFaculty = ({ previewMode = false }) => {
             </div>
           </section>
         )}
-
-        {/* Stats Cards Section */}
-        <section className={styles.statsSection}>
-          <div className={styles.statsGrid}>
-            <StatCard
-              value={registeredCourses.length}
-              label="Total Courses"
-              icon="bx-book"
-              variant="info"
-              onClick={() => navigate("/faculty/courses")}
-            />
-            <StatCard
-              value={stats.presentCount}
-              label="Present"
-              icon="bx-check-circle"
-              variant="success"
-            />
-            <StatCard
-              value={stats.absentCount}
-              label="Absent"
-              icon="bx-x-circle"
-              variant="error"
-            />
-            <StatCard
-              value={stats.studentsInRoster}
-              label="Total Students"
-              icon="bx-group"
-              variant="default"
-            />
-          </div>
-        </section>
 
         {/* Pending course registrations */}
         {facultyProfile && (

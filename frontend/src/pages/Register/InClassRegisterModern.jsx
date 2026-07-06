@@ -83,6 +83,14 @@ const InClassRegisterModern = () => {
     department: "",
     department_id: null,
     roll_no: "",
+    gender: "",
+    date_of_birth: "",
+    address: "",
+    section: "",
+    year_semester: "",
+    college_id_number: "",
+    employee_id: "",
+    designation: "",
   };
 
   /**
@@ -99,6 +107,14 @@ const InClassRegisterModern = () => {
    *  department: string,
    *  department_id: number|string|null,
    *  roll_no: string,
+  *  gender: string,
+  *  date_of_birth: string,
+  *  address: string,
+  *  section: string,
+  *  year_semester: string,
+  *  college_id_number: string,
+  *  employee_id: string,
+  *  designation: string,
    * }} FormData
    */
   /**
@@ -260,6 +276,14 @@ const InClassRegisterModern = () => {
         college_id: formData.college_id,
         department_id: formData.department_id,
         roll_no: formData.roll_no,
+        gender: formData.gender,
+        date_of_birth: formData.date_of_birth || null,
+        address: formData.address,
+        section: formData.section,
+        year_semester: formData.year_semester,
+        college_id_number: formData.college_id_number,
+        employee_id: formData.employee_id,
+        designation: formData.designation,
       });
 
       if (response.data?.token) {
@@ -599,6 +623,145 @@ const InClassRegisterModern = () => {
                   </span>
                 )}
               </div>
+
+              <div className={styles.formGroup}>
+                <label>Gender</label>
+                <div className={styles.inputWrapper}>
+                  <i className="bx bx-user"></i>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Date of Birth</label>
+                <div className={styles.inputWrapper}>
+                  <i className="bx bx-calendar"></i>
+                  <input
+                    type="date"
+                    name="date_of_birth"
+                    value={formData.date_of_birth}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              {formData.role === "student" && (
+                <>
+                  <div className={styles.formGroup}>
+                    <label>Section</label>
+                    <div className={styles.inputWrapper}>
+                      <i className="bx bx-group"></i>
+                      <select
+                        name="section"
+                        value={formData.section}
+                        onChange={handleInputChange}
+                        disabled={loading}
+                      >
+                        <option value="">Select Section</option>
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                        <option value="D">Section D</option>
+                        <option value="E">Section E</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Year / Semester</label>
+                    <div className={styles.inputWrapper}>
+                      <i className="bx bx-book-open"></i>
+                      <select
+                        name="year_semester"
+                        value={formData.year_semester}
+                        onChange={handleInputChange}
+                        disabled={loading}
+                      >
+                        <option value="">Select Year/Semester</option>
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year">3rd Year</option>
+                        <option value="4th Year">4th Year</option>
+                        <option value="5th Year">5th Year</option>
+                        <option value="Sem 1">Semester 1</option>
+                        <option value="Sem 2">Semester 2</option>
+                        <option value="Sem 3">Semester 3</option>
+                        <option value="Sem 4">Semester 4</option>
+                        <option value="Sem 5">Semester 5</option>
+                        <option value="Sem 6">Semester 6</option>
+                        <option value="Sem 7">Semester 7</option>
+                        <option value="Sem 8">Semester 8</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>College ID Number</label>
+                    <div className={styles.inputWrapper}>
+                      <i className="bx bx-id-card"></i>
+                      <input
+                        type="text"
+                        name="college_id_number"
+                        placeholder="e.g. 23CSB0A46"
+                        value={formData.college_id_number}
+                        onChange={handleInputChange}
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {formData.role === "faculty" && (
+                <>
+                  <div className={styles.formGroup}>
+                    <label>Employee ID</label>
+                    <div className={styles.inputWrapper}>
+                      <i className="bx bx-id-card"></i>
+                      <input
+                        type="text"
+                        name="employee_id"
+                        placeholder="e.g. EMP001"
+                        value={formData.employee_id}
+                        onChange={handleInputChange}
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Designation</label>
+                    <div className={styles.inputWrapper}>
+                      <i className="bx bx-briefcase"></i>
+                      <select
+                        name="designation"
+                        value={formData.designation}
+                        onChange={handleInputChange}
+                        disabled={loading}
+                      >
+                        <option value="">Select Designation</option>
+                        <option value="Professor">Professor</option>
+                        <option value="Associate Professor">Associate Professor</option>
+                        <option value="Assistant Professor">Assistant Professor</option>
+                        <option value="Lecturer">Lecturer</option>
+                        <option value="Visiting Faculty">Visiting Faculty</option>
+                      </select>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -698,6 +861,25 @@ const InClassRegisterModern = () => {
                     {validationErrors.confirmPassword}
                   </span>
                 )}
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Address (Optional)</label>
+                <div className={styles.inputWrapper}>
+                  <i className="bx bx-map"></i>
+                  <textarea
+                    name="address"
+                    placeholder="Your address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    rows={3}
+                    style={{
+                      padding: "0.75rem 1rem 0.75rem 2.75rem",
+                      resize: "vertical",
+                    }}
+                    disabled={loading}
+                  />
+                </div>
               </div>
             </div>
           )}

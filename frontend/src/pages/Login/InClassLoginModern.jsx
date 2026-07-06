@@ -129,10 +129,13 @@ const InClassLoginModern = () => {
     setFaceError("");
     setServerError("");
     try {
-      const ctx = canvasRef.current.getContext("2d");
-      canvasRef.current.width = videoRef.current.videoWidth;
-      canvasRef.current.height = videoRef.current.videoHeight;
-      ctx.drawImage(videoRef.current, 0, 0);
+    const ctx = canvasRef.current.getContext("2d");
+    canvasRef.current.width = videoRef.current.videoWidth;
+    canvasRef.current.height = videoRef.current.videoHeight;
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(videoRef.current, -canvasRef.current.width, 0);
+    ctx.restore();
 
       const faceImage = canvasRef.current.toDataURL("image/jpeg", 0.92);
 
@@ -284,6 +287,10 @@ const InClassLoginModern = () => {
       <div className={styles.loginContainer}>
         <div className={styles.formSection}>
           <div className={styles.formContent}>
+            <div className={styles.mobileLogo}>
+              <span className={styles.mobileLogoIcon}>IC</span>
+              <span className={styles.mobileLogoText}>InClass</span>
+            </div>
             <button
               type="button"
               className={styles.backButton}
@@ -480,7 +487,9 @@ const InClassLoginModern = () => {
                 playsInline
                 muted
                 className={styles.videoPreview}
+                style={{ transform: 'scaleX(-1)' }}
               />
+              
               <div
                 className={`${styles.faceCircle} ${faceDetected ? styles.faceDetectedCircle : styles.faceNotDetectedCircle}`}
               />

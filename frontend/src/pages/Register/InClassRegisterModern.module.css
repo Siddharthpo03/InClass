@@ -769,6 +769,67 @@ body.darkMode .dropdownItem:active {
   }
 }
 
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 0;
+  }
+
+  .registerPage {
+    padding: 0;
+  }
+
+  .card,
+  .formWrapper,
+  .formCard {
+    border-radius: 0;
+    min-height: 100vh;
+    box-shadow: none;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  .inputWrapper {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .dropdown {
+    position: fixed;
+    left: 1rem;
+    right: 1rem;
+    top: auto;
+    max-height: 50vh;
+    z-index: 9999;
+  }
+}
+
+@media (max-width: 480px) {
+  .stepTitle,
+  .stepLabel {
+    display: none;
+  }
+
+  .stepper,
+  .stepsIndicator {
+    gap: 0.5rem;
+  }
+
+  .buttonGroup {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
