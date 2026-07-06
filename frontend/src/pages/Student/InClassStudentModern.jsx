@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import apiClient from "../../utils/apiClient";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
+import FaceCamera from "../../components/biometrics/FaceCamera";
 import useDarkMode from "../../hooks/useDarkMode";
 import styles from "./InClassStudentModern.module.css";
 
@@ -22,6 +23,9 @@ const InClassStudentModern = ({ previewMode = false }) => {
   const [filterDateRange, setFilterDateRange] = useState("all");
   const [sessionCode, setSessionCode] = useState("");
   const [isSessionActive, setIsSessionActive] = useState(false);
+  const [showFaceCapture, setShowFaceCapture] = useState(false);
+  const [pendingAttendanceCode, setPendingAttendanceCode] = useState("");
+  const [markingAttendance, setMarkingAttendance] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenWarning, setFullscreenWarning] = useState(false);
   const [sessionTimer, setSessionTimer] = useState(null);
@@ -150,10 +154,11 @@ const InClassStudentModern = ({ previewMode = false }) => {
 
   useEffect(() => {
     const handleFullscreenChange = () => {
+      const doc = /** @type {any} */ (document);
       const isCurrentlyFullscreen = Boolean(
-        document.fullscreenElement ||
-          document.webkitFullscreenElement ||
-          document.mozFullScreenElement,
+        doc.fullscreenElement ||
+          doc.webkitFullscreenElement ||
+          doc.mozFullScreenElement,
       );
 
       setIsFullscreen(isCurrentlyFullscreen);
@@ -210,14 +215,26 @@ const InClassStudentModern = ({ previewMode = false }) => {
     e.preventDefault();
     if (!sessionCode.trim()) return;
 
+    setPendingAttendanceCode(sessionCode.trim().toUpperCase());
+    setShowFaceCapture(true);
+  };
+
+  const submitAttendanceWithFace = async (faceImage) => {
+    if (!pendingAttendanceCode || markingAttendance) return;
+
+    setMarkingAttendance(true);
+
     try {
       const response = await apiClient.post("/attendance/mark", {
-        code: sessionCode.trim().toUpperCase(),
+        code: pendingAttendanceCode,
+        faceImage,
       });
 
       if (response.data?.success) {
         addToast("Attendance marked successfully!", "success");
         setSessionCode("");
+        setPendingAttendanceCode("");
+        setShowFaceCapture(false);
         setSessionTimer(null);
         setIsSessionActive(false);
         if (document.exitFullscreen) document.exitFullscreen();
@@ -230,14 +247,34 @@ const InClassStudentModern = ({ previewMode = false }) => {
       }
     } catch (err) {
       const msg =
-        err.response?.data?.error?.message || "Failed to mark attendance";
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        "Failed to mark attendance";
       addToast(msg, "error");
+      setShowFaceCapture(false);
+      setPendingAttendanceCode("");
     }
+
+    setMarkingAttendance(false);
   };
+
+  const handleFaceCaptureCancel = () => {
+    setShowFaceCapture(false);
+    setPendingAttendanceCode("");
+    setMarkingAttendance(false);
+  };
+
+  const toDataUrl = (blob) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("Unable to read captured face image."));
+      reader.readAsDataURL(blob);
+    });
 
   const enterFullscreen = async () => {
     try {
-      const elem = document.documentElement;
+      const elem = /** @type {any} */ (document.documentElement);
       if (elem.requestFullscreen) {
         await elem.requestFullscreen();
       } else if (elem.webkitRequestFullscreen) {
@@ -316,6 +353,32 @@ const InClassStudentModern = ({ previewMode = false }) => {
 
   return (
     <div className={styles.dashboardLayout}>
+      {showFaceCapture && (
+        <div className={styles.faceCaptureOverlay} role="dialog" aria-modal="true">
+          <div className={styles.faceCaptureCard}>
+            <FaceCamera
+              active={showFaceCapture}
+              title="Verify your face"
+              instruction="Capture a clear face image to mark attendance"
+              captureLabel={markingAttendance ? "Processing..." : "Capture & Submit"}
+              cancelLabel="Cancel"
+              submitting={markingAttendance}
+              onCancel={handleFaceCaptureCancel}
+              onCapture={async (blob) => {
+                try {
+                  const faceImage = await toDataUrl(blob);
+                  await submitAttendanceWithFace(faceImage);
+                } catch (error) {
+                  console.error("Face capture failed:", error);
+                  addToast("Failed to capture face image.", "error");
+                  handleFaceCaptureCancel();
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       <aside className={styles.sidebar}>
         <div className={styles.sidebarBrand}>
           <div className={styles.sidebarLogo}>
@@ -443,7 +506,7 @@ const InClassStudentModern = ({ previewMode = false }) => {
                   placeholder="Enter code"
                   value={sessionCode}
                   onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
-                  maxLength="6"
+                  maxLength={6}
                 />
                 <button type="submit">
                   <i className="bx bx-check"></i>
@@ -559,7 +622,7 @@ const InClassStudentModern = ({ previewMode = false }) => {
                     onChange={(e) =>
                       setSessionCode(e.target.value.toUpperCase())
                     }
-                    maxLength="6"
+                    maxLength={6}
                   />
                 </div>
               </div>
@@ -688,7 +751,7 @@ const InClassStudentModern = ({ previewMode = false }) => {
                   placeholder="Enter session code (e.g. ABC123)"
                   value={sessionCode}
                   onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
-                  maxLength="6"
+                  maxLength={6}
                   className={styles.fullscreenInput}
                   autoFocus
                 />
